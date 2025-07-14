@@ -1,9 +1,56 @@
 # Demo - Hybrid workload
 
+This scenario starts off with an OpenShift Cluster on AWS including AWS account
+credentials and permissions. Part 01 of the scenario focusses on the setup a Red
+Hat Advanced Cluster Management Cluster from which a new Managed (by RHACM)
+OpenShift Cluster is deployed. This setup is based on a Hub Spoke model
+architecture and sets the stage for some nice real world use-cases.
+
+Part 02 of this scenario deals with setting up the following components on the
+newly deployed cluster:
+- OpenShift Local Storage Operator.
+- OpenShift Data Foundation Operator.
+- OpenShift Virtualization Cluster.
+- OpenShift Serverless.
+- OpenShift Pipelines.
+
+## Run the scenario
+
+### Part 1
+
+Requirements:
+- Ensure you have a basic/vanilla running OpenShift Cluster.
+- Ensure you have a login credentials for the OpenShift Cluster.
+- Ensure you have a login session with the OpenShift Cluster.
+- Ensure you privileged (cluster-admin) user access to the OpenShift Cluster.
+- Ensure you have access to an AWS account, permission and credentials.
+- Ensure you have a proper working environment with required the tools and
+  utilities.
+
+Run:
+
+```shell
+$ ./scenarios/demo-rhacm-hybrid-workload/bootstrap-demo-part-01.sh
+```
+
+### Part 2
+
+Requirements:
+- Ensure you have a basic/vanilla running OpenShift Cluster just deployed by the Part 1 of the scenarios.
+- Ensure you have a login credentials for the OpenShift Cluster.
+- Ensure you have a login session with the OpenShift Cluster.
+- Ensure you privileged (cluster-admin) user access to the OpenShift Cluster.
+
+Run:
+
+```shell
+$ ./scenarios/demo-rhacm-hybrid-workload/bootstrap-demo-part-02.sh
+```
+
 ## `bootstrap-demo-part-01.sh` output on ACM Cluster
 
 ```shell
-[vscode@cee95e6949bb OpenShiftDemoTime]$ ./scenarios/demo-rhacm-hybrid-workload/bootstrap-demo.sh 
+[vscode@cee95e6949bb OpenShiftDemoTime]$ ./scenarios/demo-rhacm-hybrid-workload/bootstrap-demo-part-01.sh 
 [14-07-2025 19:15:20] INFO - Bootstrap - Perform the scenario prerequisites | ⏳
 [14-07-2025 19:15:20] INFO - Script | /workspaces/OpenShiftDemoTime/assets/byo/credentials-aws/setup.sh
 [14-07-2025 19:15:20] INFO - Setting up | Credentials for AWS | ⏳
