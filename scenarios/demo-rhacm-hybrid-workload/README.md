@@ -413,80 +413,76 @@ job.batch/aws-cluster-01-0-5r46r-provision condition met
 
 ```shell
 [vscode@cee95e6949bb OpenShiftDemoTime]$ ./scenarios/demo-rhacm-hybrid-workload/bootstrap-demo-part-02.sh 
-[14-07-2025 20:37:41] INFO - Bootstrap - Install OpenShift Local Storage Operator | ⏳
-[14-07-2025 20:37:41] INFO - Script | /workspaces/OpenShiftDemoTime/assets/components/openshift-local-storage/setup.sh
-[14-07-2025 20:37:41] INFO - Install OpenShift Local Storage Operator | ⏳
-[14-07-2025 20:37:41] INFO - Labeling storage nodes
-node/ip-10-0-11-61.eu-central-1.compute.internal labeled
-node/ip-10-0-35-223.eu-central-1.compute.internal labeled
-node/ip-10-0-83-166.eu-central-1.compute.internal labeled
-[14-07-2025 20:37:43] INFO - Running Kustomize build part 01...
+[14-07-2025 21:12:00] INFO - Bootstrap - Install OpenShift Local Storage Operator | ⏳
+[14-07-2025 21:12:00] INFO - Script | /workspaces/OpenShiftDemoTime/assets/components/openshift-local-storage/setup.sh
+[14-07-2025 21:12:00] INFO - Install OpenShift Local Storage Operator | ⏳
+[14-07-2025 21:12:00] INFO - Labeling storage nodes
+node/ip-10-0-31-232.ec2.internal labeled
+node/ip-10-0-58-28.ec2.internal labeled
+node/ip-10-0-81-181.ec2.internal labeled
+[14-07-2025 21:12:04] INFO - Running Kustomize build part 01...
 namespace/openshift-local-storage created
 operatorgroup.operators.coreos.com/openshift-local-storage-operator-group created
 subscription.operators.coreos.com/local-storage-operator created
-[14-07-2025 20:37:44] INFO - Wait for Operator to be ready
+[14-07-2025 21:12:05] INFO - Wait for Operator to be ready
 error: no matching resources found
-[14-07-2025 20:37:44] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 0/1800 sec. timeout...
+[14-07-2025 21:12:06] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 1/1800 sec. timeout...
 error: no matching resources found
-[14-07-2025 20:37:55] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 11/1800 sec. timeout...
+[14-07-2025 21:12:17] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 12/1800 sec. timeout...
 clusterserviceversion.operators.coreos.com/local-storage-operator.v4.19.0-202507011209 condition met
-[14-07-2025 20:38:08] INFO - Running Kustomize build part 02...
+[14-07-2025 21:12:28] INFO - Running Kustomize build part 02...
 localvolumediscovery.local.storage.openshift.io/auto-discover-devices created
 localvolumeset.local.storage.openshift.io/local-storage-odf created
-[14-07-2025 20:38:08] INFO - Wait for Operator configuration to be ready
+[14-07-2025 21:12:30] INFO - Wait for Operator configuration to be ready
 localvolumediscovery.local.storage.openshift.io/auto-discover-devices condition met
-[14-07-2025 20:38:09] INFO - Wait for Workload to be ready
-pod/diskmaker-discovery-n2frl condition met
-pod/diskmaker-discovery-n2frl condition met
-pod/diskmaker-discovery-t68dn condition met
-pod/diskmaker-discovery-t68dn condition met
-pod/diskmaker-discovery-zjw2k condition met
-pod/diskmaker-discovery-zjw2k condition met
-pod/diskmaker-manager-48qvm condition met
-pod/diskmaker-manager-48qvm condition met
-pod/diskmaker-manager-6bwb9 condition met
-pod/diskmaker-manager-6bwb9 condition met
-pod/diskmaker-manager-gftcb condition met
-pod/diskmaker-manager-gftcb condition met
-pod/local-storage-operator-584d555466-9sxbd condition met
-pod/local-storage-operator-584d555466-9sxbd condition met
-[14-07-2025 20:38:24] INFO - Install OpenShift Local Storage Operator | Completed | ✅
-[14-07-2025 20:38:24] INFO - Bootstrap - Install OpenShift Local Storage Operator | Completed | ✅
-[14-07-2025 20:38:24] INFO - Bootstrap - Install OpenShift Data Foundation Operator | ⏳
-[14-07-2025 20:38:24] INFO - Script | /workspaces/OpenShiftDemoTime/assets/components/openshift-storage/setup.sh
-[14-07-2025 20:38:24] INFO - Install OpenShift Data Foundation Operator | ⏳
-[14-07-2025 20:38:24] INFO - Running Kustomize build part 01...
+[14-07-2025 21:12:31] INFO - Wait for Workload to be ready
+pod/diskmaker-discovery-gb2dl condition met
+pod/diskmaker-discovery-gb2dl condition met
+pod/diskmaker-discovery-v6spl condition met
+pod/diskmaker-discovery-v6spl condition met
+pod/diskmaker-discovery-zc224 condition met
+pod/diskmaker-discovery-zc224 condition met
+pod/diskmaker-manager-nns72 condition met
+pod/diskmaker-manager-nns72 condition met
+pod/diskmaker-manager-qdcbc condition met
+pod/diskmaker-manager-qdcbc condition met
+pod/diskmaker-manager-tbj8n condition met
+pod/diskmaker-manager-tbj8n condition met
+pod/local-storage-operator-584d555466-t6cth condition met
+pod/local-storage-operator-584d555466-t6cth condition met
+[14-07-2025 21:12:52] INFO - Install OpenShift Local Storage Operator | Completed | ✅
+[14-07-2025 21:12:52] INFO - Bootstrap - Install OpenShift Local Storage Operator | Completed | ✅
+[14-07-2025 21:12:52] INFO - Bootstrap - Install OpenShift Data Foundation Operator | ⏳
+[14-07-2025 21:12:52] INFO - Script | /workspaces/OpenShiftDemoTime/assets/components/openshift-storage/setup.sh
+[14-07-2025 21:12:52] INFO - Install OpenShift Data Foundation Operator | ⏳
+[14-07-2025 21:12:52] INFO - Running Kustomize build part 01...
 namespace/openshift-storage created
 operatorgroup.operators.coreos.com/openshift-storage-operator-group created
 subscription.operators.coreos.com/odf-operator created
-[14-07-2025 20:38:25] INFO - Wait for Operator to be ready
+[14-07-2025 21:12:53] INFO - Wait for Operator to be ready
 error: no matching resources found
-[14-07-2025 20:38:25] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 0/3600 sec. timeout...
-error: no matching resources found
-[14-07-2025 20:38:36] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 11/3600 sec. timeout...
+[14-07-2025 21:12:54] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 1/3600 sec. timeout...
 error: timed out waiting for the condition on clusterserviceversions/odf-operator.v4.18.6-rhodf
-[14-07-2025 20:39:17] WARNING - Command failed | Retrying | Attempt 3, infinite retries, 10 sec. interval, 52/3600 sec. timeout...
+[14-07-2025 21:13:34] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 41/3600 sec. timeout...
 error: timed out waiting for the condition on clusterserviceversions/odf-operator.v4.18.6-rhodf
-[14-07-2025 20:39:57] WARNING - Command failed | Retrying | Attempt 4, infinite retries, 10 sec. interval, 92/3600 sec. timeout...
+[14-07-2025 21:14:15] WARNING - Command failed | Retrying | Attempt 3, infinite retries, 10 sec. interval, 82/3600 sec. timeout...
 clusterserviceversion.operators.coreos.com/odf-operator.v4.18.6-rhodf condition met
 error: timed out waiting for the condition on clusterserviceversions/ocs-client-operator.v4.18.6-rhodf
-[14-07-2025 20:40:43] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 31/3600 sec. timeout...
+[14-07-2025 21:15:09] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 30/3600 sec. timeout...
 error: timed out waiting for the condition on clusterserviceversions/ocs-client-operator.v4.18.6-rhodf
-[14-07-2025 20:41:23] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 71/3600 sec. timeout...
+[14-07-2025 21:15:50] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 71/3600 sec. timeout...
 error: timed out waiting for the condition on clusterserviceversions/ocs-client-operator.v4.18.6-rhodf
-[14-07-2025 20:42:04] WARNING - Command failed | Retrying | Attempt 3, infinite retries, 10 sec. interval, 112/3600 sec. timeout...
+[14-07-2025 21:16:30] WARNING - Command failed | Retrying | Attempt 3, infinite retries, 10 sec. interval, 111/3600 sec. timeout...
 error: timed out waiting for the condition on clusterserviceversions/ocs-client-operator.v4.18.6-rhodf
-[14-07-2025 20:42:44] WARNING - Command failed | Retrying | Attempt 4, infinite retries, 10 sec. interval, 152/3600 sec. timeout...
+[14-07-2025 21:17:11] WARNING - Command failed | Retrying | Attempt 4, infinite retries, 10 sec. interval, 152/3600 sec. timeout...
 error: timed out waiting for the condition on clusterserviceversions/ocs-client-operator.v4.18.6-rhodf
-[14-07-2025 20:43:25] WARNING - Command failed | Retrying | Attempt 5, infinite retries, 10 sec. interval, 193/3600 sec. timeout...
+[14-07-2025 21:17:51] WARNING - Command failed | Retrying | Attempt 5, infinite retries, 10 sec. interval, 192/3600 sec. timeout...
 error: timed out waiting for the condition on clusterserviceversions/ocs-client-operator.v4.18.6-rhodf
-[14-07-2025 20:44:05] WARNING - Command failed | Retrying | Attempt 6, infinite retries, 10 sec. interval, 233/3600 sec. timeout...
-error: timed out waiting for the condition on clusterserviceversions/ocs-client-operator.v4.18.6-rhodf
-[14-07-2025 20:44:46] WARNING - Command failed | Retrying | Attempt 7, infinite retries, 10 sec. interval, 274/3600 sec. timeout...
+[14-07-2025 21:18:32] WARNING - Command failed | Retrying | Attempt 6, infinite retries, 10 sec. interval, 233/3600 sec. timeout...
 clusterserviceversion.operators.coreos.com/ocs-client-operator.v4.18.6-rhodf condition met
-[14-07-2025 20:44:56] INFO - Running Kustomize build part 02...
+[14-07-2025 21:19:02] INFO - Running Kustomize build part 02...
 storagecluster.ocs.openshift.io/ocs-storagecluster created
-[14-07-2025 20:44:57] INFO - Wait for Operators and configuration to be ready
+[14-07-2025 21:19:04] INFO - Wait for Operators and configuration to be ready
 clusterserviceversion.operators.coreos.com/cephcsi-operator.v4.18.6-rhodf condition met
 clusterserviceversion.operators.coreos.com/mcg-operator.v4.18.6-rhodf condition met
 clusterserviceversion.operators.coreos.com/ocs-operator.v4.18.6-rhodf condition met
@@ -496,223 +492,225 @@ clusterserviceversion.operators.coreos.com/odf-prometheus-operator.v4.18.6-rhodf
 clusterserviceversion.operators.coreos.com/recipe.v4.18.6-rhodf condition met
 clusterserviceversion.operators.coreos.com/rook-ceph-operator.v4.18.6-rhodf condition met
 error: timed out waiting for the condition on storageclusters/ocs-storagecluster
-[14-07-2025 20:45:32] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 30/3600 sec. timeout...
+[14-07-2025 21:19:43] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 31/3600 sec. timeout...
 error: timed out waiting for the condition on storageclusters/ocs-storagecluster
-[14-07-2025 20:46:13] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 71/3600 sec. timeout...
+[14-07-2025 21:20:23] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 71/3600 sec. timeout...
 error: timed out waiting for the condition on storageclusters/ocs-storagecluster
-[14-07-2025 20:46:53] WARNING - Command failed | Retrying | Attempt 3, infinite retries, 10 sec. interval, 111/3600 sec. timeout...
+[14-07-2025 21:21:04] WARNING - Command failed | Retrying | Attempt 3, infinite retries, 10 sec. interval, 112/3600 sec. timeout...
 error: timed out waiting for the condition on storageclusters/ocs-storagecluster
-[14-07-2025 20:47:34] WARNING - Command failed | Retrying | Attempt 4, infinite retries, 10 sec. interval, 152/3600 sec. timeout...
-error: timed out waiting for the condition on storageclusters/ocs-storagecluster
-[14-07-2025 20:48:14] WARNING - Command failed | Retrying | Attempt 5, infinite retries, 10 sec. interval, 192/3600 sec. timeout...
+[14-07-2025 21:21:44] WARNING - Command failed | Retrying | Attempt 4, infinite retries, 10 sec. interval, 152/3600 sec. timeout...
 storagecluster.ocs.openshift.io/ocs-storagecluster condition met
-[14-07-2025 20:48:36] INFO - Wait for Workload etc. to be ready
+[14-07-2025 21:21:55] INFO - Wait for Workload etc. to be ready
 storageclass.storage.k8s.io/local-storage-odf condition met
 storageclass.storage.k8s.io/ocs-storagecluster-ceph-rbd condition met
 storageclass.storage.k8s.io/ocs-storagecluster-cephfs condition met
 storageclass.storage.k8s.io/openshift-storage.noobaa.io condition met
-pod/rook-ceph-osd-0-67547ff74b-k7tnl condition met
-pod/rook-ceph-osd-1-68556cb78b-286zh condition met
-pod/rook-ceph-osd-10-65dbb64f96-w8ssw condition met
-pod/rook-ceph-osd-11-697d45bd7c-25pz6 condition met
-pod/rook-ceph-osd-2-ff48984fd-4fbbc condition met
-pod/rook-ceph-osd-3-65f6d9fcb8-rvqdb condition met
-pod/rook-ceph-osd-4-6d5cc68744-4n9lc condition met
-pod/rook-ceph-osd-5-5f85b55d57-zvglf condition met
-pod/rook-ceph-osd-6-6669f6ffb9-bnf6c condition met
-pod/rook-ceph-osd-7-7d49dd9-dxvrs condition met
-pod/rook-ceph-osd-8-6c94658dbb-pnj58 condition met
-pod/rook-ceph-osd-9-f4cd5db5f-77sv8 condition met
-[14-07-2025 20:48:40] INFO - Install OpenShift Data Foundation Operator | Completed | ✅
-[14-07-2025 20:48:40] INFO - Bootstrap - Install OpenShift Data Foundation Operator | Completed | ✅
-[14-07-2025 20:48:40] INFO - Bootstrap - Install OpenShift Virtualization Operator | ⏳
-[14-07-2025 20:48:40] INFO - Script | /workspaces/OpenShiftDemoTime/assets/components/openshift-virtualization/setup.sh
-[14-07-2025 20:48:40] INFO - Install OpenShift Virtualization Operator | ⏳
-[14-07-2025 20:48:40] INFO - Running Kustomize build part 01...
+pod/rook-ceph-osd-0-645d48b75c-bgvl6 condition met
+pod/rook-ceph-osd-1-66676d5ccc-k5s7h condition met
+pod/rook-ceph-osd-10-79f9c57674-9kcmx condition met
+pod/rook-ceph-osd-11-6c58b4bf9-4j648 condition met
+pod/rook-ceph-osd-2-78fcbcd94-rnzwm condition met
+pod/rook-ceph-osd-3-d467f8c5f-vxskh condition met
+pod/rook-ceph-osd-4-84f785556-5n47s condition met
+pod/rook-ceph-osd-5-678b7dd7f4-72rck condition met
+pod/rook-ceph-osd-6-84ff576d7b-pg72q condition met
+pod/rook-ceph-osd-7-7654fbbcbd-mx4cp condition met
+pod/rook-ceph-osd-8-6f549d5c96-8hbg4 condition met
+pod/rook-ceph-osd-9-7cf48f78ff-7dhdf condition met
+[14-07-2025 21:22:03] INFO - Install OpenShift Data Foundation Operator | Completed | ✅
+[14-07-2025 21:22:03] INFO - Bootstrap - Install OpenShift Data Foundation Operator | Completed | ✅
+[14-07-2025 21:22:03] INFO - Bootstrap - Install OpenShift Virtualization Operator | ⏳
+[14-07-2025 21:22:03] INFO - Script | /workspaces/OpenShiftDemoTime/assets/components/openshift-virtualization/setup.sh
+[14-07-2025 21:22:03] INFO - Install OpenShift Virtualization Operator | ⏳
+[14-07-2025 21:22:03] INFO - Running Kustomize build part 01...
 namespace/openshift-cnv created
 operatorgroup.operators.coreos.com/openshift-cnv-operator-group created
 subscription.operators.coreos.com/kubevirt-hyperconverged created
-[14-07-2025 20:48:41] INFO - Wait for Operator to be ready
+[14-07-2025 21:22:04] INFO - Wait for Operator to be ready
 error: no matching resources found
-[14-07-2025 20:48:42] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 1/3600 sec. timeout...
+[14-07-2025 21:22:05] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 1/3600 sec. timeout...
 error: timed out waiting for the condition on clusterserviceversions/kubevirt-hyperconverged-operator.v4.19.0
-[14-07-2025 20:49:22] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 41/3600 sec. timeout...
+[14-07-2025 21:22:45] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 41/3600 sec. timeout...
 clusterserviceversion.operators.coreos.com/kubevirt-hyperconverged-operator.v4.19.0 condition met
-[14-07-2025 20:49:33] INFO - Wait for Workload to be ready
-pod/aaq-operator-6fbb7d69cd-5526k condition met
-pod/aaq-operator-6fbb7d69cd-5526k condition met
-pod/cdi-operator-945765b7b-sbxwt condition met
-pod/cdi-operator-945765b7b-sbxwt condition met
-pod/cluster-network-addons-operator-67d7bf8dbf-2ghwk condition met
-pod/cluster-network-addons-operator-67d7bf8dbf-2ghwk condition met
-pod/hco-operator-5fb65f74f6-5xmjn condition met
-pod/hco-operator-5fb65f74f6-5xmjn condition met
-pod/hco-webhook-76f696674-6sgbt condition met
-pod/hco-webhook-76f696674-6sgbt condition met
-pod/hostpath-provisioner-operator-89b59cf49-pw9vh condition met
-pod/hostpath-provisioner-operator-89b59cf49-pw9vh condition met
-pod/hyperconverged-cluster-cli-download-7ffc87dffd-5bwxz condition met
-pod/hyperconverged-cluster-cli-download-7ffc87dffd-5bwxz condition met
-pod/ssp-operator-6b8bcf79cf-nbfm6 condition met
-pod/ssp-operator-6b8bcf79cf-nbfm6 condition met
-pod/virt-operator-684b76dd8-m9kx6 condition met
-pod/virt-operator-684b76dd8-m9kx6 condition met
-pod/virt-operator-684b76dd8-w6lj9 condition met
-pod/virt-operator-684b76dd8-w6lj9 condition met
-[14-07-2025 20:49:44] INFO - Running Kustomize build part 02...
+[14-07-2025 21:23:00] INFO - Wait for Workload to be ready
+pod/aaq-operator-6fbb7d69cd-rdffh condition met
+pod/aaq-operator-6fbb7d69cd-rdffh condition met
+pod/cdi-operator-945765b7b-mvgqb condition met
+pod/cdi-operator-945765b7b-mvgqb condition met
+pod/cluster-network-addons-operator-67d7bf8dbf-zcg7b condition met
+pod/cluster-network-addons-operator-67d7bf8dbf-zcg7b condition met
+pod/hco-operator-5fb65f74f6-b7ghr condition met
+pod/hco-operator-5fb65f74f6-b7ghr condition met
+pod/hco-webhook-5d9f74f855-dvtt7 condition met
+pod/hco-webhook-5d9f74f855-dvtt7 condition met
+pod/hostpath-provisioner-operator-f875fb674-n5sbx condition met
+pod/hostpath-provisioner-operator-f875fb674-n5sbx condition met
+pod/hyperconverged-cluster-cli-download-7ffc87dffd-87szc condition met
+pod/hyperconverged-cluster-cli-download-7ffc87dffd-87szc condition met
+pod/ssp-operator-765ffff5fd-6z44q condition met
+pod/ssp-operator-765ffff5fd-6z44q condition met
+pod/virt-operator-684b76dd8-cxbwx condition met
+pod/virt-operator-684b76dd8-cxbwx condition met
+pod/virt-operator-684b76dd8-scrpx condition met
+pod/virt-operator-684b76dd8-scrpx condition met
+[14-07-2025 21:23:21] INFO - Running Kustomize build part 02...
 hyperconverged.hco.kubevirt.io/kubevirt-hyperconverged created
-[14-07-2025 20:49:44] INFO - Wait for HyperConverged configuration to be ready
+[14-07-2025 21:23:22] INFO - Wait for HyperConverged configuration to be ready
 error: timed out waiting for the condition on hyperconvergeds/kubevirt-hyperconverged
-[14-07-2025 20:50:15] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 31/3600 sec. timeout...
+[14-07-2025 21:23:53] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 31/3600 sec. timeout...
 error: timed out waiting for the condition on hyperconvergeds/kubevirt-hyperconverged
-[14-07-2025 20:50:55] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 71/3600 sec. timeout...
+[14-07-2025 21:24:33] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 71/3600 sec. timeout...
 error: timed out waiting for the condition on hyperconvergeds/kubevirt-hyperconverged
-[14-07-2025 20:51:36] WARNING - Command failed | Retrying | Attempt 3, infinite retries, 10 sec. interval, 112/3600 sec. timeout...
+[14-07-2025 21:25:14] WARNING - Command failed | Retrying | Attempt 3, infinite retries, 10 sec. interval, 112/3600 sec. timeout...
 hyperconverged.hco.kubevirt.io/kubevirt-hyperconverged condition met
 hyperconverged.hco.kubevirt.io/kubevirt-hyperconverged condition met
-[14-07-2025 20:51:47] INFO - Wait for Workload to be ready
-pod/aaq-operator-6fbb7d69cd-5526k condition met
-pod/aaq-operator-6fbb7d69cd-5526k condition met
-pod/bridge-marker-hzxqd condition met
-pod/bridge-marker-hzxqd condition met
-pod/bridge-marker-ttdds condition met
-pod/bridge-marker-ttdds condition met
-pod/bridge-marker-zp2k4 condition met
-pod/bridge-marker-zp2k4 condition met
-pod/cdi-apiserver-6f8b75499c-qq6hf condition met
-pod/cdi-apiserver-6f8b75499c-qq6hf condition met
-pod/cdi-deployment-6dffc86989-pq5lj condition met
-pod/cdi-deployment-6dffc86989-pq5lj condition met
-pod/cdi-operator-945765b7b-sbxwt condition met
-pod/cdi-operator-945765b7b-sbxwt condition met
-pod/cdi-uploadproxy-5494fb6f58-lm5mh condition met
-pod/cdi-uploadproxy-5494fb6f58-lm5mh condition met
-pod/cluster-network-addons-operator-67d7bf8dbf-2ghwk condition met
-pod/cluster-network-addons-operator-67d7bf8dbf-2ghwk condition met
-pod/hco-operator-5fb65f74f6-5xmjn condition met
-pod/hco-operator-5fb65f74f6-5xmjn condition met
-pod/hco-webhook-76f696674-6sgbt condition met
-pod/hco-webhook-76f696674-6sgbt condition met
-pod/hostpath-provisioner-operator-89b59cf49-pw9vh condition met
-pod/hostpath-provisioner-operator-89b59cf49-pw9vh condition met
-pod/hyperconverged-cluster-cli-download-7ffc87dffd-5bwxz condition met
-pod/hyperconverged-cluster-cli-download-7ffc87dffd-5bwxz condition met
-pod/kube-cni-linux-bridge-plugin-q492b condition met
-pod/kube-cni-linux-bridge-plugin-q492b condition met
-pod/kube-cni-linux-bridge-plugin-s49ch condition met
-pod/kube-cni-linux-bridge-plugin-s49ch condition met
-pod/kube-cni-linux-bridge-plugin-zzns9 condition met
-pod/kube-cni-linux-bridge-plugin-zzns9 condition met
-pod/kubemacpool-cert-manager-547c58c8dc-l6n2b condition met
-pod/kubemacpool-cert-manager-547c58c8dc-l6n2b condition met
-pod/kubemacpool-mac-controller-manager-cfd4f668b-gllnp condition met
-pod/kubemacpool-mac-controller-manager-cfd4f668b-gllnp condition met
-pod/kubevirt-apiserver-proxy-f9b7fff64-8phlr condition met
-pod/kubevirt-apiserver-proxy-f9b7fff64-8phlr condition met
-pod/kubevirt-apiserver-proxy-f9b7fff64-pfm9q condition met
-pod/kubevirt-apiserver-proxy-f9b7fff64-pfm9q condition met
-pod/kubevirt-console-plugin-6b75855886-4qmk4 condition met
-pod/kubevirt-console-plugin-6b75855886-4qmk4 condition met
-pod/kubevirt-console-plugin-6b75855886-9ljdn condition met
-pod/kubevirt-console-plugin-6b75855886-9ljdn condition met
-pod/kubevirt-ipam-controller-manager-6c9bcccdbd-wp2x2 condition met
-pod/kubevirt-ipam-controller-manager-6c9bcccdbd-wp2x2 condition met
-pod/ssp-operator-6b8bcf79cf-nbfm6 condition met
-pod/ssp-operator-6b8bcf79cf-nbfm6 condition met
-pod/virt-api-96bcd44fc-5vmj2 condition met
-pod/virt-api-96bcd44fc-5vmj2 condition met
-pod/virt-api-96bcd44fc-9khtv condition met
-pod/virt-api-96bcd44fc-9khtv condition met
-pod/virt-controller-5c6f684699-l8mtv condition met
-pod/virt-controller-5c6f684699-l8mtv condition met
-pod/virt-controller-5c6f684699-wc57h condition met
-pod/virt-controller-5c6f684699-wc57h condition met
-pod/virt-exportproxy-97cfb96bd-bgc5f condition met
-pod/virt-exportproxy-97cfb96bd-bgc5f condition met
-pod/virt-exportproxy-97cfb96bd-gv7jl condition met
-pod/virt-exportproxy-97cfb96bd-gv7jl condition met
-pod/virt-handler-sf2mk condition met
-pod/virt-handler-sf2mk condition met
-pod/virt-handler-t789k condition met
-pod/virt-handler-t789k condition met
-pod/virt-handler-x66gh condition met
-pod/virt-handler-x66gh condition met
-pod/virt-operator-684b76dd8-m9kx6 condition met
-pod/virt-operator-684b76dd8-m9kx6 condition met
-pod/virt-operator-684b76dd8-w6lj9 condition met
-pod/virt-operator-684b76dd8-w6lj9 condition met
-pod/virt-template-validator-57d89bf8bd-7jlfd condition met
-pod/virt-template-validator-57d89bf8bd-7jlfd condition met
-pod/virt-template-validator-57d89bf8bd-xwtql condition met
-pod/virt-template-validator-57d89bf8bd-xwtql condition met
-[14-07-2025 20:52:26] INFO - Install OpenShift Virtualization Operator | Completed | ✅
-[14-07-2025 20:52:26] INFO - Bootstrap - Install OpenShift Virtualization Operator | Completed | ✅
-[14-07-2025 20:52:26] INFO - Bootstrap - Install OpenShift Serverless Operator | ⏳
-[14-07-2025 20:52:26] INFO - Script | /workspaces/OpenShiftDemoTime/assets/components/openshift-serverless/setup.sh
-[14-07-2025 20:57:36] INFO - Bootstrap - Install OpenShift Serverless Operator | ⏳
-[14-07-2025 20:57:36] INFO - Script | /workspaces/OpenShiftDemoTime/assets/components/openshift-serverless/setup.sh
-[14-07-2025 20:57:36] INFO - Install OpenShift Serverless Operator | ⏳
-[14-07-2025 20:57:36] INFO - Running Kustomize build part 01...
-namespace/openshift-serverless unchanged
-operatorgroup.operators.coreos.com/openshift-serverless-operator-group unchanged
-subscription.operators.coreos.com/serverless-operator unchanged
-[14-07-2025 20:57:40] INFO - Wait for Operator to be ready
+[14-07-2025 21:25:26] INFO - Wait for Workload to be ready
+pod/aaq-operator-6fbb7d69cd-rdffh condition met
+pod/aaq-operator-6fbb7d69cd-rdffh condition met
+pod/bridge-marker-2qxjd condition met
+pod/bridge-marker-2qxjd condition met
+pod/bridge-marker-4tgvf condition met
+pod/bridge-marker-4tgvf condition met
+pod/bridge-marker-6clfh condition met
+pod/bridge-marker-6clfh condition met
+pod/cdi-apiserver-6f8b75499c-tkgwb condition met
+pod/cdi-apiserver-6f8b75499c-tkgwb condition met
+pod/cdi-deployment-6dffc86989-q745m condition met
+pod/cdi-deployment-6dffc86989-q745m condition met
+pod/cdi-operator-945765b7b-mvgqb condition met
+pod/cdi-operator-945765b7b-mvgqb condition met
+pod/cdi-uploadproxy-5494fb6f58-g7g7w condition met
+pod/cdi-uploadproxy-5494fb6f58-g7g7w condition met
+pod/cluster-network-addons-operator-67d7bf8dbf-zcg7b condition met
+pod/cluster-network-addons-operator-67d7bf8dbf-zcg7b condition met
+pod/hco-operator-5fb65f74f6-b7ghr condition met
+pod/hco-operator-5fb65f74f6-b7ghr condition met
+pod/hco-webhook-5d9f74f855-dvtt7 condition met
+pod/hco-webhook-5d9f74f855-dvtt7 condition met
+pod/hostpath-provisioner-operator-f875fb674-n5sbx condition met
+pod/hostpath-provisioner-operator-f875fb674-n5sbx condition met
+pod/hyperconverged-cluster-cli-download-7ffc87dffd-87szc condition met
+pod/hyperconverged-cluster-cli-download-7ffc87dffd-87szc condition met
+pod/kube-cni-linux-bridge-plugin-4jlmr condition met
+pod/kube-cni-linux-bridge-plugin-4jlmr condition met
+pod/kube-cni-linux-bridge-plugin-fhdjd condition met
+pod/kube-cni-linux-bridge-plugin-fhdjd condition met
+pod/kube-cni-linux-bridge-plugin-jdvxk condition met
+pod/kube-cni-linux-bridge-plugin-jdvxk condition met
+pod/kubemacpool-cert-manager-547c58c8dc-lmfcc condition met
+pod/kubemacpool-cert-manager-547c58c8dc-lmfcc condition met
+pod/kubemacpool-mac-controller-manager-cfd4f668b-fvn8w condition met
+pod/kubemacpool-mac-controller-manager-cfd4f668b-fvn8w condition met
+pod/kubevirt-apiserver-proxy-f9b7fff64-w4vn8 condition met
+pod/kubevirt-apiserver-proxy-f9b7fff64-w4vn8 condition met
+pod/kubevirt-apiserver-proxy-f9b7fff64-xgshl condition met
+pod/kubevirt-apiserver-proxy-f9b7fff64-xgshl condition met
+pod/kubevirt-console-plugin-6b75855886-kl8m9 condition met
+pod/kubevirt-console-plugin-6b75855886-kl8m9 condition met
+pod/kubevirt-console-plugin-6b75855886-mz7x6 condition met
+pod/kubevirt-console-plugin-6b75855886-mz7x6 condition met
+pod/kubevirt-ipam-controller-manager-6c9bcccdbd-pcdsz condition met
+pod/kubevirt-ipam-controller-manager-6c9bcccdbd-pcdsz condition met
+pod/ssp-operator-765ffff5fd-6z44q condition met
+pod/ssp-operator-765ffff5fd-6z44q condition met
+pod/virt-api-96bcd44fc-g4tl2 condition met
+pod/virt-api-96bcd44fc-g4tl2 condition met
+pod/virt-api-96bcd44fc-hfwrl condition met
+pod/virt-api-96bcd44fc-hfwrl condition met
+pod/virt-controller-5c6f684699-f89d9 condition met
+pod/virt-controller-5c6f684699-f89d9 condition met
+pod/virt-controller-5c6f684699-lwp7g condition met
+pod/virt-controller-5c6f684699-lwp7g condition met
+pod/virt-exportproxy-97cfb96bd-n7nls condition met
+pod/virt-exportproxy-97cfb96bd-n7nls condition met
+pod/virt-exportproxy-97cfb96bd-ndg97 condition met
+pod/virt-exportproxy-97cfb96bd-ndg97 condition met
+pod/virt-handler-5jj25 condition met
+pod/virt-handler-5jj25 condition met
+pod/virt-handler-xlb6h condition met
+pod/virt-handler-xlb6h condition met
+pod/virt-handler-xpbzb condition met
+pod/virt-handler-xpbzb condition met
+pod/virt-operator-684b76dd8-cxbwx condition met
+pod/virt-operator-684b76dd8-cxbwx condition met
+pod/virt-operator-684b76dd8-scrpx condition met
+pod/virt-operator-684b76dd8-scrpx condition met
+pod/virt-template-validator-57d89bf8bd-cqc9c condition met
+pod/virt-template-validator-57d89bf8bd-cqc9c condition met
+pod/virt-template-validator-57d89bf8bd-fr6bx condition met
+pod/virt-template-validator-57d89bf8bd-fr6bx condition met
+[14-07-2025 21:26:39] INFO - Install OpenShift Virtualization Operator | Completed | ✅
+[14-07-2025 21:26:39] INFO - Bootstrap - Install OpenShift Virtualization Operator | Completed | ✅
+[14-07-2025 21:26:39] INFO - Bootstrap - Install OpenShift Serverless Operator | ⏳
+[14-07-2025 21:26:39] INFO - Script | /workspaces/OpenShiftDemoTime/assets/components/openshift-serverless/setup.sh
+[14-07-2025 21:26:39] INFO - Install OpenShift Serverless Operator | ⏳
+[14-07-2025 21:26:39] INFO - Running Kustomize build part 01...
+namespace/openshift-serverless created
+operatorgroup.operators.coreos.com/openshift-serverless-operator-group created
+subscription.operators.coreos.com/serverless-operator created
+[14-07-2025 21:26:40] INFO - Wait for Operator to be ready
+error: no matching resources found
+[14-07-2025 21:26:41] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 1/1800 sec. timeout...
+error: no matching resources found
+[14-07-2025 21:26:52] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 12/1800 sec. timeout...
 clusterserviceversion.operators.coreos.com/serverless-operator.v1.36.0 condition met
-[14-07-2025 20:57:40] INFO - Wait for Workload to be ready
-pod/knative-openshift-84755b78bc-pjn7l condition met
-pod/knative-openshift-84755b78bc-pjn7l condition met
-pod/knative-openshift-ingress-5f575cdc76-h427d condition met
-pod/knative-openshift-ingress-5f575cdc76-h427d condition met
-pod/knative-operator-webhook-57c8b97c99-q4l98 condition met
-pod/knative-operator-webhook-57c8b97c99-q4l98 condition met
-[14-07-2025 20:57:45] INFO - Running Kustomize build part 02...
+[14-07-2025 21:27:06] INFO - Wait for Workload to be ready
+pod/knative-openshift-59b4f8885d-r6sjj condition met
+pod/knative-openshift-59b4f8885d-r6sjj condition met
+pod/knative-openshift-ingress-5f575cdc76-2h744 condition met
+pod/knative-openshift-ingress-5f575cdc76-2h744 condition met
+pod/knative-operator-webhook-787f5cc844-6c8ws condition met
+pod/knative-operator-webhook-787f5cc844-6c8ws condition met
+[14-07-2025 21:27:13] INFO - Running Kustomize build part 02...
 knativeserving.operator.knative.dev/knative-serving created
-[14-07-2025 20:57:45] INFO - Wait for KnativeServing setup to be ready
-pod/activator-6fdfdcf87-62ld6 condition met
-pod/activator-6fdfdcf87-gb2sz condition met
-pod/activator-6fdfdcf87-62ld6 condition met
-pod/activator-6fdfdcf87-gb2sz condition met
-pod/autoscaler-cd6f877fc-r8rhs condition met
-pod/autoscaler-cd6f877fc-wdsw2 condition met
-pod/autoscaler-cd6f877fc-r8rhs condition met
-pod/autoscaler-cd6f877fc-wdsw2 condition met
-pod/autoscaler-hpa-59bdc86c4f-89ttg condition met
-pod/autoscaler-hpa-59bdc86c4f-f9ssq condition met
-pod/autoscaler-hpa-59bdc86c4f-89ttg condition met
-pod/autoscaler-hpa-59bdc86c4f-f9ssq condition met
-pod/controller-558787857b-tfkbw condition met
-pod/controller-558787857b-v8d46 condition met
-pod/controller-558787857b-tfkbw condition met
-pod/controller-558787857b-v8d46 condition met
-pod/webhook-785d4998c8-sbfkg condition met
-pod/webhook-785d4998c8-zf7kn condition met
-pod/webhook-785d4998c8-sbfkg condition met
-pod/webhook-785d4998c8-zf7kn condition met
-pod/3scale-kourier-gateway-7bc4cb475f-l2pdt condition met
-pod/3scale-kourier-gateway-7bc4cb475f-zdnfn condition met
-pod/3scale-kourier-gateway-7bc4cb475f-l2pdt condition met
-pod/3scale-kourier-gateway-7bc4cb475f-zdnfn condition met
-pod/net-kourier-controller-7b9d5c44bc-2vjs8 condition met
-pod/net-kourier-controller-7b9d5c44bc-j97js condition met
-pod/net-kourier-controller-7b9d5c44bc-2vjs8 condition met
-pod/net-kourier-controller-7b9d5c44bc-j97js condition met
-[14-07-2025 20:57:54] INFO - Install OpenShift Serverless Operator | Completed | ✅
-[14-07-2025 20:57:54] INFO - Bootstrap - Install OpenShift Serverless Operator | Completed | ✅
-[14-07-2025 20:57:54] INFO - Bootstrap - Setup the OpenShift Pipelines Operator | ⏳
-[14-07-2025 20:57:54] INFO - Script | /workspaces/OpenShiftDemoTime/assets/components/openshift-pipelines/setup.sh
-[14-07-2025 20:57:54] INFO - Install the OpenShift Pipelines Operator | ⏳
-[14-07-2025 20:57:54] INFO - Running Kustomize build...
+[14-07-2025 21:27:15] INFO - Wait for KnativeServing setup to be ready
+error: no matching resources found
+[14-07-2025 21:27:16] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 1/1800 sec. timeout...
+pod/activator-6fdfdcf87-64k75 condition met
+pod/activator-6fdfdcf87-64k75 condition met
+pod/autoscaler-cd6f877fc-b6ms9 condition met
+pod/autoscaler-cd6f877fc-tptxt condition met
+pod/autoscaler-cd6f877fc-b6ms9 condition met
+pod/autoscaler-cd6f877fc-tptxt condition met
+pod/autoscaler-hpa-59bdc86c4f-jz4d7 condition met
+pod/autoscaler-hpa-59bdc86c4f-txg7t condition met
+pod/autoscaler-hpa-59bdc86c4f-jz4d7 condition met
+pod/autoscaler-hpa-59bdc86c4f-txg7t condition met
+pod/controller-777d7844-lphwg condition met
+pod/controller-777d7844-p5j2l condition met
+pod/controller-777d7844-lphwg condition met
+pod/controller-777d7844-p5j2l condition met
+pod/webhook-785d4998c8-7xbqj condition met
+pod/webhook-785d4998c8-fw8cw condition met
+pod/webhook-785d4998c8-7xbqj condition met
+pod/webhook-785d4998c8-fw8cw condition met
+pod/3scale-kourier-gateway-7bc4cb475f-4kb7d condition met
+pod/3scale-kourier-gateway-7bc4cb475f-kln6z condition met
+pod/3scale-kourier-gateway-7bc4cb475f-4kb7d condition met
+pod/3scale-kourier-gateway-7bc4cb475f-kln6z condition met
+pod/net-kourier-controller-7b9d5c44bc-qp6vm condition met
+pod/net-kourier-controller-7b9d5c44bc-tkw6m condition met
+pod/net-kourier-controller-7b9d5c44bc-qp6vm condition met
+pod/net-kourier-controller-7b9d5c44bc-tkw6m condition met
+[14-07-2025 21:28:04] INFO - Install OpenShift Serverless Operator | Completed | ✅
+[14-07-2025 21:28:04] INFO - Bootstrap - Install OpenShift Serverless Operator | Completed | ✅
+[14-07-2025 21:28:04] INFO - Bootstrap - Setup the OpenShift Pipelines Operator | ⏳
+[14-07-2025 21:28:04] INFO - Script | /workspaces/OpenShiftDemoTime/assets/components/openshift-pipelines/setup.sh
+[14-07-2025 21:28:04] INFO - Install the OpenShift Pipelines Operator | ⏳
+[14-07-2025 21:28:04] INFO - Running Kustomize build...
 subscription.operators.coreos.com/openshift-pipelines-operator-rh created
-[14-07-2025 20:57:54] INFO - Wait for Operator to be ready
+[14-07-2025 21:28:05] INFO - Wait for Operator to be ready
 clusterserviceversion.operators.coreos.com/serverless-operator.v1.36.0 condition met
 error: the server doesn't have a resource type "tektonconfigs"
-[14-07-2025 20:57:56] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 1/1800 sec. timeout...
+[14-07-2025 21:28:08] WARNING - Command failed | Retrying | Attempt 1, infinite retries, 10 sec. interval, 1/1800 sec. timeout...
 error: the server doesn't have a resource type "tektonconfigs"
-[14-07-2025 20:58:06] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 11/1800 sec. timeout...
+[14-07-2025 21:28:19] WARNING - Command failed | Retrying | Attempt 2, infinite retries, 10 sec. interval, 12/1800 sec. timeout...
+Error from server (NotFound): tektonconfigs.operator.tekton.dev "config" not found
+[14-07-2025 21:28:30] WARNING - Command failed | Retrying | Attempt 3, infinite retries, 10 sec. interval, 23/1800 sec. timeout...
 config               
-[14-07-2025 20:58:17] INFO - Wait for Workload to be ready
-pod/openshift-pipelines-operator-8945758c7-z7blb condition met
-pod/openshift-pipelines-operator-8945758c7-z7blb condition met
-[14-07-2025 20:58:18] INFO - Install the OpenShift Pipelines Operator | Completed | ✅
-[14-07-2025 20:58:18] INFO - Bootstrap - Setup the OpenShift Pipelines Operator | Completed | ✅
+[14-07-2025 21:28:42] INFO - Wait for Workload to be ready
+pod/openshift-pipelines-operator-8945758c7-99rpr condition met
+pod/openshift-pipelines-operator-8945758c7-99rpr condition met
+[14-07-2025 21:28:44] INFO - Install the OpenShift Pipelines Operator | Completed | ✅
+[14-07-2025 21:28:44] INFO - Bootstrap - Setup the OpenShift Pipelines Operator | Completed | ✅
 ```
