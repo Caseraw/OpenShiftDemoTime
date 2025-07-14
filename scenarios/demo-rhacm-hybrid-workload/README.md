@@ -1,6 +1,6 @@
 # Demo - Hybrid workload
 
-## `bootstrap-demo-part-01.sh` output
+## `bootstrap-demo-part-01.sh` output on ACM Cluster
 
 ```shell
 [vscode@cee95e6949bb OpenShiftDemoTime]$ ./scenarios/demo-rhacm-hybrid-workload/bootstrap-demo.sh 
@@ -409,7 +409,7 @@ job.batch/aws-cluster-01-0-5r46r-provision condition met
 [14-07-2025 20:17:15] INFO - Bootstrap - Deploy the Red Hat Virtualization Cluster on AWS | Completed | ✅
 ```
 
-## `bootstrap-demo-part-01.sh` output
+## `bootstrap-demo-part-01.sh` output on Managed AWS Cluster
 
 ```shell
 [vscode@cee95e6949bb OpenShiftDemoTime]$ ./scenarios/demo-rhacm-hybrid-workload/bootstrap-demo-part-02.sh 
