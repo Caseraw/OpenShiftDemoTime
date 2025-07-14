@@ -10,7 +10,7 @@ To start working with this repository you'll need a good foundation to work from
 
 Go ahead and bootstrap a demo environment located in the path: `<project root>/scenarios/<demo folder name>`.
 
-Here's an example of a Demo Scenario: [Demo Hybrid Workload](/scenarios/README.md)
+Here's an example of a Demo Scenario: [Demo Hybrid Workload](/scenarios/demo-rhacm-hybrid-workload/README.md)
 
 ### Run a scenario
 
