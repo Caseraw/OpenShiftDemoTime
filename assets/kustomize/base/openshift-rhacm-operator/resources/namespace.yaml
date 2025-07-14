@@ -1,0 +1,7 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: open-cluster-management
+  labels:
+    kubernetes.io/metadata.name: open-cluster-management

@@ -1,0 +1,36 @@
+---
+apiVersion: operator.openshift.io/v1
+kind: Console
+metadata:
+  name: cluster
+spec:
+  customization:
+    addPage: {}
+    customLogoFile:
+      name: ""
+    developerCatalog:
+      types:
+        state: Enabled
+    perspectives:
+    - id: dev
+      visibility:
+        state: Disabled
+    projectAccess: {}
+    quickStarts: {}
+  logLevel: Normal
+  managementState: Managed
+  observedConfig: null
+  operatorLogLevel: Normal
+  plugins:
+  - monitoring-plugin
+  - networking-console-plugin
+  - mce
+  - acm
+  - gitops-plugin
+  - pipelines-console-plugin
+  providers: {}
+  route:
+    hostname: ""
+    secret:
+      name: ""
+  unsupportedConfigOverrides: null

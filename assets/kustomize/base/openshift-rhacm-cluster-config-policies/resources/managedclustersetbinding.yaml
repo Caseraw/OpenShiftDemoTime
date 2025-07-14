@@ -1,0 +1,8 @@
+---
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: managed-cluster-config
+  namespace: acm-cluster-config-policies
+spec:
+  clusterSet: managed-cluster-config

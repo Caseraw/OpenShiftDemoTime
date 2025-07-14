@@ -1,0 +1,9 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: openshift-serverless
+  annotations:
+    openshift.io/node-selector: ""
+  labels:
+    kubernetes.io/metadata.name: openshift-serverless

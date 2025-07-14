@@ -1,0 +1,7 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: acm-cluster-config-policies
+  labels:
+    kubernetes.io/metadata.name: acm-cluster-config-policies

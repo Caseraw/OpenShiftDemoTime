@@ -1,0 +1,29 @@
+# Gitignore file
+
+# Ignore Notes.md
+WIP/*
+!WIP/README.md
+
+# Ignore files in the "WIP" (Work In Progress) folder
+WIP/*
+!WIP/README.md
+
+# Ignore files in the "assets/byo" folder
+assets/byo/*
+!assets/byo/README.md
+
+# Manage ingores in the "assets/byo/credentials-aws" folder
+!assets/byo/credentials-aws/
+assets/byo/credentials-aws/*
+!assets/byo/credentials-aws/README.md
+!assets/byo/credentials-aws/setup.sh
+
+!assets/byo/pull-secret/
+assets/byo/pull-secret/*
+!assets/byo/pull-secret/README.md
+!assets/byo/pull-secret/setup.sh
+
+!assets/byo/ssh-keys/
+assets/byo/ssh-keys/*
+!assets/byo/ssh-keys/README.md
+!assets/byo/ssh-keys/setup.sh
