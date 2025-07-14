@@ -1,7 +1,9 @@
 # Demo - Hybrid workload
 
 This scenario starts off with an OpenShift Cluster on AWS including AWS account
-credentials and permissions. Part 01 of the scenario focusses on the setup a Red
+credentials and permissions.
+
+Part 01 of the scenario focusses on the setup a Red
 Hat Advanced Cluster Management Cluster from which a new Managed (by RHACM)
 OpenShift Cluster is deployed. This setup is based on a Hub Spoke model
 architecture and sets the stage for some nice real world use-cases.
