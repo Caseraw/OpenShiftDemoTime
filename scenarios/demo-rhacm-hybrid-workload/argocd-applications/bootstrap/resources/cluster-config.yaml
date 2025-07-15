@@ -1,0 +1,19 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pipeline
+spec:
+  destination:
+    namespace: cluster-config
+    server: https://kubernetes.default.svc
+  source:
+    path: scenarios/demo-rhacm-hybrid-workload/kustomize/base/cluster-config
+    repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+    targetRevision: HEAD
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
