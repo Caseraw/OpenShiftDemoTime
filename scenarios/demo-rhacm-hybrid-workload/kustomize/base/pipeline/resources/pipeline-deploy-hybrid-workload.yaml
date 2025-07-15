@@ -2,11 +2,10 @@
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: deploy-hyrbrid-workload
-  namespace: demo-pipelines
+  name: deploy-hybrid-workload
 spec:
   finally:
-    - name: openshift-client-final
+    - name: final-message
       params:
         - name: SCRIPT
           value: |-
@@ -15,72 +14,62 @@ spec:
             echo "ArgoCD Application for Hybrid Workload has been created"
             echo "To view the Application go to: $ROUTE/applications/openshift-gitops/hybrid-workload"
         - name: VERSION
-          value: '4.19'
+          value: latest
       taskRef:
         kind: Task
-        name: openshift-client
-      workspaces:
-        - name: manifest-dir
-          workspace: workspace
+        name: ocp-cli
   tasks:
-    - name: git-clone
+    - name: clone-git-project
       params:
-        - name: url
-          value: 'https://github.com/Caseraw/OpenShiftDemoTime.git'
-        - name: revision
-          value: main
-        - name: refspec
-          value: ''
-        - name: submodules
-          value: 'true'
-        - name: depth
-          value: '1'
-        - name: sslVerify
-          value: 'true'
-        - name: crtFileName
+        - name: CRT_FILENAME
           value: ca-bundle.crt
-        - name: subdirectory
+        - name: HTTP_PROXY
           value: ''
-        - name: sparseCheckoutDirectories
+        - name: HTTPS_PROXY
           value: ''
-        - name: deleteExisting
-          value: 'true'
-        - name: httpProxy
+        - name: NO_PROXY
           value: ''
-        - name: httpsProxy
+        - name: SUBDIRECTORY
           value: ''
-        - name: noProxy
-          value: ''
-        - name: verbose
-          value: 'true'
-        - name: gitInitImage
-          value: 'ghcr.io/tektoncd-catalog/git-clone:v1.1.0'
-        - name: userHome
+        - name: USER_HOME
           value: /home/git
+        - name: DELETE_EXISTING
+          value: 'true'
+        - name: VERBOSE
+          value: 'false'
+        - name: SSL_VERIFY
+          value: 'true'
+        - name: URL
+          value: 'https://github.com/Caseraw/OpenShiftDemoTime.git'
+        - name: REVISION
+          value: main
+        - name: REFSPEC
+          value: ''
+        - name: SUBMODULES
+          value: 'true'
+        - name: DEPTH
+          value: '1'
+        - name: SPARSE_CHECKOUT_DIRECTORIES
+          value: ''
       taskRef:
         kind: Task
-        name: git-clone
+        name: clone-git-project
       workspaces:
         - name: output
-          workspace: workspace
-    - name: openshift-client
+          workspace: shared-data
+    - name: ocp-cli
       params:
         - name: SCRIPT
-          value: |-
-            pwd
-            ls -la
-            ls -la /workspace/output
-
-            oc apply -k scenarios/demo-rhacm-hybrid-workload/argocd-applications/hybrid-workload
+          value: oc apply -k scenarios/demo-rhacm-hybrid-workload/argocd-applications/hybrid-workload
         - name: VERSION
-          value: '4.19'
+          value: latest
       runAfter:
-        - git-clone
+        - clone-git-project
       taskRef:
         kind: Task
-        name: openshift-client
+        name: ocp-cli
       workspaces:
-        - name: manifest-dir
-          workspace: workspace
+        - name: manifest_dir
+          workspace: shared-data
   workspaces:
-    - name: workspace
+    - name: shared-data
