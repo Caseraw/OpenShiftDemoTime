@@ -12,7 +12,6 @@ spec:
       from:
         kind: DockerImage
         name: php-crud
-      generation: 3
       importPolicy:
         importMode: Legacy
       referencePolicy:
