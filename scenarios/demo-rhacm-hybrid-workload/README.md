@@ -56,7 +56,7 @@ $ ./scenarios/demo-rhacm-hybrid-workload/bootstrap-demo-part-02.sh
 [14-07-2025 19:15:20] INFO - Bootstrap - Perform the scenario prerequisites | ⏳
 [14-07-2025 19:15:20] INFO - Script | /workspaces/OpenShiftDemoTime/assets/byo/credentials-aws/setup.sh
 [14-07-2025 19:15:20] INFO - Setting up | Credentials for AWS | ⏳
-Enter AWS Access Key ID: AKIAV27GVXIZC2SZWUNX
+Enter AWS Access Key ID: XXXXXX
 Enter AWS Secret Access Key: 
 Enter AWS Region: eu-central-1
 Enter OCP cluster base domain: sandbox2743.opentlc.com
