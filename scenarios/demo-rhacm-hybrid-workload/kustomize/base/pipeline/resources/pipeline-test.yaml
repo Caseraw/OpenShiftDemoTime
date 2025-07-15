@@ -1,0 +1,25 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: test
+spec:
+  tasks:
+    - name: openshift-client
+      params:
+        - name: SCRIPT
+          value: |-
+            oc version
+            oc get cm
+            oc get sa
+            oc get nodes
+        - name: VERSION
+          value: '4.19'
+      taskRef:
+        kind: Task
+        name: openshift-client
+      workspaces:
+        - name: manifest-dir
+          workspace: workspace
+  workspaces:
+    - name: workspace
