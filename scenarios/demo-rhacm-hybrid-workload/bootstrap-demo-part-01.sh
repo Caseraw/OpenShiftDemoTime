@@ -86,11 +86,3 @@ show_msg "show-date" "INFO" "Bootstrap - Deploy AWS Credentials in RHACM" "⏳"
 show_msg "show-date" "INFO" "Script" "$SCRIPT"
 source "$SCRIPT"
 show_msg "show-date" "INFO" "Bootstrap - Deploy AWS Credentials in RHACM" "Completed" "✅"
-
-# 9) Deploy the Red Hat Virtualization Cluster on AWS
-SCRIPT="$COMPONENTS_BASE/openshift-rhacm-deploy-aws-cluster/setup.sh"
-
-show_msg "show-date" "INFO" "Bootstrap - Deploy the Red Hat Virtualization Cluster on AWS" "⏳"
-show_msg "show-date" "INFO" "Script" "$SCRIPT"
-source "$SCRIPT"
-show_msg "show-date" "INFO" "Bootstrap - Deploy the Red Hat Virtualization Cluster on AWS" "Completed" "✅"
