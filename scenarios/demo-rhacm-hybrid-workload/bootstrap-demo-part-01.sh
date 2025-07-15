@@ -79,15 +79,7 @@ show_msg "show-date" "INFO" "Script" "$SCRIPT"
 source "$SCRIPT"
 show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Pipelines Operator" "Completed" "✅"
 
-# 8) Setup the OpenShift Console Configuration
-SCRIPT="$COMPONENTS_BASE/openshift-console-config/setup.sh"
-
-show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Console Configuration" "⏳"
-show_msg "show-date" "INFO" "Script" "$SCRIPT"
-source "$SCRIPT"
-show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Console Configuration" "Completed" "✅"
-
-# 9) Deploy AWS Credentials to RHACM
+# 8) Deploy AWS Credentials to RHACM
 SCRIPT="$COMPONENTS_BASE/openshift-rhacm-credentials-aws/setup.sh"
 
 show_msg "show-date" "INFO" "Bootstrap - Deploy AWS Credentials in RHACM" "⏳"
@@ -95,7 +87,7 @@ show_msg "show-date" "INFO" "Script" "$SCRIPT"
 source "$SCRIPT"
 show_msg "show-date" "INFO" "Bootstrap - Deploy AWS Credentials in RHACM" "Completed" "✅"
 
-# 10) Deploy the Red Hat Virtualization Cluster on AWS
+# 9) Deploy the Red Hat Virtualization Cluster on AWS
 SCRIPT="$COMPONENTS_BASE/openshift-rhacm-deploy-aws-cluster/setup.sh"
 
 show_msg "show-date" "INFO" "Bootstrap - Deploy the Red Hat Virtualization Cluster on AWS" "⏳"
