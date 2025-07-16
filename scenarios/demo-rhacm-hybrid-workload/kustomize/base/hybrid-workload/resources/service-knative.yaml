@@ -10,6 +10,11 @@ spec:
         app.kubernetes.io/component: ksvc-php-crud
         app.kubernetes.io/instance: ksvc-php-crud
         app.openshift.io/runtime-version: latest
+      annotations:
+        autoscaling.knative.dev/min-scale: "0"
+        autoscaling.knative.dev/max-scale: "10"
+        autoscaling.knative.dev/target: "200"
+        autoscaling.knative.dev/target-utilization-percentage: "70"
     spec:
       containerConcurrency: 0
       containers:
