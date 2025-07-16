@@ -12,5 +12,3 @@ spec:
     path: scenarios/demo-rhacm-hybrid-workload/kustomize/base/hybrid-workload
     repoURL: 'https://github.com/Caseraw/OpenShiftDemoTime.git'
     targetRevision: HEAD
-  syncPolicy:
-    automated: {}
