@@ -15,3 +15,4 @@ resources:
   - resources/secret.yaml
   - resources/route.yaml
   - resources/service-knative.yaml
+  - resources/networkpolicy.yaml
