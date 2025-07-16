@@ -22,6 +22,7 @@ RUN dnf install -y \
     vim-enhanced \
     iputils \
     bind-utils \
+    httpd-tools \
     iproute \
     traceroute \
     procps-ng \
