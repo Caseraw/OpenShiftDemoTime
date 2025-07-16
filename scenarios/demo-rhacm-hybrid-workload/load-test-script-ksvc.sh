@@ -10,10 +10,6 @@ echo "Endpoint: $ENDPOINT"
 echo "Total requests: $REQUESTS"
 echo "Concurrency: $CONCURRENCY"
 echo
-echo "Endpoint: $ENDPOINT"
-echo "Total requests: $REQUESTS"
-echo "Concurrency: $CONCURRENCY"
-echo
 
 PER_WORKER=$((REQUESTS / CONCURRENCY))
 REMAINDER=$((REQUESTS % CONCURRENCY))
