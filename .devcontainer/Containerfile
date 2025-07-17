@@ -122,6 +122,11 @@ RUN curl -L -f -o kn "https://github.com/knative/client/releases/download/knativ
     install -m 755 kn /usr/local/bin/kn && \
     rm -rf kn
 
+# Download hey (load generator) CLI
+RUN curl -L -f -o hey "https://hey-release.s3.us-east-2.amazonaws.com/hey_linux_amd64" && \
+    install -m 755 hey /usr/local/bin/hey && \
+    rm -rf kn
+
 # Create a non-root user to use the dev container
 RUN useradd -m -s /bin/bash vscode
 COPY files/.bashrc /home/vscode/.bashrc
