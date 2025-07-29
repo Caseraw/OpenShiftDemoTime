@@ -1,0 +1,103 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: galera-01
+spec:
+  dataVolumeTemplates:
+    - metadata:
+        name: galera-01-volume
+      spec:
+        sourceRef:
+          kind: DataSource
+          name: rhel8
+          namespace: openshift-virtualization-os-images
+        storage:
+          accessModes:
+            - ReadWriteMany
+          resources:
+            requests:
+              storage: 30Gi
+          storageClassName: ocs-storagecluster-ceph-rbd
+          volumeMode: Block
+  instancetype:
+    kind: virtualmachineclusterinstancetype
+    name: u1.medium
+  preference:
+    kind: virtualmachineclusterpreference
+    name: rhel.8
+  runStrategy: RerunOnFailure
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        galera/cluster: galera
+        network.kubevirt.io/headlessService: headless
+        vm.kubevirt.io/name: galera-01
+    spec:
+      architecture: amd64
+      domain:
+        devices: {}
+        machine:
+          type: pc-q35-rhel9.6.0
+        resources: {}
+      subdomain: headless
+      volumes:
+        - dataVolume:
+            name: galera-01-volume
+          name: rootdisk
+        - cloudInitNoCloud:
+            userData: |
+              #cloud-config
+              user: cloud-user
+              password: cloud8@123
+              chpasswd: { expire: False }
+              rh_subscription:
+                activation-key: kasra_at_redhat_demo_activation_key
+                org: 11009103
+                auto-attach: true
+              runcmd:
+                - sudo subscription-manager repos --list-enabled
+                - sudo dnf module install -y mariadb/galera
+                - |
+                    cat <<EOF | sudo tee /etc/my.cnf
+                    #
+                    # This group is read both both by the client and the server
+                    # use it for options that affect everything
+                    #
+                    [client-server]
+
+                    [galera]
+                    wsrep_on=ON
+                    wsrep_cluster_name=rws
+                    binlog_format=ROW
+                    bind-address=0.0.0.0
+
+                    default-storage-engine=InnoDB
+                    innodb_autoinc_lock_mode=2
+                    innodb_doublewrite=1
+                    query_cache_size=0
+                    wsrep_provider=/usr/lib64/galera-4/libgalera_smm.so
+
+                    wsrep_cluster_address=gcomm://
+
+                    wsrep_sst_method=rsync
+                    wsrep_dirty_reads=ON
+                    wsrep-sync-wait=0
+
+                    wsrep_node_address=galera-01
+
+                    #
+                    # include all files from the config directory
+                    #
+                    !includedir /etc/my.cnf.d
+                    EOF
+                - sudo systemctl start mariadb
+                - sudo systemctl status mariadb
+                - mysql -u root -e "SHOW STATUS LIKE 'wsrep_cluster_size';"
+                - mysql -u root -e "create database sampledb;"
+                - mysql -u root -e "create user 'userOSR' identified by 'WmyArnyFmiyKrt7n';"
+                - mysql -u root -e "grant all privileges on sampledb.* to 'userOSR'@'%' identified by 'WmyArnyFmiyKrt7n';"
+                - mysql -u root -e "flush privileges;"
+              final_message: Cloud-init has completed successfully!
+          name: cloudinitdisk

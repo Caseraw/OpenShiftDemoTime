@@ -1,0 +1,9 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: openshift-cnv
+  annotations:
+    openshift.io/node-selector: ""
+  labels:
+    kubernetes.io/metadata.name: openshift-cnv

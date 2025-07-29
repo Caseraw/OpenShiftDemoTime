@@ -1,0 +1,10 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - resources/namespace.yaml
+  - resources/managedclusterset.yaml
+  - resources/managedclustersetbinding.yaml
+  - resources/policy-setup-acm-cluster-config-policies.yaml
+  - resources/policy-install-openshift-gitops-operator.yaml

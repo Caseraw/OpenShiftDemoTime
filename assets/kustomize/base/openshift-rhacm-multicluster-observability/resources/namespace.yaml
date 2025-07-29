@@ -1,0 +1,8 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: open-cluster-management-observability
+  labels:
+    kubernetes.io/metadata.name: open-cluster-management-observability
+    openshift.io/cluster-monitoring: 'true'

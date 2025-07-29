@@ -1,0 +1,1 @@
+# Kustomize base asset folder

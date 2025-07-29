@@ -1,0 +1,137 @@
+# Use the latest Fedora image
+ARG PLATFORM
+FROM --platform=$PLATFORM fedora:latest
+
+# Install necessary packages
+RUN dnf install -y \
+    bash \
+    bash-completion \
+    curl \
+    wget \
+    git \
+    tree \
+    less \
+    more \
+    tar \
+    zip \
+    unzip \
+    jq \
+    rsync \
+    which \
+    vim \
+    vim-enhanced \
+    iputils \
+    bind-utils \
+    httpd-tools \
+    iproute \
+    traceroute \
+    procps-ng \
+    util-linux-core \
+    wireshark \
+    htop \
+    net-tools \
+    telnet \
+    tcpdump \
+    nmap \
+    mtr \
+    strace \
+    lsof \
+    iftop \
+    iperf \
+    iperf3 \
+    tmux \
+    screen \
+    nano \
+    zip \
+    unzip \
+    nc \
+    python3 \
+    python3-pip \
+    make \
+    gcc \
+    gdb \
+    openssl \
+    openssh-clients \
+    ansible \
+    skopeo \
+    buildah \
+    podman && \
+    dnf clean all
+
+# Download/Install OpenShift and Kubernetes Client binaries
+RUN wget -q -O oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz && \
+    tar -xzf oc.tar.gz && \
+    install -m 755 oc /usr/local/bin/oc  && \
+    install -m 755 kubectl /usr/local/bin/kubectl && \
+    # oc completion bash > /etc/bash_completion.d/oc && \
+    # kubectl completion bash > /etc/bash_completion.d/kubectl && \
+    rm -rf oc.tar.gz oc kubectl README.md
+
+# Download/Install Kustomize Client binary
+RUN wget -q -O kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.7.0/kustomize_v5.7.0_linux_amd64.tar.gz && \
+    tar -xzf kustomize.tar.gz && \
+    install -m 755 kustomize /usr/local/bin/kustomize && \
+    kustomize completion bash > /etc/bash_completion.d/kustomize && \
+    rm -rf kustomize.tar.gz kustomize
+
+# Download/Install Helm Client binary
+RUN wget -q -O helm.tar.gz https://get.helm.sh/helm-v3.18.3-linux-amd64.tar.gz && \
+    tar -xzf helm.tar.gz && \
+    install -m 755 linux-amd64/helm /usr/local/bin/helm && \
+    helm completion bash > /etc/bash_completion.d/helm && \
+    rm -rf helm.tar.gz linux-amd64
+
+# Download/Install Tekton CLI RPM directly from URL
+RUN dnf install -y https://github.com/tektoncd/cli/releases/download/v0.41.0/tektoncd-cli-0.41.0_Linux-64bit.rpm && \
+    dnf clean all && \
+    tkn completion bash > /etc/bash_completion.d/tkn
+
+# Download/Install roxctl from URL
+RUN curl -L -f -o roxctl "https://mirror.openshift.com/pub/rhacs/assets/latest/bin/Linux/roxctl" && \
+    install -m 755 roxctl /usr/local/bin/roxctl && \
+    rm -rf roxctl
+
+# Download/Install AWS CLI from URL
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    sudo ./aws/install && \
+    rm -rf awscliv2.zip
+
+# Download/Install Azure CLI from URL
+RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
+    dnf install -y https://packages.microsoft.com/config/fedora/42/packages-microsoft-prod.rpm && \
+    dnf install -y azure-cli && \
+    dnf clean all
+
+# Download/Install OpenShift Installer
+RUN wget -q -O openshift-install-linux.tar.gz https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-install-linux.tar.gz && \
+    tar -xzf openshift-install-linux.tar.gz && \
+    install -m 755 openshift-install /usr/local/bin/openshift-install && \
+    openshift-install completion bash > /etc/bash_completion.d/openshift-install && \
+    rm -rf openshift-install-linux.tar.gz openshift-install
+
+# Download/Install Rosa CLI
+RUN wget -q -O rosa-linux.tar.gz https://mirror.openshift.com/pub/cgw/rosa/latest/rosa-linux.tar.gz && \
+    tar -xzf rosa-linux.tar.gz && \
+    install -m 755 rosa /usr/local/bin/rosa && \
+    rosa completion bash > /etc/bash_completion.d/rosa && \
+    rm -rf rosa-linux.tar.gz rosa
+
+# Download Knative CLI
+RUN curl -L -f -o kn "https://github.com/knative/client/releases/download/knative-v1.18.0/kn-linux-amd64" && \
+    install -m 755 kn /usr/local/bin/kn && \
+    rm -rf kn
+
+# Download hey (load generator) CLI
+RUN curl -L -f -o hey "https://hey-release.s3.us-east-2.amazonaws.com/hey_linux_amd64" && \
+    install -m 755 hey /usr/local/bin/hey && \
+    rm -rf kn
+
+# Create a non-root user to use the dev container
+RUN useradd -m -s /bin/bash vscode
+COPY files/.bashrc /home/vscode/.bashrc
+RUN chown vscode:vscode /home/vscode/.bashrc
+USER vscode
+
+# Set the working directory to the workspace folder within the vscode home directory
+WORKDIR /home/vscode/workspace

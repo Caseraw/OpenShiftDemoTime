@@ -1,0 +1,29 @@
+{
+    "name": "OpenShift Demo Time Workspace",
+    "build": {
+        "dockerfile": "Containerfile",
+        "args": {
+            "PLATFORM": "linux/amd64"
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.shell.linux": "/bin/bash"
+            }
+        }
+    },
+	"runArgs": [
+		"--userns=keep-id",
+		"--security-opt=label=disable",
+        "--user", "vscode"
+	],
+	"containerUser": "vscode",
+	"updateRemoteUserUID": true,
+	"containerEnv": {
+		"HOME": "/home/vscode"
+	},
+	"remoteEnv": {
+		"PODMAN_USERNS": "keep-id"
+	},
+    "remoteUser": "vscode"
+}

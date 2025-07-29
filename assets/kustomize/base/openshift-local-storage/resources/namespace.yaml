@@ -1,0 +1,8 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: openshift-local-storage
+  labels:
+    kubernetes.io/metadata.name: openshift-local-storage
+    openshift.io/cluster-monitoring: 'true'

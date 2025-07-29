@@ -1,0 +1,75 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: deploy-hybrid-workload
+spec:
+  finally:
+    - name: final-message
+      params:
+        - name: SCRIPT
+          value: |-
+            ROUTE="https://$(oc get route openshift-gitops-server -n openshift-gitops -o jsonpath='{.spec.host}')"
+
+            echo "ArgoCD Application for Hybrid Workload has been created"
+            echo "To view the Application go to: $ROUTE/applications/openshift-gitops/hybrid-workload"
+        - name: VERSION
+          value: latest
+      taskRef:
+        kind: Task
+        name: ocp-cli
+  tasks:
+    - name: clone-git-project
+      params:
+        - name: CRT_FILENAME
+          value: ca-bundle.crt
+        - name: HTTP_PROXY
+          value: ''
+        - name: HTTPS_PROXY
+          value: ''
+        - name: NO_PROXY
+          value: ''
+        - name: SUBDIRECTORY
+          value: ''
+        - name: USER_HOME
+          value: /home/git
+        - name: DELETE_EXISTING
+          value: 'true'
+        - name: VERBOSE
+          value: 'false'
+        - name: SSL_VERIFY
+          value: 'true'
+        - name: URL
+          value: 'https://github.com/Caseraw/OpenShiftDemoTime.git'
+        - name: REVISION
+          value: main
+        - name: REFSPEC
+          value: ''
+        - name: SUBMODULES
+          value: 'true'
+        - name: DEPTH
+          value: '1'
+        - name: SPARSE_CHECKOUT_DIRECTORIES
+          value: ''
+      taskRef:
+        kind: Task
+        name: clone-git-project
+      workspaces:
+        - name: output
+          workspace: shared-data
+    - name: ocp-cli
+      params:
+        - name: SCRIPT
+          value: oc apply -k scenarios/demo-rhacm-hybrid-workload/argocd-applications/hybrid-workload
+        - name: VERSION
+          value: latest
+      runAfter:
+        - clone-git-project
+      taskRef:
+        kind: Task
+        name: ocp-cli
+      workspaces:
+        - name: manifest_dir
+          workspace: shared-data
+  workspaces:
+    - name: shared-data

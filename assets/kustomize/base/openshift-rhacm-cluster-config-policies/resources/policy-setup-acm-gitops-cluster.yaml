@@ -1,0 +1,54 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: setup-acm-gitops-cluster
+  namespace: acm-cluster-config-policies
+  annotations:
+    policy.open-cluster-management.io/description: Install OpenShift GitOps Operator.
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+spec:
+  disabled: false
+  remediationAction: enforce
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: setup-acm-gitops-cluster
+        spec:
+          remediationAction: enforce
+          severity: critical
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apps.open-cluster-management.io/v1beta1
+                kind: GitOpsCluster
+                metadata:
+                  name: rhacm-gitops-cluster
+                  namespace: openshift-gitops
+                spec:
+                  argoServer:
+                    argoNamespace: openshift-gitops
+                  placementRef:
+                    name: rhacm-gitops-cluster-placement
+                    kind: Placement
+                    apiVersion: cluster.open-cluster-management.io/v1beta1
+
+          pruneObjectBehavior: None
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: install-openshift-gitops-placement
+  namespace: acm-cluster-config-policies
+placementRef:
+  name: setup-acm-cluster-config-policies-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: install-openshift-gitops
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy

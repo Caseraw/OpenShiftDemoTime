@@ -1,0 +1,213 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: clone-git-project
+spec:
+  description: |
+    This object represents Git and is able to initialize and clone a remote repository on the informed Workspace. It's likely to become the first `step` on a Pipeline. 
+  params:
+    - default: ca-bundle.crt
+      description: |
+        Certificate Authority (CA) bundle filename in the SSL CA directory.
+      name: CRT_FILENAME
+      type: string
+    - default: ''
+      description: |
+        HTTP proxy server (non-TLS requests).
+      name: HTTP_PROXY
+      type: string
+    - default: ''
+      description: |
+        HTTPS proxy server (TLS requests).
+      name: HTTPS_PROXY
+      type: string
+    - default: ''
+      description: |
+        Opt out of proxying HTTP/HTTPS requests.
+      name: NO_PROXY
+      type: string
+    - default: ''
+      description: |
+        Path to the directory for storing the cloned Git repository, relative to the
+        output directory.
+      name: SUBDIRECTORY
+      type: string
+    - default: /home/git
+      description: |
+        Absolute path to the Git user home directory.
+      name: USER_HOME
+      type: string
+    - default: 'true'
+      description: |
+        Clean out the contents of the default Workspace before specific Git operations occur, if data exists.
+      name: DELETE_EXISTING
+      type: string
+    - default: 'false'
+      description: |
+        Log the executed commands.
+      name: VERBOSE
+      type: string
+    - default: 'true'
+      description: |
+        Sets the global `http.sslVerify` value, `false` is not advised unless
+        you trust the remote repository.
+      name: SSL_VERIFY
+      type: string
+    - description: |
+        Git repository URL.
+      name: URL
+      type: string
+    - default: main
+      description: |
+        Revision to checkout, an branch, tag, sha, ref, etc...
+      name: REVISION
+      type: string
+    - default: ''
+      description: |
+        Repository `refspec` to fetch before checking out the revision.
+      name: REFSPEC
+      type: string
+    - default: 'true'
+      description: |
+        Initialize and fetch Git submodules.
+      name: SUBMODULES
+      type: string
+    - default: '1'
+      description: |
+        Number of commits to fetch, a "shallow clone" is a single commit.
+      name: DEPTH
+      type: string
+    - default: ''
+      description: |
+        List of directory patterns split by comma to perform "sparse checkout".
+      name: SPARSE_CHECKOUT_DIRECTORIES
+      type: string
+  results:
+    - description: |
+        The precise commit SHA digest cloned.
+      name: COMMIT
+      type: string
+    - description: |
+        The precise repository URL.
+      name: URL
+      type: string
+    - description: |
+        The epoch timestamp of the commit cloned.
+      name: COMMITTER_DATE
+      type: string
+  stepTemplate:
+    computeResources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    env:
+      - name: PARAMS_URL
+        value: $(params.URL)
+      - name: PARAMS_REVISION
+        value: $(params.REVISION)
+      - name: PARAMS_REFSPEC
+        value: $(params.REFSPEC)
+      - name: PARAMS_SUBMODULES
+        value: $(params.SUBMODULES)
+      - name: PARAMS_DEPTH
+        value: $(params.DEPTH)
+      - name: PARAMS_SPARSE_CHECKOUT_DIRECTORIES
+        value: $(params.SPARSE_CHECKOUT_DIRECTORIES)
+      - name: RESULTS_COMMITTER_DATE_PATH
+        value: $(results.COMMITTER_DATE.path)
+      - name: RESULTS_URL_PATH
+        value: $(results.URL.path)
+      - name: WORKSPACES_OUTPUT_PATH
+        value: $(workspaces.output.path)
+      - name: PARAMS_SSL_VERIFY
+        value: $(params.SSL_VERIFY)
+      - name: PARAMS_CRT_FILENAME
+        value: $(params.CRT_FILENAME)
+      - name: PARAMS_SUBDIRECTORY
+        value: $(params.SUBDIRECTORY)
+      - name: PARAMS_DELETE_EXISTING
+        value: $(params.DELETE_EXISTING)
+      - name: PARAMS_HTTP_PROXY
+        value: $(params.HTTP_PROXY)
+      - name: PARAMS_HTTPS_PROXY
+        value: $(params.HTTPS_PROXY)
+      - name: PARAMS_NO_PROXY
+        value: $(params.NO_PROXY)
+      - name: PARAMS_VERBOSE
+        value: $(params.VERBOSE)
+      - name: PARAMS_USER_HOME
+        value: $(params.USER_HOME)
+      - name: WORKSPACES_SSH_DIRECTORY_BOUND
+        value: $(workspaces.ssh-directory.bound)
+      - name: WORKSPACES_SSH_DIRECTORY_PATH
+        value: $(workspaces.ssh-directory.path)
+      - name: WORKSPACES_BASIC_AUTH_BOUND
+        value: $(workspaces.basic-auth.bound)
+      - name: WORKSPACES_BASIC_AUTH_PATH
+        value: $(workspaces.basic-auth.path)
+      - name: WORKSPACES_SSL_CA_DIRECTORY_BOUND
+        value: $(workspaces.ssl-ca-directory.bound)
+      - name: WORKSPACES_SSL_CA_DIRECTORY_PATH
+        value: $(workspaces.ssl-ca-directory.path)
+      - name: RESULTS_COMMIT_PATH
+        value: $(results.COMMIT.path)
+    securityContext:
+      privileged: true
+      runAsNonRoot: false
+      runAsUser: 65532
+  steps:
+    - computeResources: {}
+      image: 'registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel9@sha256:ecb8bfb2161a0ffc2ccc2aa4f8f1082a21ac18e991812b0b5d32f8d84fb6a1c0'
+      name: prepare-and-run
+      script: |
+        set -e
+        printf '%s' "IyEvdXNyL2Jpbi9lbnYgc2gKCmV4cG9ydCBQQVJBTVNfVVJMPSIke1BBUkFNU19VUkw6LX0iCmV4cG9ydCBQQVJBTVNfUkVWSVNJT049IiR7UEFSQU1TX1JFVklTSU9OOi19IgpleHBvcnQgUEFSQU1TX1JFRlNQRUM9IiR7UEFSQU1TX1JFRlNQRUM6LX0iCmV4cG9ydCBQQVJBTVNfU1VCTU9EVUxFUz0iJHtQQVJBTVNfU1VCTU9EVUxFUzotfSIKZXhwb3J0IFBBUkFNU19ERVBUSD0iJHtQQVJBTVNfREVQVEg6LX0iCmV4cG9ydCBQQVJBTVNfU1NMX1ZFUklGWT0iJHtQQVJBTVNfU1NMX1ZFUklGWTotfSIKZXhwb3J0IFBBUkFNU19DUlRfRklMRU5BTUU9IiR7UEFSQU1TX0NSVF9GSUxFTkFNRTotfSIKZXhwb3J0IFBBUkFNU19TVUJESVJFQ1RPUlk9IiR7UEFSQU1TX1NVQkRJUkVDVE9SWTotfSIKZXhwb3J0IFBBUkFNU19TUEFSU0VfQ0hFQ0tPVVRfRElSRUNUT1JJRVM9IiR7UEFSQU1TX1NQQVJTRV9DSEVDS09VVF9ESVJFQ1RPUklFUzotfSIKZXhwb3J0IFBBUkFNU19ERUxFVEVfRVhJU1RJTkc9IiR7UEFSQU1TX0RFTEVURV9FWElTVElORzotfSIKZXhwb3J0IFBBUkFNU19IVFRQX1BST1hZPSIke1BBUkFNU19IVFRQX1BST1hZOi19IgpleHBvcnQgUEFSQU1TX0hUVFBTX1BST1hZPSIke1BBUkFNU19IVFRQU19QUk9YWTotfSIKZXhwb3J0IFBBUkFNU19OT19QUk9YWT0iJHtQQVJBTVNfTk9fUFJPWFk6LX0iCmV4cG9ydCBQQVJBTVNfVkVSQk9TRT0iJHtQQVJBTVNfVkVSQk9TRTotfSIKZXhwb3J0IFBBUkFNU19VU0VSX0hPTUU9IiR7UEFSQU1TX1VTRVJfSE9NRTotfSIKZXhwb3J0IFBBUkFNU19HSVRfVVNFUl9FTUFJTD0iJHtQQVJBTVNfR0lUX1VTRVJfRU1BSUw6LX0iCmV4cG9ydCBQQVJBTVNfR0lUX1VTRVJfTkFNRT0iJHtQQVJBTVNfR0lUX1VTRVJfTkFNRTotfSIKZXhwb3J0IFBBUkFNU19HSVRfU0NSSVBUPSIke1BBUkFNU19HSVRfU0NSSVBUOi19IgoKZXhwb3J0IFdPUktTUEFDRVNfU09VUkNFX1BBVEg9IiR7V09SS1NQQUNFU19TT1VSQ0VfUEFUSDotfSIKZXhwb3J0IFdPUktTUEFDRVNfT1VUUFVUX1BBVEg9IiR7V09SS1NQQUNFU19PVVRQVVRfUEFUSDotfSIKZXhwb3J0IFdPUktTUEFDRVNfU1NIX0RJUkVDVE9SWV9CT1VORD0iJHtXT1JLU1BBQ0VTX1NTSF9ESVJFQ1RPUllfQk9VTkQ6LX0iCmV4cG9ydCBXT1JLU1BBQ0VTX1NTSF9ESVJFQ1RPUllfUEFUSD0iJHtXT1JLU1BBQ0VTX1NTSF9ESVJFQ1RPUllfUEFUSDotfSIKZXhwb3J0IFdPUktTUEFDRVNfQkFTSUNfQVVUSF9CT1VORD0iJHtXT1JLU1BBQ0VTX0JBU0lDX0FVVEhfQk9VTkQ6LX0iCmV4cG9ydCBXT1JLU1BBQ0VTX0JBU0lDX0FVVEhfUEFUSD0iJHtXT1JLU1BBQ0VTX0JBU0lDX0FVVEhfUEFUSDotfSIKZXhwb3J0IFdPUktTUEFDRVNfU1NMX0NBX0RJUkVDVE9SWV9CT1VORD0iJHtXT1JLU1BBQ0VTX1NTTF9DQV9ESVJFQ1RPUllfQk9VTkQ6LX0iCmV4cG9ydCBXT1JLU1BBQ0VTX1NTTF9DQV9ESVJFQ1RPUllfUEFUSD0iJHtXT1JLU1BBQ0VTX1NTTF9DQV9ESVJFQ1RPUllfUEFUSDotfSIKCmV4cG9ydCBSRVNVTFRTX0NPTU1JVFRFUl9EQVRFX1BBVEg9IiR7UkVTVUxUU19DT01NSVRURVJfREFURV9QQVRIOi19IgpleHBvcnQgUkVTVUxUU19DT01NSVRfUEFUSD0iJHtSRVNVTFRTX0NPTU1JVF9QQVRIOi19IgpleHBvcnQgUkVTVUxUU19VUkxfUEFUSD0iJHtSRVNVTFRTX1VSTF9QQVRIOi19IgoKIyBmdWxsIHBhdGggdG8gdGhlIGNoZWNrb3V0IGRpcmVjdG9yeSwgdXNpbmcgdGhlIHNvdXJjZSB3b3Jrc3BhY2UgYW5kIHN1YmRpcmVjdG9yIHBhcmFtZXRlcgpbWyAhIC16ICR7V09SS1NQQUNFU19TT1VSQ0VfUEFUSH0gXV0gJiYgZXhwb3J0IFdPUktTUEFDRVNfUk9PVF9QQVRIPSIke1dPUktTUEFDRVNfU09VUkNFX1BBVEh9IgpbWyAhIC16ICR7V09SS1NQQUNFU19PVVRQVVRfUEFUSH0gXV0gJiYgZXhwb3J0IFdPUktTUEFDRVNfUk9PVF9QQVRIPSIke1dPUktTUEFDRVNfT1VUUFVUX1BBVEh9IgoKY2hlY2tvdXRfZGlyPSIke1dPUktTUEFDRVNfUk9PVF9QQVRIfS8ke1BBUkFNU19TVUJESVJFQ1RPUll9IgoKIwojIEZ1bmN0aW9ucwojCgpmYWlsKCkgewogICAgZWNobyAiRVJST1I6ICR7QH0iIDE+JjIKICAgIGV4aXQgMQp9CgpwaGFzZSgpIHsKICAgIGVjaG8gIi0tLT4gUGhhc2U6ICR7QH0uLi4iCn0KCiMgSW5zcGVjdCB0aGUgZW52aXJvbm1lbnQgdmFyaWFibGVzIHRvIGFzc2VydCB0aGUgbWluaW11bSBjb25maWd1cmF0aW9uIGlzIGluZm9ybWVkLgphc3NlcnRfcmVxdWlyZWRfY29uZmlndXJhdGlvbl9vcl9mYWlsKCkgewogICAgW1sgLXogIiR7UEFSQU1TX1VSTH0iICAmJiAgLXogIiR7UEFSQU1TX0dJVF9TQ1JJUFR9IiBdXSAmJgogICAgICAgIGZhaWwgIlBhcmFtZXRlciBVUkwgb3IgU0NSSVBUIG11c3QgYmUgc2V0ISIKCiAgICBbWyAteiAiJHtXT1JLU1BBQ0VTX1JPT1RfUEFUSH0iIF1dICYmCiAgICAgICAgZmFpbCAiUm9vdCBXb3Jrc3BhY2UgaXMgbm90IHNldCEiCgogICAgW1sgISAtZCAiJHtXT1JLU1BBQ0VTX1JPT1RfUEFUSH0iIF1dICYmCiAgICAgICAgZmFpbCAiUm9vdCBXb3Jrc3BhY2UgZGlyZWN0b3J5IG5vdCBmb3VuZCEiCiAgICByZXR1cm4gMAp9CgojIENvcHkgdGhlIGZpbGUgaW50byB0aGUgZGVzdGluYXRpb24sIGNoZWNraW5nIGlmIHRoZSBzb3VyY2UgZXhpc3RzLgpjb3B5X29yX2ZhaWwoKSB7CiAgICBsb2NhbCBfbW9kZT0iJHsxfSIKICAgIGxvY2FsIF9zcmM9IiR7Mn0iCiAgICBsb2NhbCBfZHN0PSIkezN9IgoKICAgIGlmIFtbICEgLWYgIiR7X3NyY30iICYmICEgLWQgIiR7X3NyY30iIF1dOyB0aGVuCiAgICAgICAgZmFpbCAiU291cmNlIGZpbGUvZGlyZWN0b3J5IGlzIG5vdCBmb3VuZCBhdCAnJHtfc3JjfSciCiAgICBmaQoKICAgIGlmIFtbIC1kICIke19zcmN9IiBdXTsgdGhlbgogICAgICAgIGNwIC1SdiAke19zcmN9ICR7X2RzdH0KICAgICAgICBjaG1vZCAtdiAke19tb2RlfSAke19kc3R9CiAgICBlbHNlCiAgICAgICAgaW5zdGFsbCAtLXZlcmJvc2UgLS1tb2RlPSR7X21vZGV9ICR7X3NyY30gJHtfZHN0fQogICAgZmkKfQoKIyBEZWxldGUgYW55IGV4aXN0aW5nIGNvbnRlbnRzIG9mIHRoZSByZXBvIGRpcmVjdG9yeSBpZiBpdCBleGlzdHMuIFdlIGRvbid0IGp1c3QgInJtIC1yZiA8ZGlyPiIKIyBiZWNhdXNlIG1pZ2h0IGJlICIvIiBvciB0aGUgcm9vdCBvZiBhIG1vdW50ZWQgdm9sdW1lLgpjbGVhbl9kaXIoKSB7CiAgICBsb2NhbCBfZGlyPSIkezF9IgoKICAgIFtbICEgLWQgIiR7X2Rpcn0iIF1dICYmCiAgICAgICAgcmV0dXJuIDAKCiAgICAjIERlbGV0ZSBub24taGlkZGVuIGZpbGVzIGFuZCBkaXJlY3RvcmllcwogICAgcm0gLXJmdiAke19kaXI6P30vKgogICAgIyBEZWxldGUgZmlsZXMgYW5kIGRpcmVjdG9yaWVzIHN0YXJ0aW5nIHdpdGggLiBidXQgZXhjbHVkaW5nIC4uCiAgICBybSAtcmZ2ICR7X2Rpcn0vLlshLl0qCiAgICAjIERlbGV0ZSBmaWxlcyBhbmQgZGlyZWN0b3JpZXMgc3RhcnRpbmcgd2l0aCAuLiBwbHVzIGFueSBvdGhlciBjaGFyYWN0ZXIKICAgIHJtIC1yZnYgJHtfZGlyfS8uLj8qCn0KCiMKIyBTZXR0aW5ncwojCgojIHdoZW4gdGhlIGtvLWFwcCBkaXJlY3RvcnkgaXMgcHJlc2VudCwgbWFraW5nIHN1cmUgaXQncyBwYXJ0IG9mIHRoZSBQQVRICltbIC1kICIva28tYXBwIiBdXSAmJiBleHBvcnQgUEFUSD0iJHtQQVRIfTova28tYXBwIgoKIyBtYWtpbmcgdGhlIHNoZWxsIHZlcmJvc2Ugd2hlbiB0aGUgcGFyYW10ZXIgaXMgc2V0CltbICIke1BBUkFNU19WRVJCT1NFfSIgPT0gInRydWUiIF1dICYmIHNldCAteAoKcmV0dXJuIDA=" |base64 -d >"/scripts/common.sh"
+        printf '%s' "IyEvdXNyL2Jpbi9lbnYgc2gKc2V0IC1ldQoKc291cmNlICQoQ0RQQVRIPSBjZCAtLSAiJChkaXJuYW1lIC0tICR7MH0pIiAmJiBwd2QpL2NvbW1vbi5zaAoKYXNzZXJ0X3JlcXVpcmVkX2NvbmZpZ3VyYXRpb25fb3JfZmFpbAoKcGhhc2UgIlNldHRpbmcgb3V0cHV0IHdvcmtzcGFjZSBhcyBzYWZlIGRpcmVjdG9yeSAoJyR7V09SS1NQQUNFU19ST09UX1BBVEh9JykiCmdpdCBjb25maWcgLS1nbG9iYWwgLS1hZGQgc2FmZS5kaXJlY3RvcnkgIiR7V09SS1NQQUNFU19ST09UX1BBVEh9IgoKIyBTZXR0aW5nIHVwIHRoZSBjb25maWcgZm9yIHRoZSBnaXQuCgppZiBbIC1uICIke1BBUkFNU19HSVRfVVNFUl9FTUFJTH0iIF0gOyB0aGVuCiAgICBwaGFzZSAiU2V0dGluZyBnbG9iYWwgZW1haWwgZm9yIGdpdCAke1BBUkFNU19HSVRfVVNFUl9FTUFJTH0iCiAgICBnaXQgY29uZmlnIC0tZ2xvYmFsIHVzZXIuZW1haWwgIiR7UEFSQU1TX0dJVF9VU0VSX0VNQUlMfSIKZmkKCmlmIFsgLW4gIiR7UEFSQU1TX0dJVF9VU0VSX05BTUV9IiBdIDsgdGhlbgogICAgcGhhc2UgIlNldHRpbmcgZ2xvYmFsIHVzZXJuYW1lIGZvciBnaXQgJHtQQVJBTVNfR0lUX1VTRVJfTkFNRX0iCiAgICBnaXQgY29uZmlnIC0tZ2xvYmFsIHVzZXIubmFtZSAiJHtQQVJBTVNfR0lUX1VTRVJfTkFNRX0iCmZpCgojCiMgQ0EgKGBzc2wtY2EtZGlyZWN0b3J5YCBXb3Jrc3BhY2UpCiMKCmlmIFtbICIke1dPUktTUEFDRVNfU1NMX0NBX0RJUkVDVE9SWV9CT1VORH0iID09ICJ0cnVlIiAmJiAtbiAiJHtQQVJBTVNfQ1JUX0ZJTEVOQU1FfSIgXV07IHRoZW4KCXBoYXNlICJJbnNwZWN0aW5nICdzc2wtY2EtZGlyZWN0b3J5JyB3b3Jrc3BhY2UgbG9va2luZyBmb3IgJyR7UEFSQU1TX0NSVF9GSUxFTkFNRX0nIGZpbGUiCgljcnQ9IiR7V09SS1NQQUNFU19TU0xfQ0FfRElSRUNUT1JZX1BBVEh9LyR7UEFSQU1TX0NSVF9GSUxFTkFNRX0iCglbWyAhIC1mICIke2NydH0iIF1dICYmCgkJZmFpbCAiQ1JUIGZpbGUgKFBBUkFNU19DUlRfRklMRU5BTUUpIG5vdCBmb3VuZCBhdCAnJHtjcnR9JyIKCglwaGFzZSAiRXhwb3J0aW5nIGN1c3RvbSBDQSBjZXJ0aWZpY2F0ZSAnR0lUX1NTTF9DQUlORk89JHtjcnR9JyIKCWV4cG9ydCBHSVRfU1NMX0NBSU5GTz0ke2NydH0KZmkKCiMKIyBQcm94eSBTZXR0aW5ncwojCgpwaGFzZSAiU2V0dGluZyB1cCBIVFRQX1BST1hZPScke1BBUkFNU19IVFRQX1BST1hZfSciCltbIC1uICIke1BBUkFNU19IVFRQX1BST1hZfSIgXV0gJiYgZXhwb3J0IEhUVFBfUFJPWFk9IiR7UEFSQU1TX0hUVFBfUFJPWFl9IgoKcGhhc2UgIlNldHR0aW5nIHVwIEhUVFBTX1BST1hZPScke1BBUkFNU19IVFRQU19QUk9YWX0nIgpbWyAtbiAiJHtQQVJBTVNfSFRUUFNfUFJPWFl9IiBdXSAmJiBleHBvcnQgSFRUUFNfUFJPWFk9IiR7UEFSQU1TX0hUVFBTX1BST1hZfSIKCnBoYXNlICJTZXR0aW5nIHVwIE5PX1BST1hZPScke1BBUkFNU19OT19QUk9YWX0nIgpbWyAtbiAiJHtQQVJBTVNfTk9fUFJPWFl9IiBdXSAmJiBleHBvcnQgTk9fUFJPWFk9IiR7UEFSQU1TX05PX1BST1hZfSIKCgppZiBbWyAhIC16ICIke1BBUkFNU19VUkx9IiBdXTsKdGhlbgogICAgcGhhc2UgIkNsb25pbmcgJyR7UEFSQU1TX1VSTH0nIGludG8gJyR7Y2hlY2tvdXRfZGlyfSciCiAgICBzZXQgLXgKICAgIGV4ZWMgZ2l0LWluaXQgXAogICAgICAgIC11cmw9IiR7UEFSQU1TX1VSTH0iIFwKICAgICAgICAtcmV2aXNpb249IiR7UEFSQU1TX1JFVklTSU9OfSIgXAogICAgICAgIC1yZWZzcGVjPSIke1BBUkFNU19SRUZTUEVDfSIgXAogICAgICAgIC1wYXRoPSIke2NoZWNrb3V0X2Rpcn0iIFwKICAgICAgICAtc3NsVmVyaWZ5PSIke1BBUkFNU19TU0xfVkVSSUZZfSIgXAogICAgICAgIC1zdWJtb2R1bGVzPSIke1BBUkFNU19TVUJNT0RVTEVTfSIgXAogICAgICAgIC1kZXB0aD0iJHtQQVJBTVNfREVQVEh9IiBcCiAgICAgICAgLXNwYXJzZUNoZWNrb3V0RGlyZWN0b3JpZXM9IiR7UEFSQU1TX1NQQVJTRV9DSEVDS09VVF9ESVJFQ1RPUklFU30iCmVsc2UKICAgIHBoYXNlICJSdW5uaW5nIHRoZSBwcm92aWRlZCBzY3JpcHRzICR7UEFSQU1TX0dJVF9TQ1JJUFR9IGluICR7Y2hlY2tvdXRfZGlyfSIKICAgIGV2YWwgIiR7UEFSQU1TX0dJVF9TQ1JJUFR9IgoKICAgIFJFU1VMVF9TSEE9IiQoZ2l0IHJldi1wYXJzZSBIRUFEIHwgdHIgLWQgJ1xuJykiCiAgICBFWElUX0NPREU9IiQ/IgogICAgaWYgWyAiJEVYSVRfQ09ERSIgIT0gMCBdCiAgICB0aGVuCiAgICAgICAgZXhpdCAkRVhJVF9DT0RFCiAgICBmaQogICAgIyBNYWtlIHN1cmUgd2UgZG9uJ3QgYWRkIGEgdHJhaWxpbmcgbmV3bGluZSB0byB0aGUgcmVzdWx0IQogICAgcHJpbnRmICIlcyIgIiRSRVNVTFRfU0hBIiA+ICIke1JFU1VMVFNfQ09NTUlUX1BBVEh9IgogICAgZWNobyAkUkVTVUxUX1NIQQpmaQoK" |base64 -d >"/scripts/git-run.sh"
+        printf '%s' "IyEvdXNyL2Jpbi9lbnYgc2gKIwojIFNldHMgdXAgdGhlIGJhc2ljIGFuZCBTU0ggYXV0aGVudGljYXRpb24gYmFzZWQgb24gaW5mb3JtZWQgd29ya3NwYWNlcywgYXMgd2VsbCBhcyBjbGVhbmluZyB1cCB0aGUKIyBwcmV2aW91cyBnaXQtY2xvbmUgc3RhbGUgZGF0YS4KIwoKc2V0IC1ldQoKc291cmNlICQoQ0RQQVRIPSBjZCAtLSAiJChkaXJuYW1lIC0tICR7MH0pIiAmJiBwd2QpL2NvbW1vbi5zaAoKYXNzZXJ0X3JlcXVpcmVkX2NvbmZpZ3VyYXRpb25fb3JfZmFpbAoKcGhhc2UgIlByZXBhcmluZyB0aGUgZmlsZXN5c3RlbSBiZWZvcmUgY2xvbmluZyB0aGUgcmVwb3NpdG9yeSIKCmlmIFtbICIke1BBUkFNU19ERUxFVEVfRVhJU1RJTkd9IiA9PSAidHJ1ZSIgXV07IHRoZW4KCXBoYXNlICJEZWxldGluZyBhbGwgY29udGVudHMgb2YgY2hlY2tvdXQtZGlyICcke2NoZWNrb3V0X2Rpcn0nIgoJY2xlYW5fZGlyICR7Y2hlY2tvdXRfZGlyfSB8fCB0cnVlCmZpCgppZiBbWyAiJHtXT1JLU1BBQ0VTX0JBU0lDX0FVVEhfQk9VTkR9IiA9PSAidHJ1ZSIgXV07IHRoZW4KCXBoYXNlICJDb25maWd1cmluZyBHaXQgYXV0aGVudGljYXRpb24gd2l0aCAnYmFzaWMtYXV0aCcgV29ya3NwYWNlIGZpbGVzIgoKCWZvciBmIGluIC5naXQtY3JlZGVudGlhbHMgLmdpdGNvbmZpZzsgZG8KCQlzcmM9IiR7V09SS1NQQUNFU19CQVNJQ19BVVRIX1BBVEh9LyR7Zn0iCgkJcGhhc2UgIkNvcHlpbmcgJyR7c3JjfScgdG8gJyR7UEFSQU1TX1VTRVJfSE9NRX0nIgoJCWNvcHlfb3JfZmFpbCA0MDAgJHtzcmN9ICIke1BBUkFNU19VU0VSX0hPTUV9LyIKCWRvbmUKZmkKCmlmIFtbICIke1dPUktTUEFDRVNfU1NIX0RJUkVDVE9SWV9CT1VORH0iID09ICJ0cnVlIiBdXTsgdGhlbgoJcGhhc2UgIkNvcHlpbmcgJy5zc2gnIGZyb20gc3NoLWRpcmVjdG9yeSB3b3Jrc3BhY2UgKCcke1dPUktTUEFDRVNfU1NIX0RJUkVDVE9SWV9QQVRIfScpIgoKCWRvdF9zc2g9IiR7UEFSQU1TX1VTRVJfSE9NRX0vLnNzaCIKCWNvcHlfb3JfZmFpbCA3MDAgJHtXT1JLU1BBQ0VTX1NTSF9ESVJFQ1RPUllfUEFUSH0gJHtkb3Rfc3NofQoJY2htb2QgLVJ2IDQwMCAke2RvdF9zc2h9LyoKZmkKCgpleGl0IDA=" |base64 -d >"/scripts/prepare.sh"
+        printf '%s' "IyEvdXNyL2Jpbi9lbnYgc2gKIwojIFNjYW4gdGhlIGNsb25lZCByZXBvc2l0b3J5IGluIG9yZGVyIHRvIHJlcG9ydCBkZXRhaWxzIHdyaXR0aW5nIHRoZSByZXN1bHQgZmlsZXMuCiMKCnNldCAtZXUKCnNvdXJjZSAkKENEUEFUSD0gY2QgLS0gIiQoZGlybmFtZSAtLSAkezB9KSIgJiYgcHdkKS9jb21tb24uc2gKCmFzc2VydF9yZXF1aXJlZF9jb25maWd1cmF0aW9uX29yX2ZhaWwKCnBoYXNlICJDb2xsZWN0aW5nIGNsb25lZCByZXBvc2l0b3J5IGluZm9ybWF0aW9uICgnJHtjaGVja291dF9kaXJ9JykiCgpjZCAiJHtjaGVja291dF9kaXJ9IiB8fCBmYWlsICJOb3QgYWJsZSB0byBlbnRlciBjaGVja291dC1kaXIgJyR7Y2hlY2tvdXRfZGlyfSciCgpwaGFzZSAiU2V0dGluZyBvdXRwdXQgd29ya3NwYWNlIGFzIHNhZmUgZGlyZWN0b3J5ICgnJHtXT1JLU1BBQ0VTX1JPT1RfUEFUSH0nKSIKZ2l0IGNvbmZpZyAtLWdsb2JhbCAtLWFkZCBzYWZlLmRpcmVjdG9yeSAiJHtXT1JLU1BBQ0VTX1JPT1RfUEFUSH0iCgpyZXN1bHRfc2hhPSIkKGdpdCByZXYtcGFyc2UgSEVBRCkiCnJlc3VsdF9jb21taXR0ZXJfZGF0ZT0iJChnaXQgbG9nIC0xIC0tcHJldHR5PSVjdCkiCgpwaGFzZSAiUmVwb3J0aW5nIGxhc3QgY29tbWl0IGRhdGUgJyR7cmVzdWx0X2NvbW1pdHRlcl9kYXRlfSciCnByaW50ZiAiJXMiICIke3Jlc3VsdF9jb21taXR0ZXJfZGF0ZX0iID4ke1JFU1VMVFNfQ09NTUlUVEVSX0RBVEVfUEFUSH0KCnBoYXNlICJSZXBvcnRpbmcgcGFyc2VkIHJldmlzaW9uIFNIQSAnJHtyZXN1bHRfc2hhfSciCnByaW50ZiAiJXMiICIke3Jlc3VsdF9zaGF9IiA+JHtSRVNVTFRTX0NPTU1JVF9QQVRIfQoKcGhhc2UgIlJlcG9ydGluZyByZXBvc2l0b3J5IFVSTCAnJHtQQVJBTVNfVVJMfSciCnByaW50ZiAiJXMiICIke1BBUkFNU19VUkx9IiA+JHtSRVNVTFRTX1VSTF9QQVRIfQoKZXhpdCAw" |base64 -d >"/scripts/report.sh"
+        chmod +x /scripts/*.sh;echo "Running Script /scripts/prepare.sh";
+            /scripts/prepare.sh;echo "Running Script /scripts/git-run.sh";
+            /scripts/git-run.sh;echo "Running Script /scripts/report.sh";
+            /scripts/report.sh;
+      volumeMounts:
+        - mountPath: /scripts
+          name: scripts-dir
+        - mountPath: $(params.USER_HOME)
+          name: user-home
+      workingDir: $(workspaces.output.path)
+  volumes:
+    - emptyDir: {}
+      name: user-home
+    - emptyDir: {}
+      name: scripts-dir
+  workspaces:
+    - description: |
+        A `.ssh` directory with private key, `known_hosts`, `config`, etc.
+        Copied to the Git user's home before cloning the repository, in order to
+        server as authentication mechanismBinding a Secret to this Workspace is
+        strongly recommended over other volume types.
+      name: ssh-directory
+      optional: true
+    - description: |
+        A Workspace containing a `.gitconfig` and `.git-credentials` files.
+        These will be copied to the user's home before Git commands run. All
+        other files in this Workspace are ignored. It is strongly recommended to
+        use `ssh-directory` over `basic-auth` whenever possible, and to bind a
+        Secret to this Workspace over other volume types.
+      name: basic-auth
+      optional: true
+    - description: |
+        A Workspace containing CA certificates, this will be used by Git to
+        verify the peer with when interacting with remote repositories using
+        HTTPS.
+      name: ssl-ca-directory
+      optional: true
+    - description: |
+        A workspace that contains the fetched git repository, data will be placed on the root of the
+        Workspace, or on the relative path defined by the SUBDIRECTORY
+        parameter.
+      name: output
