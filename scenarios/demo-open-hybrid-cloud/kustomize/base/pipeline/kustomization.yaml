@@ -1,0 +1,12 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: demo-pipelines
+
+resources:
+  - resources/namespace.yaml
+  - resources/clusterrolebinding.yaml
+  - resources/task-git-clone-project.yaml
+  - resources/task-ocp-cli.yaml
+  - resources/pipeline-deploy-hybrid-workload.yaml
