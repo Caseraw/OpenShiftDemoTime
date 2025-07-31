@@ -27,3 +27,4 @@ assets/byo/pull-secret/*
 assets/byo/ssh-keys/*
 !assets/byo/ssh-keys/README.md
 !assets/byo/ssh-keys/setup.sh
+assets/slack-command/node_modules

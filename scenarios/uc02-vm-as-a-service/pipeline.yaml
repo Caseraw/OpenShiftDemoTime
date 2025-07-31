@@ -88,3 +88,84 @@ spec:
     - name: source
       optional: false
   finally: []
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: vm-as-a-service-trigger-binding
+spec:
+  params:
+    - name: action
+      value: $(body.action)
+    - name: tenant
+      value: $(body.tenant)
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: vm-as-a-service-trigger-template
+spec:
+  params:
+    - name: action
+    - name: tenant
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: vm-as-a-service-pipeline-$(tt.params.tenant)-
+      spec:
+        params:
+          - name: action
+            value: $(tt.params.action)
+          - name: tenant
+            value: $(tt.params.tenant)
+        pipelineRef:
+          name: vm-as-a-service-pipeline
+        serviceAccountName: pipeline
+        workspaces:
+          - name: source
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 64Mi
+                #storageClassName: ocs-external-storagecluster-ceph-rbd
+                storageClassName: gp3-csi
+                volumeMode: Filesystem
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: vm-as-a-service-event-listener
+spec:
+  namespaceSelector: {}
+  resources: {}
+  serviceAccountName: pipeline
+  triggers:
+    - bindings:
+        - kind: TriggerBinding
+          ref: vm-as-a-service-trigger-binding
+      name: application-trigger
+      template:
+        ref: vm-as-a-service-trigger-template
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: el-vm-as-a-service-event-listener
+  labels:
+    app.kubernetes.io/managed-by: EventListener
+    app.kubernetes.io/part-of: Triggers
+    eventlistener: vm-as-a-service-event-listener
+  annotations:
+    openshift.io/host.generated: 'true'
+spec:
+  to:
+    kind: Service
+    name: el-vm-as-a-service-event-listener
+    weight: 100
+  port:
+    targetPort: http-listener
+  wildcardPolicy: None
