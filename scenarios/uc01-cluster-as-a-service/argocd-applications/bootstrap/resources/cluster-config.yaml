@@ -2,17 +2,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: demo-pipelines
+  name: cluster-config
   namespace: openshift-gitops
 spec:
   destination:
-    namespace: demo-pipelines
     server: 'https://kubernetes.default.svc'
   project: default
   source:
-    path: scenarios/demo-open-hybrid-cloud/kustomize/base/pipeline
+    path: scenarios/demo-open-hybrid-cloud/kustomize/base/cluster-config
     repoURL: 'https://github.com/Caseraw/OpenShiftDemoTime.git'
-    targetRevision: HEAD
+    targetRevision: UC01
   syncPolicy:
     automated:
       prune: true
