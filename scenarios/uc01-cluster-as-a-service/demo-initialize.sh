@@ -3,7 +3,7 @@
 # Define paths
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../" && pwd)"
 COMPONENTS_BASE="$PROJECT_DIR/assets/components"
-SCENARIO_BASE="$PROJECT_DIR/scenarios/demo-open-hybrid-cloud"
+SCENARIO_BASE="$PROJECT_DIR/scenarios/uc01-cluster-as-a-service"
 
 # Load additional functions
 source "$PROJECT_DIR/assets/scripts/shell/lib/show_msg.sh"
