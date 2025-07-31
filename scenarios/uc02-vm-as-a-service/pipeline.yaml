@@ -1,0 +1,90 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: vm-as-a-service
+spec:
+  params:
+    - default: create
+      description: create or delete
+      name: action
+      type: string
+    - default: pss
+      name: tenant
+      type: string
+    - default: main
+      name: REVISION
+      type: string
+  tasks:
+    - name: git-clone
+      params:
+        - name: refspec
+          value: ''
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: crtFileName
+          value: ca-bundle.crt
+        - name: subdirectory
+          value: ''
+        - name: sparseCheckoutDirectories
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: httpProxy
+          value: ''
+        - name: httpsProxy
+          value: ''
+        - name: noProxy
+          value: ''
+        - name: verbose
+          value: 'true'
+        - name: gitInitImage
+          value: >-
+            registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:868966ef9d4b54952d8a74eb83bba40eb1f52c0148994fa704efd0e3797c61c5
+        - name: userHome
+          value: /home/git
+        - name: URL
+          value: https://github.com/Caseraw/OpenShiftDemoTime
+        - name: REVISION
+          value: $(params.REVISION)
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: output
+          workspace: source
+    - name: provision-vms
+      params:
+        - name: SCRIPT
+          value: >-
+            sed -e 's/TENANT/$(params.tenant)/g' scenarios/uc02-vm-as-a-service/appset.yaml |
+            oc $(params.action) -f - -n openshift-gitops
+        - name: VERSION
+          value: latest
+      runAfter:
+        - git-clone
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: manifest_dir
+          workspace: source
+  workspaces:
+    - name: source
+      optional: false
+  finally: []

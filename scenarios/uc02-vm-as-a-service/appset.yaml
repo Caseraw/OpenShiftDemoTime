@@ -1,0 +1,36 @@
+# https://github.com/gmidha1/virtdemos
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: bm-TENANT
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: bm-placement
+        requeueAfterSeconds: 180
+  template:
+    metadata:
+      name: bm-TENANT
+      labels:
+        velero.io/exclude-from-backup: "true"
+    spec:
+      project: default
+      sources:
+        - repositoryType: git
+          repoURL: https://github.com/wael2000/rws
+          targetRevision: main
+          path: gitops/provisioning/vm
+      destination:
+        namespace: TENANT
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true

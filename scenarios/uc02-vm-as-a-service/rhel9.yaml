@@ -1,0 +1,46 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: rhel-9-amaranth-mite-44
+spec:
+  dataVolumeTemplates:
+    - metadata:
+        name: rhel-9-amaranth-mite-44-volume
+      spec:
+        sourceRef:
+          kind: DataSource
+          name: rhel9
+          namespace: openshift-virtualization-os-images
+        storage:
+          accessModes:
+            - ReadWriteMany
+          resources:
+            requests:
+              storage: 30Gi
+          storageClassName: ocs-external-storagecluster-ceph-rbd
+          volumeMode: Block
+  instancetype:
+    name: u1.medium
+  preference:
+    name: rhel.9
+  running: true
+  template:
+    metadata:
+      labels:
+        network.kubevirt.io/headlessService: headless
+    spec:
+      domain:
+        devices: {}
+      subdomain: headless
+      volumes:
+        - dataVolume:
+            name: rhel-9-amaranth-mite-44-volume
+          name: rootdisk
+        - cloudInitNoCloud:
+            userData: |
+              #cloud-config
+              chpasswd:
+                expire: false
+              password: cloud@123
+              user: cloud-user
+          name: cloudinitdisk
