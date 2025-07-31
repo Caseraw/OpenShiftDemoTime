@@ -9,7 +9,7 @@ spec:
     server: 'https://kubernetes.default.svc'
   project: default
   source:
-    path: scenarios/demo-open-hybrid-cloud/kustomize/base/cluster-config
+    path: scenarios/uc01-cluster-as-a-service/kustomize/base/cluster-config
     repoURL: 'https://github.com/Caseraw/OpenShiftDemoTime.git'
     targetRevision: UC01
   syncPolicy:
