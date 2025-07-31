@@ -18,3 +18,11 @@ show_msg "show-date" "INFO" "Running Kustomize build..."
 kustomize build "$SCENARIO_BASE/argocd-applications/bootstrap" | oc apply -f -
 
 show_msg "show-date" "INFO" "Bootstrap - Deploy the first ArgoCD Applications to initiate" "Completed" "✅"
+
+# 1) Copy the AWS Credentials to use in demo-pipelines
+SCRIPT="$COMPONENTS_BASE/openshift-rhacm-credentials-aws/copy-secret-for-demo-pipelines.sh"
+
+show_msg "show-date" "INFO" "Bootstrap - Copy AWS Credentials for demo-pipelines" "⏳"
+show_msg "show-date" "INFO" "Script" "$SCRIPT"
+source "$SCRIPT"
+show_msg "show-date" "INFO" "Bootstrap - Copy AWS Credentials for demo-pipelines" "Completed" "✅"
