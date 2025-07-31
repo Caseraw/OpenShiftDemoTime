@@ -8,7 +8,7 @@ spec:
     - name: demo-deploy-aws-cluster
       params:
         - name: CLUSTER_NAME
-          value: aws-cluster-01
+          value: aws-cluster-02
         - name: AWS_REGION
           value: us-east-2
         - name: CLUSTER_TYPE
