@@ -21,13 +21,13 @@ app.listen(HTTP_PORT, () => {
 app.post("/vm", (req, res, next) => {
     console.log(req.body);
     var data = {
-        "tenant": req.body,
+        "tenant": req.body.text,
         "action": "create"
     };
     var args = {
         data: data,
-        "message": req.body + " VMs are being deployed",
-        "tenant": req.body,
+        "message": req.body.text + " VMs are being deployed",
+        "tenant": req.body.text,
         headers: { "Content-Type": "application/json" }
     };
     client.post("http://el-vm-as-a-service-event-listener-cicd.apps.cluster-sfhmt.sfhmt.sandbox587.opentlc.com",
