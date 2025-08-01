@@ -120,7 +120,7 @@ spec:
           - name: tenant
             value: $(tt.params.tenant)
         pipelineRef:
-          name: vm-as-a-service-pipeline
+          name: vm-as-a-service
         serviceAccountName: pipeline
         workspaces:
           - name: source
