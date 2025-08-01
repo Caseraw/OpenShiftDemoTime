@@ -11,7 +11,7 @@ spec:
   source:
     path: scenarios/uc01-cluster-as-a-service/kustomize/base/cluster-config
     repoURL: 'https://github.com/Caseraw/OpenShiftDemoTime.git'
-    targetRevision: UC01
+    targetRevision: HEAD
   syncPolicy:
     automated:
       prune: true
