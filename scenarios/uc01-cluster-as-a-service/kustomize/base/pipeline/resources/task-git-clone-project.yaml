@@ -2,7 +2,7 @@
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: clone-git-project
+  name: demo-clone-git-project
 spec:
   description: |
     This object represents Git and is able to initialize and clone a remote repository on the informed Workspace. It's likely to become the first `step` on a Pipeline. 
