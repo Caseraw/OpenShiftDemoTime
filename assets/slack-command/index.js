@@ -17,7 +17,7 @@ app.listen(HTTP_PORT, () => {
     console.log("Server running on port %PORT%".replace("%PORT%", HTTP_PORT))
 });
 
-// /onboard-tenant slash command
+// /onboard-tenant slash command 
 // only VMS for the sake of demo the concept
 app.post("/vm", (req, res, next) => {
     console.log(req.body);
