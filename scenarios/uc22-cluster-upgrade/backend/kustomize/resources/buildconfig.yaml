@@ -4,6 +4,9 @@ kind: BuildConfig
 metadata:
   name: backend-build
 spec:
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
   source:
     type: Git
     git:
@@ -14,7 +17,7 @@ spec:
     sourceStrategy:
       from:
         kind: ImageStreamTag
-        name: python-311:latest
+        name: image-registry.openshift-image-registry.svc:5000/openshift/python:3.11-ubi9
         namespace: openshift
   output:
     to:

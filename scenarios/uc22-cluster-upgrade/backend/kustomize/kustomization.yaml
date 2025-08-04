@@ -6,8 +6,5 @@ namespace: demo-app-resiliency-01
 
 resources:
   - resources/namespace.yaml
-  - resources/clusterrolebinding.yaml
-  - resources/task-git-clone-project.yaml
-  - resources/task-ocp-cli.yaml
-  - resources/task-deploy-acm-managed-aws-cluster.yaml
-  - resources/pipeline-deploy-acm-managed-aws-cluster.yaml
+  - resources/buildconfig.yaml
+  - resources/imagestream.yaml
