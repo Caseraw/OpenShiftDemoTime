@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>App Resiliency Demo</title>
+  <title>Cluster Health Pulse</title>
   <meta charset="utf-8">
   <style>
     :root {
@@ -35,21 +35,51 @@
       text-shadow: 0 1px 0 #fff;
       margin-bottom: 0.2em;
     }
-    #reset-btn {
+    h4 {
+      margin: 0 0 1em 0;
+      color: #446;
+      font-weight: 400;
+      font-size: 1.1em;
+      letter-spacing: 0.01em;
+    }
+    #button-bar {
+      margin-bottom: 1.4em;
+    }
+    .button {
       background: var(--accent);
       color: #fff;
       font-weight: 600;
       border: none;
       border-radius: 6px;
-      padding: 0.6em 1.6em;
+      padding: 0.6em 1.4em;
       font-size: 1em;
-      margin-bottom: 1.2em;
+      margin-right: 1em;
       box-shadow: 0 2px 6px #0002;
       cursor: pointer;
-      transition: background 0.2s, color 0.2s;
+      transition: background 0.18s;
+      outline: none;
     }
-    #reset-btn:hover {
+    .button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .button:hover:enabled {
       background: #174c7c;
+    }
+    #backend-url-form {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+      margin-bottom: 1.8em;
+      flex-wrap: wrap;
+    }
+    #backend-url-input {
+      font-size: 1.08em;
+      padding: 0.5em 0.8em;
+      border: 1.4px solid #aaa;
+      border-radius: 5px;
+      width: 360px;
+      max-width: 92vw;
     }
     .timestamp {
       color: #888;
@@ -88,16 +118,29 @@
     }
     td.mono, th.mono { font-family: 'Fira Mono', 'Consolas', monospace; font-size: 0.99em;}
     td.error { color: var(--error); font-weight: bold;}
+    .hidden { display: none !important; }
     @media (max-width: 700px) {
       .container { padding: 1em; }
       th, td { font-size: 0.96em; }
+      #backend-url-input { width: 99vw; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>App Resiliency Demo</h2>
-    <button id="reset-btn">Reset Table</button>
+    <h2>Cluster Health Pulse</h2>
+    <h4>Real-time OpenShift Workload Monitor</h4>
+    <form id="backend-url-form" class="hidden">
+      <label for="backend-url-input"><b>Backend API URL:</b></label>
+      <input type="url" id="backend-url-input" placeholder="https://..." required />
+      <button class="button" id="url-save-btn" type="submit">Save & Start</button>
+    </form>
+    <div id="button-bar">
+      <button class="button" id="start-btn">Start</button>
+      <button class="button" id="pause-btn">Pause</button>
+      <button class="button" id="stop-btn">Stop</button>
+      <button class="button" id="reset-btn">Reset</button>
+    </div>
     <div class="timestamp" id="table-updated"></div>
     <table id="statustable">
       <thead>
@@ -115,15 +158,18 @@
   </div>
   <script>
     // === CONFIGURATION ===
-    const BACKEND_URL = '<BACKEND_API_URL>'; // <-- set your backend endpoint here
-    const STORAGE_KEY = 'resiliency-demo-records-simple';
+    const STORAGE_KEY = 'resiliency-demo-records-v2';
+    const BACKEND_URL_KEY = 'resiliency-demo-backend-url-v2';
 
     // === APP STATE ===
     let records = [];
     let recordIndexMap = {}; // key -> index in records[]
     let lastUpdated = null;
+    let backendUrl = '';
+    let polling = false;
+    let pollInterval = null;
 
-    // Load and save to browser storage
+    // Load/save records
     function loadRecords() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -143,14 +189,26 @@
       });
     }
 
-    // Date formatting
+    // Backend URL helpers
+    function loadBackendUrl() {
+      backendUrl = localStorage.getItem(BACKEND_URL_KEY) || '';
+    }
+    function saveBackendUrl(url) {
+      backendUrl = url;
+      localStorage.setItem(BACKEND_URL_KEY, backendUrl);
+    }
+    function clearBackendUrl() {
+      backendUrl = '';
+      localStorage.removeItem(BACKEND_URL_KEY);
+    }
+
     function formatTime(val) {
       if (!val || val === 'ERROR') return val;
       try { return new Date(val).toLocaleString(); }
       catch { return val; }
     }
 
-    // Renders the status table
+    // Render the status table
     function updateTable() {
       const tbody = document.querySelector('#statustable tbody');
       tbody.innerHTML = '';
@@ -169,26 +227,63 @@
       if (lastUpdated) {
         document.getElementById('table-updated').textContent =
           `Last updated: ${new Date(lastUpdated).toLocaleTimeString()}`;
+      } else {
+        document.getElementById('table-updated').textContent = '';
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadRecords();
+    function setButtons(start, pause, stop, reset) {
+      document.getElementById('start-btn').disabled = !start;
+      document.getElementById('pause-btn').disabled = !pause;
+      document.getElementById('stop-btn').disabled = !stop;
+      document.getElementById('reset-btn').disabled = !reset;
+    }
+
+    function showUrlForm(show) {
+      const form = document.getElementById('backend-url-form');
+      if (show) form.classList.remove('hidden');
+      else form.classList.add('hidden');
+    }
+
+    function startPolling() {
+      if (!backendUrl) return;
+      if (polling) return;
+      polling = true;
+      setButtons(false, true, true, true);
+      pollInterval = setInterval(fetchBackend, 2000);
+    }
+    function pausePolling() {
+      if (!polling) return;
+      polling = false;
+      setButtons(true, false, true, true);
+      clearInterval(pollInterval);
+    }
+    function stopPolling() {
+      polling = false;
+      setButtons(true, false, false, true);
+      clearInterval(pollInterval);
+      // Optionally clear records: if you want to keep data, comment out below
+      // records = [];
+      // updateIndexMap();
+      // saveRecords();
+      // updateTable();
+    }
+    function resetAll() {
+      records = [];
+      updateIndexMap();
+      saveRecords();
+      clearBackendUrl();
+      lastUpdated = null;
       updateTable();
+      pausePolling();
+      showUrlForm(true);
+    }
 
-      document.getElementById('reset-btn').onclick = () => {
-        records = [];
-        updateIndexMap();
-        saveRecords();
-        updateTable();
-      };
-    });
-
-    // === API Polling ===
-    setInterval(async () => {
+    // API Polling
+    async function fetchBackend() {
       const start = performance.now();
       try {
-        const res = await fetch(BACKEND_URL);
+        const res = await fetch(backendUrl);
         const response_code = res.status;
         const latency_ms = Math.round(performance.now() - start);
         if (!res.ok) throw new Error('Failed to fetch');
@@ -196,14 +291,13 @@
         const key = `${data.pod_name}||${data.node_name}`;
 
         if (key in recordIndexMap) {
-          // Increment counter, update response code and latency, but do NOT create a new row.
+          // Increment counter, update response code and latency
           const rec = records[recordIndexMap[key]];
           rec.count += 1;
           rec.response_code = response_code;
           rec.latency_ms = latency_ms;
-          // Only keep the earliest time for display (not overwritten).
         } else {
-          // New row for new pod/node combo.
+          // New row for new pod/node combo
           records.push({
             count: 1,
             datetime: data.datetime,
@@ -240,7 +334,56 @@
         lastUpdated = Date.now();
         updateTable();
       }
-    }, 2000);
+    }
+
+    // ==== UI EVENTS ====
+    document.addEventListener('DOMContentLoaded', () => {
+      loadRecords();
+      updateTable();
+      loadBackendUrl();
+
+      if (!backendUrl) {
+        showUrlForm(true);
+        setButtons(false, false, false, true);
+      } else {
+        showUrlForm(false);
+        setButtons(true, false, false, true);
+      }
+
+      document.getElementById('start-btn').onclick = () => {
+        if (!backendUrl) {
+          showUrlForm(true);
+          return;
+        }
+        startPolling();
+      };
+      document.getElementById('pause-btn').onclick = () => {
+        pausePolling();
+      };
+      document.getElementById('stop-btn').onclick = () => {
+        stopPolling();
+      };
+      document.getElementById('reset-btn').onclick = () => {
+        resetAll();
+      };
+
+      // Backend URL form
+      document.getElementById('backend-url-form').onsubmit = function (e) {
+        e.preventDefault();
+        const url = document.getElementById('backend-url-input').value.trim();
+        if (!url) return;
+        saveBackendUrl(url);
+        showUrlForm(false);
+        setButtons(true, false, false, true);
+        updateTable();
+      };
+
+      // Fill form with previous URL if available
+      if (backendUrl) {
+        document.getElementById('backend-url-input').value = backendUrl;
+      }
+    });
+
   </script>
 </body>
 </html>

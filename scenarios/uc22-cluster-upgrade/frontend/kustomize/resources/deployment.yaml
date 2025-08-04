@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: image-registry.openshift-image-registry.svc:5000/demo-app-resiliency-01/frontend:latest
+        image: image-registry.openshift-image-registry.svc:5000/demo-app-resiliency-01/frontend:1.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

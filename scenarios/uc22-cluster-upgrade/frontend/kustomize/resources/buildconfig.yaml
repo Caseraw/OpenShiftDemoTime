@@ -23,4 +23,4 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: frontend:latest
+      name: frontend:1.0
