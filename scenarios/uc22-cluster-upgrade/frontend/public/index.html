@@ -26,20 +26,15 @@
 <script>
   const BACKEND_URL = '<BACKEND_API_URL>';
 
-  // Track unique output
-  let records = [];
-  let lastData = null;
-
-  function isEqual(a, b) {
-    return a && b &&
-      a.pod_name === b.pod_name &&
-      a.node_name === b.node_name;
-  }
+  // Use a map to store unique pod/node combos
+  let recordMap = {};
 
   function updateTable() {
     const tbody = document.querySelector('#statustable tbody');
     tbody.innerHTML = '';
-    for (const rec of records) {
+    // Show rows in order of first seen
+    const sortedRecords = Object.values(recordMap).sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+    for (const rec of sortedRecords) {
       const tr = document.createElement('tr');
       tr.innerHTML = `<td>${rec.count}</td><td>${rec.datetime}</td><td>${rec.pod_name}</td><td>${rec.node_name}</td>`;
       tbody.appendChild(tr);
@@ -51,33 +46,31 @@
       const res = await fetch(BACKEND_URL);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
-
-      if (isEqual(data, lastData)) {
-        // Increment count only, do NOT update datetime
-        records[records.length - 1].count += 1;
+      const key = `${data.pod_name}||${data.node_name}`;
+      if (recordMap[key]) {
+        recordMap[key].count += 1;
+        // Do not update datetime!
       } else {
-        // New unique record
-        records.push({
+        recordMap[key] = {
           count: 1,
-          datetime: data.datetime,  // Capture only the *first* time for this group
+          datetime: data.datetime,
           pod_name: data.pod_name,
           node_name: data.node_name
-        });
-        lastData = data;
+        };
       }
       updateTable();
     } catch (e) {
-      // Handle error as a unique "error" row, ignore datetime grouping
-      if (lastData && lastData.pod_name === '-' && lastData.node_name === '-') {
-        records[records.length - 1].count += 1;
+      // Handle errors as a unique "error" row
+      const key = `-||-`;
+      if (recordMap[key]) {
+        recordMap[key].count += 1;
       } else {
-        records.push({
+        recordMap[key] = {
           count: 1,
           datetime: 'ERROR',
           pod_name: '-',
           node_name: '-'
-        });
-        lastData = { pod_name: '-', node_name: '-' };
+        };
       }
       updateTable();
     }
