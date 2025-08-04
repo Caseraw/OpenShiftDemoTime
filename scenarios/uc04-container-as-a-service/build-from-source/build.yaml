@@ -1,0 +1,47 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: demo
+  labels:
+    app: demo
+    app.kubernetes.io/component: demo
+    app.kubernetes.io/instance: demo
+    app.kubernetes.io/name: demo
+    app.kubernetes.io/part-of: demo
+    app.openshift.io/runtime: java
+    app.openshift.io/runtime-version: openjdk-17-ubi8
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'demo:latest'
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        namespace: openshift
+        name: 'java:openjdk-17-ubi8'
+  postCommit: {}
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/Caseraw/OpenShiftDemoTime'
+      ref: UC04--Container-as-a-service
+    contextDir: /scenarios/uc04-container-as-a-service/app
+  triggers:
+    - type: Generic
+      generic:
+        secretReference:
+          name: demo-generic-webhook-secret
+    - type: GitHub
+      github:
+        secretReference:
+          name: demo-github-webhook-secret
+    - type: ImageChange
+      imageChange: {}
+    - type: ConfigChange
+  runPolicy: Serial
