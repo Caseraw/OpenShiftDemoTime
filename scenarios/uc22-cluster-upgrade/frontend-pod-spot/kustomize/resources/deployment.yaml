@@ -16,6 +16,6 @@ spec:
       containers:
       - name: frontend-pod-spot
         image: image-registry.openshift-image-registry.svc:5000/frontend-pod-spot/frontend-pod-spot:1.0
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
