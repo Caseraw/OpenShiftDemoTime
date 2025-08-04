@@ -14,17 +14,36 @@
   <h2>Status Updates from Backend</h2>
   <table id="statustable">
     <thead>
-      <tr><th>Time</th><th>Pod Name</th><th>Node Name</th></tr>
+      <tr>
+        <th>Count</th>
+        <th>Time</th>
+        <th>Pod Name</th>
+        <th>Node Name</th>
+      </tr>
     </thead>
     <tbody></tbody>
   </table>
   <script>
     const BACKEND_URL = '<BACKEND_API_URL>';
 
-    function addRow(data) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${data.datetime}</td><td>${data.pod_name}</td><td>${data.node_name}</td>`;
-      document.querySelector('#statustable tbody').appendChild(tr);
+    // Track unique output
+    let records = [];
+    let lastData = null;
+
+    function isEqual(a, b) {
+      return a && b &&
+        a.pod_name === b.pod_name &&
+        a.node_name === b.node_name;
+    }
+
+    function updateTable() {
+      const tbody = document.querySelector('#statustable tbody');
+      tbody.innerHTML = '';
+      for (const rec of records) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${rec.count}</td><td>${rec.datetime}</td><td>${rec.pod_name}</td><td>${rec.node_name}</td>`;
+        tbody.appendChild(tr);
+      }
     }
 
     setInterval(async () => {
@@ -32,9 +51,37 @@
         const res = await fetch(BACKEND_URL);
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
-        addRow(data);
+
+        if (isEqual(data, lastData)) {
+          // Increment count for repeated record, update time
+          records[records.length - 1].count += 1;
+          records[records.length - 1].datetime = data.datetime;
+        } else {
+          // New unique record
+          records.push({
+            count: 1,
+            datetime: data.datetime,
+            pod_name: data.pod_name,
+            node_name: data.node_name
+          });
+          lastData = data;
+        }
+        updateTable();
       } catch (e) {
-        addRow({ datetime: 'ERROR', pod_name: '-', node_name: '-' });
+        // Handle error as a unique "error" row
+        if (lastData && lastData.pod_name === '-' && lastData.node_name === '-') {
+          records[records.length - 1].count += 1;
+          records[records.length - 1].datetime = 'ERROR';
+        } else {
+          records.push({
+            count: 1,
+            datetime: 'ERROR',
+            pod_name: '-',
+            node_name: '-'
+          });
+          lastData = { pod_name: '-', node_name: '-' };
+        }
+        updateTable();
       }
     }, 2000);
   </script>
