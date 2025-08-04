@@ -232,11 +232,28 @@
       // Always sort by last_seen DESC (latest-hit row on top)
       records = records.sort(getSortFn('last_seen', 'desc'));
 
-      for (const rec of records) {
+      records.forEach((rec) => {
         const key = `${rec.pod_name}||${rec.node_name}`;
         const tr = document.createElement('tr');
         tr.className = 'status-row';
-        if (key === lastRowKey) tr.classList.add('highlight');
+        tr.dataset.key = key;
+
+        // Apply highlight only to the last-hit row
+        if (key === lastRowKey) {
+          tr.classList.add('highlight');
+
+          // Remove highlight after animation completes (fix for persistent highlight)
+          setTimeout(() => {
+            // Only remove if this row is still in DOM and still highlighted
+            const rows = document.querySelectorAll('tr.status-row');
+            rows.forEach(row => {
+              if (row.dataset.key === key) {
+                row.classList.remove('highlight');
+              }
+            });
+          }, 1200);
+        }
+
         tr.innerHTML = `
           <td>${rec.count}</td>
           <td>${formatTime(rec.datetime)}</td>
@@ -246,7 +263,8 @@
           <td>${rec.latency_ms}</td>
         `;
         tbody.appendChild(tr);
-      }
+      });
+
       if (lastUpdated) {
         document.getElementById('table-updated').textContent =
           `Last updated: ${new Date(lastUpdated).toLocaleTimeString()}`;
