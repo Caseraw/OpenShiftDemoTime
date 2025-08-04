@@ -1,0 +1,21 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: backend-build
+spec:
+  source:
+    type: Git
+    git:
+      uri: "<YOUR_BACKEND_GIT_REPO_URL>"
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: python-311:latest
+        namespace: openshift
+  output:
+    to:
+      kind: ImageStreamTag
+      name: backend:latest
