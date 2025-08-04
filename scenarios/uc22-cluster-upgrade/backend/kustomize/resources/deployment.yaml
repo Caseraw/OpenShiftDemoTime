@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: backend:latest
+        image: image-registry.openshift-image-registry.svc:5000/demo-app-resiliency-01/backend/backend:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
