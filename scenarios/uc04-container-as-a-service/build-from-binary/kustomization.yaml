@@ -9,3 +9,9 @@ patches:
       value: /scenarios/uc04-container-as-a-service/jar
   target:
     kind: BuildConfig
+- patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/env/0/value 
+      value: Binary
+  target:
+    kind: Deployment
