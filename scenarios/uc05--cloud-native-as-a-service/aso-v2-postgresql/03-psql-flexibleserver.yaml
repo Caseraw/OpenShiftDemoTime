@@ -1,0 +1,20 @@
+apiVersion: dbforpostgresql.azure.com/v1api20210601
+kind: FlexibleServer
+metadata:
+  name: employees-server
+  namespace: demo
+spec:
+  azureName: employees-server
+  location: eastus
+  owner:
+    name: openenv-d4hzm
+  version: "13"
+  sku:
+    name: Standard_D4s_v3
+    tier: GeneralPurpose
+  administratorLogin: USERNAME
+  administratorLoginPassword:
+    name: postgres-secret
+    key: PASSWORD
+  storage:
+    storageSizeGB: 32
