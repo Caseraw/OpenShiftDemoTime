@@ -88,6 +88,18 @@
       font-style: italic;
       margin-bottom: 0.8em;
     }
+    .timer-bar {
+      font-size: 1.1em;
+      color: #222;
+      background: #eaf4fa;
+      padding: 0.5em 1em;
+      border-radius: 7px;
+      display: inline-block;
+      margin-bottom: 1em;
+      margin-right: 1em;
+      letter-spacing: 0.03em;
+      font-weight: 500;
+    }
     table {
       border-collapse: collapse;
       width: 100%;
@@ -134,7 +146,11 @@
       <label for="backend-url-input"><b>Backend API URL:</b></label>
       <input type="url" id="backend-url-input" placeholder="https://..." required />
       <button class="button" id="url-save-btn" type="submit">Save</button>
+      <button class="button" id="url-reset-btn" type="button">Reset URL</button>
     </form>
+    <div class="timer-bar">
+      Timer: <span id="timer-value">00:00:00</span>
+    </div>
     <div id="button-bar">
       <button class="button" id="start-btn">Start</button>
       <button class="button" id="pause-btn">Pause</button>
@@ -159,6 +175,8 @@
     // === CONFIGURATION ===
     const STORAGE_KEY = 'resiliency-demo-records-v2';
     const BACKEND_URL_KEY = 'resiliency-demo-backend-url-v2';
+    const TIMER_KEY = 'resiliency-demo-timer-v2';
+    const TIMER_STATE_KEY = 'resiliency-demo-timer-state-v2';
 
     // === APP STATE ===
     let records = [];
@@ -168,7 +186,73 @@
     let polling = false;
     let pollInterval = null;
 
-    // Load/save records
+    // Timer state
+    let timerStart = null;   // Epoch ms of last start/resume
+    let timerElapsed = 0;    // Elapsed ms before last start/resume
+    let timerRunning = false;
+    let timerInterval = null;
+
+    // --- Timer helpers ---
+    function loadTimerState() {
+      const state = JSON.parse(localStorage.getItem(TIMER_STATE_KEY) || '{}');
+      timerStart = state.timerStart || null;
+      timerElapsed = state.timerElapsed || 0;
+      timerRunning = state.timerRunning || false;
+    }
+    function saveTimerState() {
+      localStorage.setItem(TIMER_STATE_KEY, JSON.stringify({
+        timerStart,
+        timerElapsed,
+        timerRunning
+      }));
+    }
+    function startTimer() {
+      if (timerRunning) return;
+      timerRunning = true;
+      timerStart = Date.now();
+      saveTimerState();
+      updateTimerDisplay();
+      if (!timerInterval) {
+        timerInterval = setInterval(updateTimerDisplay, 1000);
+      }
+    }
+    function pauseTimer() {
+      if (!timerRunning) return;
+      timerElapsed += Date.now() - timerStart;
+      timerStart = null;
+      timerRunning = false;
+      saveTimerState();
+      updateTimerDisplay();
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    function resetTimer() {
+      timerElapsed = 0;
+      timerStart = null;
+      timerRunning = false;
+      saveTimerState();
+      updateTimerDisplay();
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    function getTimerMs() {
+      if (timerRunning && timerStart) {
+        return timerElapsed + (Date.now() - timerStart);
+      }
+      return timerElapsed;
+    }
+    function formatTimer(ms) {
+      const total = Math.floor(ms / 1000);
+      const hours = Math.floor(total / 3600).toString().padStart(2, '0');
+      const mins = Math.floor((total % 3600) / 60).toString().padStart(2, '0');
+      const secs = (total % 60).toString().padStart(2, '0');
+      return `${hours}:${mins}:${secs}`;
+    }
+    function updateTimerDisplay() {
+      document.getElementById('timer-value').textContent = formatTimer(getTimerMs());
+    }
+
+    // --- Records & Storage ---
     function loadRecords() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -199,6 +283,7 @@
     function clearBackendUrl() {
       backendUrl = '';
       localStorage.removeItem(BACKEND_URL_KEY);
+      document.getElementById('backend-url-input').value = '';
     }
 
     function formatTime(val) {
@@ -243,23 +328,26 @@
       polling = true;
       setButtons(false, true, true);
       pollInterval = setInterval(fetchBackend, 2000);
+      startTimer();
     }
     function pausePolling() {
       if (!polling) return;
       polling = false;
       setButtons(true, false, true);
       clearInterval(pollInterval);
+      pollInterval = null;
+      pauseTimer();
     }
     function resetAll() {
       records = [];
       updateIndexMap();
       saveRecords();
-      clearBackendUrl();
       lastUpdated = null;
       updateTable();
       pausePolling();
-      // Keep the input visible and clear its value
-      document.getElementById('backend-url-input').value = '';
+      resetTimer();
+      // Keep the URL in localStorage and input
+      // Don't clear backendUrl here
     }
 
     // API Polling
@@ -324,6 +412,8 @@
       loadRecords();
       updateTable();
       loadBackendUrl();
+      loadTimerState();
+      updateTimerDisplay();
 
       // Show backend URL input always, fill with stored value if available
       document.getElementById('backend-url-input').value = backendUrl;
@@ -351,6 +441,10 @@
         if (!url) return;
         saveBackendUrl(url);
         // Do not auto-start polling
+      };
+
+      document.getElementById('url-reset-btn').onclick = function () {
+        clearBackendUrl();
       };
     });
 
