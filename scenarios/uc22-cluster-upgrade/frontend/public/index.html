@@ -19,7 +19,8 @@
       margin: 0; padding: 0;
     }
     .container {
-      max-width: 900px;
+      max-width: 1200px;
+      min-width: 340px;
       margin: 2.5em auto 1em auto;
       background: #fff;
       border-radius: 14px;
@@ -39,7 +40,7 @@
       transition: background 0.3s;
     }
     .highlight {
-      animation: highlight 1.5s;
+      animation: highlight 1.2s;
     }
     @keyframes highlight {
       from { background: #ffe066; }
@@ -61,6 +62,22 @@
     #reset-btn:hover {
       background: #174c7c;
     }
+    .top-controls {
+      display: flex;
+      gap: 1.5em;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2em;
+      flex-wrap: wrap;
+    }
+    #filter-input {
+      font-size: 1em;
+      padding: 0.5em 1em;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      min-width: 160px;
+      background: #fafcff;
+    }
     table {
       border-collapse: collapse;
       width: 100%;
@@ -68,6 +85,7 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: var(--shadow);
+      table-layout: auto;
     }
     th {
       background: var(--accent);
@@ -77,11 +95,23 @@
       font-weight: 700;
       padding: 12px 8px;
       border-bottom: 2px solid #ddd4;
+      user-select: none;
+      cursor: pointer;
+      position: relative;
+    }
+    th.sort-asc::after {
+      content: " ▲";
+      font-size: 0.88em;
+    }
+    th.sort-desc::after {
+      content: " ▼";
+      font-size: 0.88em;
     }
     td {
       padding: 11px 8px;
       font-size: 1.04em;
       border-bottom: 1px solid #eee;
+      word-break: break-word;
     }
     tr:nth-child(even) td {
       background: #f2f8fc;
@@ -101,23 +131,29 @@
     @media (max-width: 700px) {
       .container { padding: 1em; }
       th, td { font-size: 0.96em; }
+      .top-controls { flex-direction: column; gap: 0.6em; align-items: flex-start;}
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>App Resiliency Demo</h2>
-    <div class="timestamp" id="table-updated"></div>
-    <button id="reset-btn">Reset Table</button>
+    <div class="top-controls">
+      <div>
+        <button id="reset-btn">Reset Table</button>
+      </div>
+      <input type="text" id="filter-input" placeholder="Filter by any value...">
+      <div class="timestamp" id="table-updated"></div>
+    </div>
     <table id="statustable">
       <thead>
         <tr>
-          <th>Count</th>
-          <th>Time</th>
-          <th class="mono">Pod Name</th>
-          <th class="mono">Node Name</th>
-          <th>Response Code</th>
-          <th>Latency (ms)</th>
+          <th data-col="count">Count</th>
+          <th data-col="datetime">Time</th>
+          <th data-col="pod_name" class="mono">Pod Name</th>
+          <th data-col="node_name" class="mono">Node Name</th>
+          <th data-col="response_code">Response Code</th>
+          <th data-col="latency_ms">Latency (ms)</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -130,6 +166,18 @@
     let recordMap = {};
     let lastRowKey = null;
     let lastUpdated = null;
+
+    // Sorting state
+    let sortCol = 'last_seen';  // Default: last call on top
+    let sortDir = 'desc';       // Descending
+
+    // Filter state
+    let filterVal = '';
+
+    // Add/Update "last_seen" on each record for sorting
+    function touchRecord(key) {
+      recordMap[key].last_seen = Date.now();
+    }
 
     function loadRecords() {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -144,14 +192,46 @@
 
     function formatTime(val) {
       if (!val || val === 'ERROR') return val;
-      return new Date(val).toLocaleString();
+      try { return new Date(val).toLocaleString(); }
+      catch { return val; }
+    }
+
+    function getSortFn(col, dir) {
+      return (a, b) => {
+        let av = a[col], bv = b[col];
+        if (col === 'datetime' || col === 'last_seen') {
+          av = new Date(av || 0).getTime();
+          bv = new Date(bv || 0).getTime();
+        }
+        if (typeof av === 'string') av = av.toLowerCase();
+        if (typeof bv === 'string') bv = bv.toLowerCase();
+        if (av < bv) return dir === 'asc' ? -1 : 1;
+        if (av > bv) return dir === 'asc' ? 1 : -1;
+        return 0;
+      };
     }
 
     function updateTable() {
       const tbody = document.querySelector('#statustable tbody');
       tbody.innerHTML = '';
-      const sortedRecords = Object.values(recordMap).sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
-      for (const rec of sortedRecords) {
+      let records = Object.values(recordMap);
+
+      // Filtering
+      if (filterVal) {
+        const f = filterVal.trim().toLowerCase();
+        records = records.filter(rec =>
+          Object.values(rec).some(val =>
+            String(val).toLowerCase().includes(f)
+          )
+        );
+      }
+
+      // Sorting
+      if (sortCol && sortDir) {
+        records = records.sort(getSortFn(sortCol, sortDir));
+      }
+
+      for (const rec of records) {
         const key = `${rec.pod_name}||${rec.node_name}`;
         const tr = document.createElement('tr');
         tr.className = 'status-row';
@@ -170,16 +250,44 @@
         document.getElementById('table-updated').textContent =
           `Last updated: ${new Date(lastUpdated).toLocaleTimeString()}`;
       }
+      // Update header sort indicators
+      document.querySelectorAll('th').forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        if (th.dataset.col === sortCol) {
+          th.classList.add('sort-' + sortDir);
+        }
+      });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       loadRecords();
       updateTable();
+
       document.getElementById('reset-btn').onclick = () => {
         recordMap = {};
         saveRecords();
         updateTable();
       };
+
+      // Filter event
+      document.getElementById('filter-input').oninput = (e) => {
+        filterVal = e.target.value;
+        updateTable();
+      };
+
+      // Sorting events
+      document.querySelectorAll('th[data-col]').forEach(th => {
+        th.onclick = () => {
+          const col = th.dataset.col;
+          if (sortCol === col) {
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+          } else {
+            sortCol = col;
+            sortDir = (col === 'count' || col === 'response_code' || col === 'latency_ms') ? 'desc' : 'asc';
+          }
+          updateTable();
+        };
+      });
     });
 
     setInterval(async () => {
@@ -196,6 +304,7 @@
           recordMap[key].count += 1;
           recordMap[key].response_code = response_code;
           recordMap[key].latency_ms = latency_ms;
+          touchRecord(key);
         } else {
           recordMap[key] = {
             count: 1,
@@ -203,7 +312,8 @@
             pod_name: data.pod_name,
             node_name: data.node_name,
             response_code: response_code,
-            latency_ms: latency_ms
+            latency_ms: latency_ms,
+            last_seen: Date.now()
           };
         }
         saveRecords();
@@ -217,6 +327,7 @@
           recordMap[key].count += 1;
           recordMap[key].response_code = 0;
           recordMap[key].latency_ms = latency_ms;
+          touchRecord(key);
         } else {
           recordMap[key] = {
             count: 1,
@@ -224,7 +335,8 @@
             pod_name: '-',
             node_name: '-',
             response_code: 0,
-            latency_ms: latency_ms
+            latency_ms: latency_ms,
+            last_seen: Date.now()
           };
         }
         saveRecords();
