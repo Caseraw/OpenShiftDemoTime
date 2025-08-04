@@ -2,29 +2,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: frontend
   template:
     metadata:
       labels:
-        app: backend
+        app: frontend
     spec:
       containers:
-      - name: backend
-        image: image-registry.openshift-image-registry.svc:5000/demo-app-resiliency-01/backend:latest
+      - name: frontend
+        image: frontend:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         env:
-        - name: MY_POD_NAME
+        - name: BACKEND_URL
           valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: MY_NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
+            configMapKeyRef:
+              name: frontend-config
+              key: BACKEND_URL

@@ -2,33 +2,6 @@
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
-  name: backend-build
-spec:
-  triggers:
-    - type: ConfigChange
-    - type: ImageChange
-  source:
-    type: Git
-    git:
-      uri: "https://github.com/Caseraw/OpenShiftDemoTime.git"
-      ref: "UC22-cluster-upgrade"
-    contextDir: scenarios/uc22-cluster-upgrade/backend
-  strategy:
-    type: Source
-    sourceStrategy:
-      from:
-        kind: ImageStreamTag
-        name: python:3.11-ubi9
-        namespace: openshift
-  output:
-    to:
-      kind: ImageStreamTag
-      name: backend:latest
-
-
-apiVersion: build.openshift.io/v1
-kind: BuildConfig
-metadata:
   name: frontend-build
 spec:
   triggers:
