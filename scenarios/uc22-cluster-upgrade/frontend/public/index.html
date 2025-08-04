@@ -238,22 +238,6 @@
         tr.className = 'status-row';
         tr.dataset.key = key;
 
-        // Apply highlight only to the last-hit row
-        if (key === lastRowKey) {
-          tr.classList.add('highlight');
-
-          // Remove highlight after animation completes (fix for persistent highlight)
-          setTimeout(() => {
-            // Only remove if this row is still in DOM and still highlighted
-            const rows = document.querySelectorAll('tr.status-row');
-            rows.forEach(row => {
-              if (row.dataset.key === key) {
-                row.classList.remove('highlight');
-              }
-            });
-          }, 1200);
-        }
-
         tr.innerHTML = `
           <td>${rec.count}</td>
           <td>${formatTime(rec.datetime)}</td>
@@ -263,6 +247,20 @@
           <td>${rec.latency_ms}</td>
         `;
         tbody.appendChild(tr);
+
+        // Trigger highlight only for the latest-hit row
+        if (key === lastRowKey) {
+          // Remove highlight first in case it's still there
+          tr.classList.remove('highlight');
+          // Force reflow to restart the animation
+          void tr.offsetWidth;
+          // Add highlight class
+          tr.classList.add('highlight');
+          // Remove after animation duration, so the row can be retriggered again
+          setTimeout(() => {
+            tr.classList.remove('highlight');
+          }, 1200);
+        }
       });
 
       if (lastUpdated) {
