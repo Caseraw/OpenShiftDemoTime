@@ -2,7 +2,7 @@
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
-  name: backend-build
+  name: backend-pod-spot-build
 spec:
   triggers:
     - type: ConfigChange
@@ -12,7 +12,7 @@ spec:
     git:
       uri: "https://github.com/Caseraw/OpenShiftDemoTime.git"
       ref: "UC22-cluster-upgrade"
-    contextDir: scenarios/uc22-cluster-upgrade/backend
+    contextDir: scenarios/uc22-cluster-upgrade/backend-pod-spot
   strategy:
     type: Source
     sourceStrategy:
@@ -23,4 +23,4 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: backend:1.0
+      name: backend-pod-spot:1.0

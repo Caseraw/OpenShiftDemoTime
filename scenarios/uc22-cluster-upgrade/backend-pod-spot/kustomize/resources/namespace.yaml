@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend-pod-spot
+  labels:
+    kubernetes.io/metadata.name: backend-pod-spot
+  annotations:
+    openshift.io/description: "backend-pod-spot"
+    openshift.io/display-name: "backend-pod-spot"
