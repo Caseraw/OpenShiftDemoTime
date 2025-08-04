@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PodSpot</title>
+  <title>Cluster Health Pulse</title>
   <meta charset="utf-8">
   <style>
     :root {
@@ -124,12 +124,16 @@
       font-size: 1.04em;
       border-bottom: 1px solid #eee;
       word-break: break-word;
+      text-align: center;
     }
     tr:nth-child(even) td {
       background: #f2f8fc;
     }
     td.mono, th.mono { font-family: 'Fira Mono', 'Consolas', monospace; font-size: 0.99em;}
     td.error { color: var(--error); font-weight: bold;}
+    .active-indicator { font-size: 1.6em; }
+    .active-green { color: #20c962; }
+    .active-gray { color: #bbb; }
     .hidden { display: none !important; }
     @media (max-width: 700px) {
       .container { padding: 1em; }
@@ -140,8 +144,8 @@
 </head>
 <body>
   <div class="container">
-    <h2>PodSpot</h2>
-    <h4>See exactly where your OpenShift workloads are running, live. Perfect for tracking pods and nodes during upgrades or rescheduling.</h4>
+    <h2>Cluster Health Pulse</h2>
+    <h4>Real-time OpenShift Workload Monitor</h4>
     <form id="backend-url-form">
       <label for="backend-url-input"><b>Backend API URL:</b></label>
       <input type="url" id="backend-url-input" placeholder="https://..." required />
@@ -160,6 +164,7 @@
     <table id="statustable">
       <thead>
         <tr>
+          <th></th>
           <th>Count</th>
           <th>Time</th>
           <th class="mono">Pod Name</th>
@@ -177,6 +182,7 @@
     const BACKEND_URL_KEY = 'resiliency-demo-backend-url-v2';
     const TIMER_KEY = 'resiliency-demo-timer-v2';
     const TIMER_STATE_KEY = 'resiliency-demo-timer-state-v2';
+    const ACTIVE_ROW_KEY = 'resiliency-demo-active-key-v2';
 
     // === APP STATE ===
     let records = [];
@@ -185,6 +191,8 @@
     let backendUrl = '';
     let polling = false;
     let pollInterval = null;
+
+    let activeKey = null; // key of last active (just-hit) row
 
     // Timer state
     let timerStart = null;   // Epoch ms of last start/resume
@@ -286,6 +294,15 @@
       document.getElementById('backend-url-input').value = '';
     }
 
+    // Active row logic
+    function saveActiveKey(key) {
+      activeKey = key;
+      localStorage.setItem(ACTIVE_ROW_KEY, key || '');
+    }
+    function loadActiveKey() {
+      activeKey = localStorage.getItem(ACTIVE_ROW_KEY) || null;
+    }
+
     function formatTime(val) {
       if (!val || val === 'ERROR') return val;
       try { return new Date(val).toLocaleString(); }
@@ -297,8 +314,14 @@
       const tbody = document.querySelector('#statustable tbody');
       tbody.innerHTML = '';
       records.forEach(rec => {
+        const key = `${rec.pod_name}||${rec.node_name}`;
+        const isActive = key === activeKey;
+        const symbol = isActive
+          ? '<span class="active-indicator active-green" title="Most recent">🟢</span>'
+          : '<span class="active-indicator active-gray" title="Idle">⚪</span>';
         const tr = document.createElement('tr');
         tr.innerHTML = `
+          <td>${symbol}</td>
           <td>${rec.count}</td>
           <td>${formatTime(rec.datetime)}</td>
           <td class="mono">${rec.pod_name}</td>
@@ -343,11 +366,11 @@
       updateIndexMap();
       saveRecords();
       lastUpdated = null;
+      saveActiveKey(null);
       updateTable();
       pausePolling();
       resetTimer();
       // Keep the URL in localStorage and input
-      // Don't clear backendUrl here
     }
 
     // API Polling
@@ -381,6 +404,7 @@
         }
         saveRecords();
         lastUpdated = Date.now();
+        saveActiveKey(key);
         updateTable();
       } catch (e) {
         // Record error as its own key
@@ -403,6 +427,7 @@
         }
         saveRecords();
         lastUpdated = Date.now();
+        saveActiveKey(key);
         updateTable();
       }
     }
@@ -414,6 +439,7 @@
       loadBackendUrl();
       loadTimerState();
       updateTimerDisplay();
+      loadActiveKey();
 
       // Show backend URL input always, fill with stored value if available
       document.getElementById('backend-url-input').value = backendUrl;
