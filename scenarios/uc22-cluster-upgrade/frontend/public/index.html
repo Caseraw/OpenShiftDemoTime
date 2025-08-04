@@ -41,6 +41,7 @@
     }
     .highlight {
       animation: highlight 1.2s;
+      background: #ffe066 !important;
     }
     @keyframes highlight {
       from { background: #ffe066; }
@@ -160,25 +161,24 @@
     </table>
   </div>
   <script>
-    const BACKEND_URL = '<BACKEND_API_URL>';
+    // === CONFIGURATION ===
+    const BACKEND_URL = '<BACKEND_API_URL>'; // <-- set your backend endpoint here
     const STORAGE_KEY = 'resiliency-demo-records';
 
+    // === APP STATE ===
     let recordMap = {};
     let lastRowKey = null;
     let lastUpdated = null;
-
-    // Sorting state
-    let sortCol = 'last_seen';  // Default: last call on top
-    let sortDir = 'desc';       // Descending
-
-    // Filter state
+    let sortCol = 'last_seen'; // Always default to "latest hit on top"
+    let sortDir = 'desc';      // Descending (latest first)
     let filterVal = '';
 
-    // Add/Update "last_seen" on each record for sorting
+    // Util: Update 'last_seen' on a record
     function touchRecord(key) {
       recordMap[key].last_seen = Date.now();
     }
 
+    // Load and save to browser storage
     function loadRecords() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -190,12 +190,14 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(recordMap));
     }
 
+    // Date formatting
     function formatTime(val) {
       if (!val || val === 'ERROR') return val;
       try { return new Date(val).toLocaleString(); }
       catch { return val; }
     }
 
+    // Sorting function by column and direction
     function getSortFn(col, dir) {
       return (a, b) => {
         let av = a[col], bv = b[col];
@@ -211,6 +213,7 @@
       };
     }
 
+    // Renders the status table
     function updateTable() {
       const tbody = document.querySelector('#statustable tbody');
       tbody.innerHTML = '';
@@ -226,10 +229,8 @@
         );
       }
 
-      // Sorting
-      if (sortCol && sortDir) {
-        records = records.sort(getSortFn(sortCol, sortDir));
-      }
+      // Always sort by last_seen DESC (latest-hit row on top)
+      records = records.sort(getSortFn('last_seen', 'desc'));
 
       for (const rec of records) {
         const key = `${rec.pod_name}||${rec.node_name}`;
@@ -275,7 +276,7 @@
         updateTable();
       };
 
-      // Sorting events
+      // Sorting events (optional: if you want manual sort in future)
       document.querySelectorAll('th[data-col]').forEach(th => {
         th.onclick = () => {
           const col = th.dataset.col;
@@ -290,6 +291,7 @@
       });
     });
 
+    // === API Polling ===
     setInterval(async () => {
       const start = performance.now();
       try {
@@ -318,6 +320,10 @@
         }
         saveRecords();
         lastUpdated = Date.now();
+
+        // After a new call, always show latest-hit row on top
+        sortCol = 'last_seen';
+        sortDir = 'desc';
         updateTable();
       } catch (e) {
         const key = `-||-`;
@@ -341,6 +347,9 @@
         }
         saveRecords();
         lastUpdated = Date.now();
+        // After a new call, always show latest-hit row on top
+        sortCol = 'last_seen';
+        sortDir = 'desc';
         updateTable();
       }
     }, 2000);
