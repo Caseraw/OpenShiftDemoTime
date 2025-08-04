@@ -11,6 +11,7 @@
       --shadow: 0 2px 12px #0001;
       --error: #e63946;
       --success: #2ec4b6;
+      --active-bg: #e3f7ff;
       --font: 'Segoe UI', 'Arial', sans-serif;
     }
     html, body {
@@ -106,6 +107,16 @@
     tr:nth-child(even) td {
       background: #f2f8fc;
     }
+    tr.active-row td {
+      background: var(--active-bg) !important;
+      border-left: 4px solid var(--accent);
+    }
+    .active-dot {
+      font-size: 1.3em;
+      color: var(--success);
+      text-align: center;
+      width: 2em;
+    }
     tr:hover td {
       background: #eaf3fb;
     }
@@ -122,6 +133,7 @@
       .container { padding: 1em; }
       th, td { font-size: 0.96em; }
       .top-controls { flex-direction: column; gap: 0.6em; align-items: flex-start;}
+      .active-dot { font-size: 1.2em; }
     }
   </style>
 </head>
@@ -138,6 +150,7 @@
     <table id="statustable">
       <thead>
         <tr>
+          <th style="width:2em"></th>
           <th data-col="count">Count</th>
           <th data-col="datetime">Time</th>
           <th data-col="pod_name" class="mono">Pod Name</th>
@@ -202,7 +215,7 @@
       };
     }
 
-    // Renders the status table (no highlight logic)
+    // Renders the status table (now with "active row" marker)
     function updateTable() {
       const tbody = document.querySelector('#statustable tbody');
       tbody.innerHTML = '';
@@ -222,9 +235,11 @@
       records = records.sort(getSortFn('last_seen', 'desc'));
 
       records.forEach((rec) => {
+        const key = `${rec.pod_name}||${rec.node_name}`;
         const tr = document.createElement('tr');
-        tr.className = 'status-row';
+        tr.className = 'status-row' + (key === lastRowKey ? ' active-row' : '');
         tr.innerHTML = `
+          <td class="active-dot">${key === lastRowKey ? '🟢' : ''}</td>
           <td>${rec.count}</td>
           <td>${formatTime(rec.datetime)}</td>
           <td class="mono">${rec.pod_name}</td>
