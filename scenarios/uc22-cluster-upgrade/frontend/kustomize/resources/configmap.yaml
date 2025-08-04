@@ -1,7 +1,0 @@
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: frontend-config
-data:
-  BACKEND_URL: "https://backend-demo-app-resiliency-01.apps.cluster-d8hnk.d8hnk.sandbox2183.opentlc.com/api/status"

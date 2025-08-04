@@ -8,7 +8,6 @@ resources:
   - resources/namespace.yaml
   - resources/buildconfig.yaml
   - resources/imagestream.yaml
-  - resources/configmap.yaml
   - resources/deployment.yaml
   - resources/service.yaml
   - resources/route.yaml

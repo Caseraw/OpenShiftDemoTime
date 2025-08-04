@@ -130,15 +130,14 @@
   <div class="container">
     <h2>Cluster Health Pulse</h2>
     <h4>Real-time OpenShift Workload Monitor</h4>
-    <form id="backend-url-form" class="hidden">
+    <form id="backend-url-form">
       <label for="backend-url-input"><b>Backend API URL:</b></label>
       <input type="url" id="backend-url-input" placeholder="https://..." required />
-      <button class="button" id="url-save-btn" type="submit">Save & Start</button>
+      <button class="button" id="url-save-btn" type="submit">Save</button>
     </form>
     <div id="button-bar">
       <button class="button" id="start-btn">Start</button>
       <button class="button" id="pause-btn">Pause</button>
-      <button class="button" id="stop-btn">Stop</button>
       <button class="button" id="reset-btn">Reset</button>
     </div>
     <div class="timestamp" id="table-updated"></div>
@@ -232,41 +231,24 @@
       }
     }
 
-    function setButtons(start, pause, stop, reset) {
+    function setButtons(start, pause, reset) {
       document.getElementById('start-btn').disabled = !start;
       document.getElementById('pause-btn').disabled = !pause;
-      document.getElementById('stop-btn').disabled = !stop;
       document.getElementById('reset-btn').disabled = !reset;
-    }
-
-    function showUrlForm(show) {
-      const form = document.getElementById('backend-url-form');
-      if (show) form.classList.remove('hidden');
-      else form.classList.add('hidden');
     }
 
     function startPolling() {
       if (!backendUrl) return;
       if (polling) return;
       polling = true;
-      setButtons(false, true, true, true);
+      setButtons(false, true, true);
       pollInterval = setInterval(fetchBackend, 2000);
     }
     function pausePolling() {
       if (!polling) return;
       polling = false;
-      setButtons(true, false, true, true);
+      setButtons(true, false, true);
       clearInterval(pollInterval);
-    }
-    function stopPolling() {
-      polling = false;
-      setButtons(true, false, false, true);
-      clearInterval(pollInterval);
-      // Optionally clear records: if you want to keep data, comment out below
-      // records = [];
-      // updateIndexMap();
-      // saveRecords();
-      // updateTable();
     }
     function resetAll() {
       records = [];
@@ -276,7 +258,8 @@
       lastUpdated = null;
       updateTable();
       pausePolling();
-      showUrlForm(true);
+      // Keep the input visible and clear its value
+      document.getElementById('backend-url-input').value = '';
     }
 
     // API Polling
@@ -342,17 +325,14 @@
       updateTable();
       loadBackendUrl();
 
-      if (!backendUrl) {
-        showUrlForm(true);
-        setButtons(false, false, false, true);
-      } else {
-        showUrlForm(false);
-        setButtons(true, false, false, true);
-      }
+      // Show backend URL input always, fill with stored value if available
+      document.getElementById('backend-url-input').value = backendUrl;
+
+      setButtons(true, false, true);
 
       document.getElementById('start-btn').onclick = () => {
         if (!backendUrl) {
-          showUrlForm(true);
+          alert('Please provide a valid Backend URL first.');
           return;
         }
         startPolling();
@@ -360,28 +340,18 @@
       document.getElementById('pause-btn').onclick = () => {
         pausePolling();
       };
-      document.getElementById('stop-btn').onclick = () => {
-        stopPolling();
-      };
       document.getElementById('reset-btn').onclick = () => {
         resetAll();
       };
 
-      // Backend URL form
+      // Backend URL form: always visible, only saves
       document.getElementById('backend-url-form').onsubmit = function (e) {
         e.preventDefault();
         const url = document.getElementById('backend-url-input').value.trim();
         if (!url) return;
         saveBackendUrl(url);
-        showUrlForm(false);
-        setButtons(true, false, false, true);
-        updateTable();
+        // Do not auto-start polling
       };
-
-      // Fill form with previous URL if available
-      if (backendUrl) {
-        document.getElementById('backend-url-input').value = backendUrl;
-      }
     });
 
   </script>
