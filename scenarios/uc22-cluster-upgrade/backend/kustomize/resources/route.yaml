@@ -9,3 +9,5 @@ spec:
     name: backend
   port:
     targetPort: 8080
+  tls:
+    termination: edge

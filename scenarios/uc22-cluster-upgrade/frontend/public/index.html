@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>App Resiliency Demo</title>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background: #eee; }
+  </style>
+</head>
+<body>
+  <h2>Status Updates from Backend</h2>
+  <table id="statustable">
+    <thead>
+      <tr><th>Time</th><th>Pod Name</th><th>Node Name</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script>
+    const BACKEND_URL = '<BACKEND_API_URL>';
+
+    function addRow(data) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${data.datetime}</td><td>${data.pod_name}</td><td>${data.node_name}</td>`;
+      document.querySelector('#statustable tbody').appendChild(tr);
+    }
+
+    setInterval(async () => {
+      try {
+        const res = await fetch(BACKEND_URL);
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        addRow(data);
+      } catch (e) {
+        addRow({ datetime: 'ERROR', pod_name: '-', node_name: '-' });
+      }
+    }, 2000);
+  </script>
+</body>
+</html>
