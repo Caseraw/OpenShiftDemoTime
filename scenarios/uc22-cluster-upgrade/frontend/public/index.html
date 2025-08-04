@@ -10,8 +10,6 @@
       --header: #ffffffcc;
       --shadow: 0 2px 12px #0001;
       --error: #e63946;
-      --success: #2ec4b6;
-      --active-bg: #e3f7ff;
       --font: 'Segoe UI', 'Arial', sans-serif;
     }
     html, body {
@@ -53,21 +51,12 @@
     #reset-btn:hover {
       background: #174c7c;
     }
-    .top-controls {
-      display: flex;
-      gap: 1.5em;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.2em;
-      flex-wrap: wrap;
-    }
-    #filter-input {
-      font-size: 1em;
-      padding: 0.5em 1em;
-      border-radius: 6px;
-      border: 1px solid #cbd5e1;
-      min-width: 160px;
-      background: #fafcff;
+    .timestamp {
+      color: #888;
+      font-size: 0.96em;
+      float: right;
+      font-style: italic;
+      margin-bottom: 0.8em;
     }
     table {
       border-collapse: collapse;
@@ -87,16 +76,6 @@
       padding: 12px 8px;
       border-bottom: 2px solid #ddd4;
       user-select: none;
-      cursor: pointer;
-      position: relative;
-    }
-    th.sort-asc::after {
-      content: " ▲";
-      font-size: 0.88em;
-    }
-    th.sort-desc::after {
-      content: " ▼";
-      font-size: 0.88em;
     }
     td {
       padding: 11px 8px;
@@ -107,56 +86,28 @@
     tr:nth-child(even) td {
       background: #f2f8fc;
     }
-    tr.active-row td {
-      background: var(--active-bg) !important;
-      border-left: 4px solid var(--accent);
-    }
-    .active-dot {
-      font-size: 1.3em;
-      color: var(--success);
-      text-align: center;
-      width: 2em;
-    }
-    tr:hover td {
-      background: #eaf3fb;
-    }
     td.mono, th.mono { font-family: 'Fira Mono', 'Consolas', monospace; font-size: 0.99em;}
     td.error { color: var(--error); font-weight: bold;}
-    .timestamp {
-      color: #888;
-      font-size: 0.96em;
-      float: right;
-      font-style: italic;
-      margin-bottom: 0.8em;
-    }
     @media (max-width: 700px) {
       .container { padding: 1em; }
       th, td { font-size: 0.96em; }
-      .top-controls { flex-direction: column; gap: 0.6em; align-items: flex-start;}
-      .active-dot { font-size: 1.2em; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>App Resiliency Demo</h2>
-    <div class="top-controls">
-      <div>
-        <button id="reset-btn">Reset Table</button>
-      </div>
-      <input type="text" id="filter-input" placeholder="Filter by any value...">
-      <div class="timestamp" id="table-updated"></div>
-    </div>
+    <button id="reset-btn">Reset Table</button>
+    <div class="timestamp" id="table-updated"></div>
     <table id="statustable">
       <thead>
         <tr>
-          <th style="width:2em"></th>
-          <th data-col="count">Count</th>
-          <th data-col="datetime">Time</th>
-          <th data-col="pod_name" class="mono">Pod Name</th>
-          <th data-col="node_name" class="mono">Node Name</th>
-          <th data-col="response_code">Response Code</th>
-          <th data-col="latency_ms">Latency (ms)</th>
+          <th>Count</th>
+          <th>Time</th>
+          <th class="mono">Pod Name</th>
+          <th class="mono">Node Name</th>
+          <th>Response Code</th>
+          <th>Latency (ms)</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -165,31 +116,31 @@
   <script>
     // === CONFIGURATION ===
     const BACKEND_URL = '<BACKEND_API_URL>'; // <-- set your backend endpoint here
-    const STORAGE_KEY = 'resiliency-demo-records';
+    const STORAGE_KEY = 'resiliency-demo-records-simple';
 
     // === APP STATE ===
-    let recordMap = {};
-    let lastRowKey = null;
+    let records = [];
+    let recordIndexMap = {}; // key -> index in records[]
     let lastUpdated = null;
-    let sortCol = 'last_seen'; // Always default to "latest hit on top"
-    let sortDir = 'desc';      // Descending (latest first)
-    let filterVal = '';
-
-    // Util: Update 'last_seen' on a record
-    function touchRecord(key) {
-      recordMap[key].last_seen = Date.now();
-    }
 
     // Load and save to browser storage
     function loadRecords() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        try { recordMap = JSON.parse(stored); }
-        catch { recordMap = {}; }
+        try { records = JSON.parse(stored); }
+        catch { records = []; }
       }
+      updateIndexMap();
     }
     function saveRecords() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(recordMap));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+    function updateIndexMap() {
+      recordIndexMap = {};
+      records.forEach((rec, i) => {
+        const key = `${rec.pod_name}||${rec.node_name}`;
+        recordIndexMap[key] = i;
+      });
     }
 
     // Date formatting
@@ -199,47 +150,13 @@
       catch { return val; }
     }
 
-    // Sorting function by column and direction
-    function getSortFn(col, dir) {
-      return (a, b) => {
-        let av = a[col], bv = b[col];
-        if (col === 'datetime' || col === 'last_seen') {
-          av = new Date(av || 0).getTime();
-          bv = new Date(bv || 0).getTime();
-        }
-        if (typeof av === 'string') av = av.toLowerCase();
-        if (typeof bv === 'string') bv = bv.toLowerCase();
-        if (av < bv) return dir === 'asc' ? -1 : 1;
-        if (av > bv) return dir === 'asc' ? 1 : -1;
-        return 0;
-      };
-    }
-
-    // Renders the status table (now with "active row" marker)
+    // Renders the status table
     function updateTable() {
       const tbody = document.querySelector('#statustable tbody');
       tbody.innerHTML = '';
-      let records = Object.values(recordMap);
-
-      // Filtering
-      if (filterVal) {
-        const f = filterVal.trim().toLowerCase();
-        records = records.filter(rec =>
-          Object.values(rec).some(val =>
-            String(val).toLowerCase().includes(f)
-          )
-        );
-      }
-
-      // Always sort by last_seen DESC (latest-hit row on top)
-      records = records.sort(getSortFn('last_seen', 'desc'));
-
-      records.forEach((rec) => {
-        const key = `${rec.pod_name}||${rec.node_name}`;
+      records.forEach(rec => {
         const tr = document.createElement('tr');
-        tr.className = 'status-row' + (key === lastRowKey ? ' active-row' : '');
         tr.innerHTML = `
-          <td class="active-dot">${key === lastRowKey ? '🟢' : ''}</td>
           <td>${rec.count}</td>
           <td>${formatTime(rec.datetime)}</td>
           <td class="mono">${rec.pod_name}</td>
@@ -249,18 +166,10 @@
         `;
         tbody.appendChild(tr);
       });
-
       if (lastUpdated) {
         document.getElementById('table-updated').textContent =
           `Last updated: ${new Date(lastUpdated).toLocaleTimeString()}`;
       }
-      // Update header sort indicators
-      document.querySelectorAll('th').forEach(th => {
-        th.classList.remove('sort-asc', 'sort-desc');
-        if (th.dataset.col === sortCol) {
-          th.classList.add('sort-' + sortDir);
-        }
-      });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -268,30 +177,11 @@
       updateTable();
 
       document.getElementById('reset-btn').onclick = () => {
-        recordMap = {};
+        records = [];
+        updateIndexMap();
         saveRecords();
         updateTable();
       };
-
-      // Filter event
-      document.getElementById('filter-input').oninput = (e) => {
-        filterVal = e.target.value;
-        updateTable();
-      };
-
-      // Sorting events
-      document.querySelectorAll('th[data-col]').forEach(th => {
-        th.onclick = () => {
-          const col = th.dataset.col;
-          if (sortCol === col) {
-            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-          } else {
-            sortCol = col;
-            sortDir = (col === 'count' || col === 'response_code' || col === 'latency_ms') ? 'desc' : 'asc';
-          }
-          updateTable();
-        };
-      });
     });
 
     // === API Polling ===
@@ -304,55 +194,50 @@
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         const key = `${data.pod_name}||${data.node_name}`;
-        lastRowKey = key;
-        if (recordMap[key]) {
-          recordMap[key].count += 1;
-          recordMap[key].response_code = response_code;
-          recordMap[key].latency_ms = latency_ms;
-          touchRecord(key);
+
+        if (key in recordIndexMap) {
+          // Increment counter, update response code and latency, but do NOT create a new row.
+          const rec = records[recordIndexMap[key]];
+          rec.count += 1;
+          rec.response_code = response_code;
+          rec.latency_ms = latency_ms;
+          // Only keep the earliest time for display (not overwritten).
         } else {
-          recordMap[key] = {
+          // New row for new pod/node combo.
+          records.push({
             count: 1,
             datetime: data.datetime,
             pod_name: data.pod_name,
             node_name: data.node_name,
             response_code: response_code,
-            latency_ms: latency_ms,
-            last_seen: Date.now()
-          };
+            latency_ms: latency_ms
+          });
+          updateIndexMap();
         }
         saveRecords();
         lastUpdated = Date.now();
-
-        // After a new call, always show latest-hit row on top
-        sortCol = 'last_seen';
-        sortDir = 'desc';
         updateTable();
       } catch (e) {
+        // Record error as its own key
         const key = `-||-`;
-        const latency_ms = Math.round(performance.now() - start);
-        lastRowKey = key;
-        if (recordMap[key]) {
-          recordMap[key].count += 1;
-          recordMap[key].response_code = 0;
-          recordMap[key].latency_ms = latency_ms;
-          touchRecord(key);
+        if (key in recordIndexMap) {
+          const rec = records[recordIndexMap[key]];
+          rec.count += 1;
+          rec.response_code = 0;
+          rec.latency_ms = 0;
         } else {
-          recordMap[key] = {
+          records.push({
             count: 1,
             datetime: 'ERROR',
             pod_name: '-',
             node_name: '-',
             response_code: 0,
-            latency_ms: latency_ms,
-            last_seen: Date.now()
-          };
+            latency_ms: 0
+          });
+          updateIndexMap();
         }
         saveRecords();
         lastUpdated = Date.now();
-        // After a new call, always show latest-hit row on top
-        sortCol = 'last_seen';
-        sortDir = 'desc';
         updateTable();
       }
     }, 2000);
