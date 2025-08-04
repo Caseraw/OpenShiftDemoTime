@@ -7,7 +7,8 @@ spec:
   source:
     type: Git
     git:
-      uri: "<YOUR_BACKEND_GIT_REPO_URL>"
+      uri: "https://github.com/Caseraw/OpenShiftDemoTime.git"
+    contextDir: scenarios/uc22-cluster-upgrade/backend
   strategy:
     type: Source
     sourceStrategy:
