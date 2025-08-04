@@ -19,6 +19,8 @@
         <th>Time</th>
         <th>Pod Name</th>
         <th>Node Name</th>
+        <th>Response Code</th>
+        <th>Latency (ms)</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -26,50 +28,61 @@
 <script>
   const BACKEND_URL = '<BACKEND_API_URL>';
 
-  // Use a map to store unique pod/node combos
+  // Map to store unique (pod, node) combos
   let recordMap = {};
 
   function updateTable() {
     const tbody = document.querySelector('#statustable tbody');
     tbody.innerHTML = '';
-    // Show rows in order of first seen
+    // Sort by first seen datetime
     const sortedRecords = Object.values(recordMap).sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
     for (const rec of sortedRecords) {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${rec.count}</td><td>${rec.datetime}</td><td>${rec.pod_name}</td><td>${rec.node_name}</td>`;
+      tr.innerHTML = `<td>${rec.count}</td><td>${rec.datetime}</td><td>${rec.pod_name}</td><td>${rec.node_name}</td><td>${rec.response_code}</td><td>${rec.latency_ms}</td>`;
       tbody.appendChild(tr);
     }
   }
 
   setInterval(async () => {
+    const start = performance.now();
     try {
       const res = await fetch(BACKEND_URL);
+      const response_code = res.status;
+      const latency_ms = Math.round(performance.now() - start);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       const key = `${data.pod_name}||${data.node_name}`;
       if (recordMap[key]) {
         recordMap[key].count += 1;
-        // Do not update datetime!
+        recordMap[key].response_code = response_code; // update with last call
+        recordMap[key].latency_ms = latency_ms;       // update with last call
       } else {
         recordMap[key] = {
           count: 1,
           datetime: data.datetime,
           pod_name: data.pod_name,
-          node_name: data.node_name
+          node_name: data.node_name,
+          response_code: response_code,
+          latency_ms: latency_ms
         };
       }
       updateTable();
     } catch (e) {
-      // Handle errors as a unique "error" row
+      // On error, show "-" for pod/node, response_code = 0, latency to "-"
       const key = `-||-`;
+      const latency_ms = Math.round(performance.now() - start);
       if (recordMap[key]) {
         recordMap[key].count += 1;
+        recordMap[key].response_code = 0;
+        recordMap[key].latency_ms = latency_ms;
       } else {
         recordMap[key] = {
           count: 1,
           datetime: 'ERROR',
           pod_name: '-',
-          node_name: '-'
+          node_name: '-',
+          response_code: 0,
+          latency_ms: latency_ms
         };
       }
       updateTable();
