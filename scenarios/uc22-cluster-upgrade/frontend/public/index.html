@@ -4,47 +4,147 @@
   <title>App Resiliency Demo</title>
   <meta charset="utf-8">
   <style>
-    body { font-family: Arial, sans-serif; margin: 2em; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background: #eee; }
-    #reset-btn { margin-bottom: 1em; }
+    :root {
+      --accent: #1d72b8;
+      --bg: #f5f7fa;
+      --header: #ffffffcc;
+      --shadow: 0 2px 12px #0001;
+      --error: #e63946;
+      --success: #2ec4b6;
+      --font: 'Segoe UI', 'Arial', sans-serif;
+    }
+    html, body {
+      background: var(--bg);
+      font-family: var(--font);
+      margin: 0; padding: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 2.5em auto 1em auto;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 2.5em 2em 2em 2em;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 2.1em;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: var(--accent);
+      text-shadow: 0 1px 0 #fff;
+      margin-bottom: 0.2em;
+    }
+    .status-row td, .status-row th {
+      transition: background 0.3s;
+    }
+    .highlight {
+      animation: highlight 1.5s;
+    }
+    @keyframes highlight {
+      from { background: #ffe066; }
+      to { background: transparent; }
+    }
+    #reset-btn {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6em 1.6em;
+      font-size: 1em;
+      margin-bottom: 1.2em;
+      box-shadow: 0 2px 6px #0002;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    #reset-btn:hover {
+      background: #174c7c;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: var(--header);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    th {
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.03em;
+      letter-spacing: 0.02em;
+      font-weight: 700;
+      padding: 12px 8px;
+      border-bottom: 2px solid #ddd4;
+    }
+    td {
+      padding: 11px 8px;
+      font-size: 1.04em;
+      border-bottom: 1px solid #eee;
+    }
+    tr:nth-child(even) td {
+      background: #f2f8fc;
+    }
+    tr:hover td {
+      background: #eaf3fb;
+    }
+    td.mono, th.mono { font-family: 'Fira Mono', 'Consolas', monospace; font-size: 0.99em;}
+    td.error { color: var(--error); font-weight: bold;}
+    .timestamp {
+      color: #888;
+      font-size: 0.96em;
+      float: right;
+      font-style: italic;
+      margin-bottom: 0.8em;
+    }
+    @media (max-width: 700px) {
+      .container { padding: 1em; }
+      th, td { font-size: 0.96em; }
+    }
   </style>
 </head>
 <body>
-  <h2>Status Updates from Backend</h2>
-  <button id="reset-btn">Reset</button>
-  <table id="statustable">
-    <thead>
-      <tr>
-        <th>Count</th>
-        <th>Time</th>
-        <th>Pod Name</th>
-        <th>Node Name</th>
-        <th>Response Code</th>
-        <th>Latency (ms)</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="container">
+    <h2>App Resiliency Demo</h2>
+    <div class="timestamp" id="table-updated"></div>
+    <button id="reset-btn">Reset Table</button>
+    <table id="statustable">
+      <thead>
+        <tr>
+          <th>Count</th>
+          <th>Time</th>
+          <th class="mono">Pod Name</th>
+          <th class="mono">Node Name</th>
+          <th>Response Code</th>
+          <th>Latency (ms)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
   <script>
     const BACKEND_URL = '<BACKEND_API_URL>';
     const STORAGE_KEY = 'resiliency-demo-records';
 
-    // Initialize or load from localStorage
     let recordMap = {};
+    let lastRowKey = null;
+    let lastUpdated = null;
+
     function loadRecords() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        try {
-          recordMap = JSON.parse(stored);
-        } catch (e) {
-          recordMap = {};
-        }
+        try { recordMap = JSON.parse(stored); }
+        catch { recordMap = {}; }
       }
     }
     function saveRecords() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(recordMap));
+    }
+
+    function formatTime(val) {
+      if (!val || val === 'ERROR') return val;
+      return new Date(val).toLocaleString();
     }
 
     function updateTable() {
@@ -52,13 +152,26 @@
       tbody.innerHTML = '';
       const sortedRecords = Object.values(recordMap).sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
       for (const rec of sortedRecords) {
+        const key = `${rec.pod_name}||${rec.node_name}`;
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${rec.count}</td><td>${rec.datetime}</td><td>${rec.pod_name}</td><td>${rec.node_name}</td><td>${rec.response_code}</td><td>${rec.latency_ms}</td>`;
+        tr.className = 'status-row';
+        if (key === lastRowKey) tr.classList.add('highlight');
+        tr.innerHTML = `
+          <td>${rec.count}</td>
+          <td>${formatTime(rec.datetime)}</td>
+          <td class="mono">${rec.pod_name}</td>
+          <td class="mono">${rec.node_name}</td>
+          <td${rec.response_code === 0 ? ' class="error"' : ''}>${rec.response_code}</td>
+          <td>${rec.latency_ms}</td>
+        `;
         tbody.appendChild(tr);
+      }
+      if (lastUpdated) {
+        document.getElementById('table-updated').textContent =
+          `Last updated: ${new Date(lastUpdated).toLocaleTimeString()}`;
       }
     }
 
-    // Reset functionality
     document.addEventListener('DOMContentLoaded', () => {
       loadRecords();
       updateTable();
@@ -78,6 +191,7 @@
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         const key = `${data.pod_name}||${data.node_name}`;
+        lastRowKey = key;
         if (recordMap[key]) {
           recordMap[key].count += 1;
           recordMap[key].response_code = response_code;
@@ -93,10 +207,12 @@
           };
         }
         saveRecords();
+        lastUpdated = Date.now();
         updateTable();
       } catch (e) {
         const key = `-||-`;
         const latency_ms = Math.round(performance.now() - start);
+        lastRowKey = key;
         if (recordMap[key]) {
           recordMap[key].count += 1;
           recordMap[key].response_code = 0;
@@ -112,6 +228,7 @@
           };
         }
         saveRecords();
+        lastUpdated = Date.now();
         updateTable();
       }
     }, 2000);
