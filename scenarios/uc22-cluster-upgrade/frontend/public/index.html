@@ -36,17 +36,6 @@
       text-shadow: 0 1px 0 #fff;
       margin-bottom: 0.2em;
     }
-    .status-row td, .status-row th {
-      transition: background 0.3s;
-    }
-    .highlight {
-      animation: highlight 1.2s;
-      background: #ffe066 !important;
-    }
-    @keyframes highlight {
-      from { background: #ffe066; }
-      to { background: transparent; }
-    }
     #reset-btn {
       background: var(--accent);
       color: #fff;
@@ -213,7 +202,7 @@
       };
     }
 
-    // Renders the status table
+    // Renders the status table (no highlight logic)
     function updateTable() {
       const tbody = document.querySelector('#statustable tbody');
       tbody.innerHTML = '';
@@ -233,11 +222,8 @@
       records = records.sort(getSortFn('last_seen', 'desc'));
 
       records.forEach((rec) => {
-        const key = `${rec.pod_name}||${rec.node_name}`;
         const tr = document.createElement('tr');
         tr.className = 'status-row';
-        tr.dataset.key = key;
-
         tr.innerHTML = `
           <td>${rec.count}</td>
           <td>${formatTime(rec.datetime)}</td>
@@ -247,20 +233,6 @@
           <td>${rec.latency_ms}</td>
         `;
         tbody.appendChild(tr);
-
-        // Trigger highlight only for the latest-hit row
-        if (key === lastRowKey) {
-          // Remove highlight first in case it's still there
-          tr.classList.remove('highlight');
-          // Force reflow to restart the animation
-          void tr.offsetWidth;
-          // Add highlight class
-          tr.classList.add('highlight');
-          // Remove after animation duration, so the row can be retriggered again
-          setTimeout(() => {
-            tr.classList.remove('highlight');
-          }, 1200);
-        }
       });
 
       if (lastUpdated) {
@@ -292,7 +264,7 @@
         updateTable();
       };
 
-      // Sorting events (optional: if you want manual sort in future)
+      // Sorting events
       document.querySelectorAll('th[data-col]').forEach(th => {
         th.onclick = () => {
           const col = th.dataset.col;
