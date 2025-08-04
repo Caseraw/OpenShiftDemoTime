@@ -18,7 +18,7 @@ spec:
     sourceStrategy:
       from:
         kind: ImageStreamTag
-        name: image-registry.openshift-image-registry.svc:5000/openshift/python/python:3.11-ubi9
+        name: python:3.11-ubi9
         namespace: openshift
   output:
     to:
