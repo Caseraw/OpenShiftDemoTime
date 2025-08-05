@@ -19,8 +19,12 @@ SRC_NS="open-cluster-management"
 TARGET_SECRET="aws"
 TARGET_NS="demo-pipelines"
 
+# Wait for the target namespace to exists
+show_msg "show-date" "INFO" "Waiting for target namespace '$TARGET_NS' to be ready..."
+run_cmd --infinite -- oc wait ns $TARGET_NS --for=jsonpath='{.metadata.name}'=demo-pipelines
+
 # Get the secret, extract only data, and apply it directly to the target namespace
-kubectl get secret "$SRC_SECRET" -n "$SRC_NS" -o json | jq -r '
+oc get secret "$SRC_SECRET" -n "$SRC_NS" -o json | jq -r '
   .data as $d |
   {
     apiVersion: "v1",
@@ -28,7 +32,7 @@ kubectl get secret "$SRC_SECRET" -n "$SRC_NS" -o json | jq -r '
     metadata: { name: "'"$TARGET_SECRET"'" },
     type: .type,
     data: $d
-  }' | kubectl apply -n "$TARGET_NS" -f -
+  }' | oc apply -n "$TARGET_NS" -f -
 
 show_msg "show-date" "INFO" "Secret '$TARGET_SECRET' copied from '$SRC_NS' to '$TARGET_NS'" "✅"
 

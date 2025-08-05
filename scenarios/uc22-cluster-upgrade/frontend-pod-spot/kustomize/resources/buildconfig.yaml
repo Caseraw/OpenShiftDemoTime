@@ -1,0 +1,26 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: frontend-pod-spot-build
+spec:
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+  source:
+    type: Git
+    git:
+      uri: "https://github.com/Caseraw/OpenShiftDemoTime.git"
+      ref: "UC22-cluster-upgrade"
+    contextDir: scenarios/uc22-cluster-upgrade/frontend-pod-spot
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: nodejs:18-ubi9
+        namespace: openshift
+  output:
+    to:
+      kind: ImageStreamTag
+      name: frontend-pod-spot:1.0

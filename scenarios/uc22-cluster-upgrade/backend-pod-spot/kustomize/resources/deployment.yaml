@@ -1,0 +1,30 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-pod-spot
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend-pod-spot
+  template:
+    metadata:
+      labels:
+        app: backend-pod-spot
+    spec:
+      containers:
+      - name: backend-pod-spot
+        image: image-registry.openshift-image-registry.svc:5000/backend-pod-spot/backend-pod-spot:1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MY_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
