@@ -1,19 +1,11 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: demo
-  labels:
-    app: demo
-    app.kubernetes.io/component: demo
-    app.kubernetes.io/instance: demo
-    app.kubernetes.io/name: demo
-    app.kubernetes.io/part-of: demo
-    app.openshift.io/runtime: java
-    app.openshift.io/runtime-version: openjdk-17-ubi8
+  name: demo-source
 spec:
   to:
     kind: Service
-    name: demo
+    name: demo-source
     weight: 100
   port:
     targetPort: 8080-tcp

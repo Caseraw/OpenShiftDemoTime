@@ -1,30 +1,22 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: demo
-  labels:
-    app: demo
-    app.kubernetes.io/component: demo
-    app.kubernetes.io/instance: demo
-    app.kubernetes.io/name: demo
-    app.kubernetes.io/part-of: demo
-    app.openshift.io/runtime: java
-    app.openshift.io/runtime-version: openjdk-17-ubi8
+  name: demo-source
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: demo
+      app: demo-source
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: demo
-        deployment: demo
+        app: demo-source
+        deployment: demo-source
     spec:
       containers:
-        - name: demo
-          image: 'image-registry.openshift-image-registry.svc:5000/demo/demo'
+        - name: demo-source
+          image: 'image-registry.openshift-image-registry.svc:5000/demo/demo-source'
           ports:
             - containerPort: 8080
               protocol: TCP
