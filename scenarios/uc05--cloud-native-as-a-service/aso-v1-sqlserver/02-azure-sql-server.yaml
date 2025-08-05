@@ -1,0 +1,7 @@
+kind: AzureSqlServer
+apiVersion: azure.microsoft.com/v1beta1
+metadata:
+  name: sqlserver-employee
+spec:
+  location: eastus
+  resourceGroup: openenv-d4hzm

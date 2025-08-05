@@ -1,0 +1,43 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: demo-dockerfile
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-dockerfile
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: demo-dockerfile
+        deployment: demo-dockerfile
+    spec:
+      containers:
+        - name: demo-dockerfile
+          image: 'image-registry.openshift-image-registry.svc:5000/demo/demo-dockerfile'
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+          env:
+            - name: BUILD
+              value: Source
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600

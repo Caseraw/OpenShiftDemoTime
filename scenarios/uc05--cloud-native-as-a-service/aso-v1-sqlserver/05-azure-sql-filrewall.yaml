@@ -1,0 +1,9 @@
+kind: AzureSqlFirewallRule
+apiVersion: azure.microsoft.com/v1beta1
+metadata:
+  name: sql-firewall-employee
+spec:
+  endIpAddress: 255.255.255.255
+  resourceGroup: openenv-d4hzm
+  server: sqlserver-employee
+  startIpAddress: 0.0.0.0

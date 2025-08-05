@@ -1,0 +1,10 @@
+ apiVersion: dbforpostgresql.azure.com/v1api20210601
+kind: FlexibleServersDatabase
+metadata:
+  name: employees-db
+  namespace: demo
+spec:
+  azureName: employees-db
+  owner:
+    name: employees-server
+  charset: utf8

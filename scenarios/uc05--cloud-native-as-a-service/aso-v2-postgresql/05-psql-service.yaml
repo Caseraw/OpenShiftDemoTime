@@ -1,0 +1,23 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: employee-service
+spec:
+  type: ExternalName
+  externalName: employees-server.postgres.database.azure.com
+---
+apiVersion: dbformysql.azure.com/v1api20210501
+kind: FlexibleServersFirewallRule
+metadata:
+  name: employees-firewall
+  namespace: demo
+spec:
+  azureName: employees-firewall
+  owner:
+    name: employees-server
+  # The following address range allows anybody to connect to this server.
+  # This should only be used for demo purposes and not in production!
+  # There are other ways to control server access which are not covered here, you can see more about it here:
+  # https://docs.microsoft.com/azure/postgresql/flexible-server/concepts-security#network-security
+  startIpAddress: 0.0.0.0
+  endIpAddress: 255.255.255.255

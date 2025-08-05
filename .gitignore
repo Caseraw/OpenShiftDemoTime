@@ -11,6 +11,7 @@ WIP/*
 # Ignore files in the "assets/byo" folder
 assets/byo/*
 !assets/byo/README.md
+tools/*
 
 # Manage ingores in the "assets/byo/credentials-aws" folder
 !assets/byo/credentials-aws/
@@ -28,3 +29,6 @@ assets/byo/ssh-keys/*
 !assets/byo/ssh-keys/README.md
 !assets/byo/ssh-keys/setup.sh
 assets/slack-command/node_modules
+scenarios/uc05--cloud-native-as-a-service/azure-service-op-secret.yaml
+**/*.token
+**/.DS_Store
