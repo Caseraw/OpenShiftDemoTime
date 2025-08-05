@@ -4,7 +4,7 @@ metadata:
   name: mandatory-configuration
 spec:
   params:
-    - default: main
+    - default: UC07--Mandatory-configuration
       name: REVISION
       type: string
     - default: demo
