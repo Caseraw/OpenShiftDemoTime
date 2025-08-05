@@ -1,0 +1,110 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: container-as-a-service
+spec:
+  params:
+    - default: source
+      description: source/binary
+      name: build
+      type: string
+    - default: main
+      name: REVISION
+      type: string
+    - default: demo
+      name: tenant
+      type: string
+  tasks:
+    - name: git-clone
+      params:
+        - name: refspec
+          value: ''
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: crtFileName
+          value: ca-bundle.crt
+        - name: subdirectory
+          value: ''
+        - name: sparseCheckoutDirectories
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: httpProxy
+          value: ''
+        - name: httpsProxy
+          value: ''
+        - name: noProxy
+          value: ''
+        - name: verbose
+          value: 'true'
+        - name: gitInitImage
+          value: 'registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:868966ef9d4b54952d8a74eb83bba40eb1f52c0148994fa704efd0e3797c61c5'
+        - name: userHome
+          value: /home/git
+        - name: URL
+          value: 'https://github.com/Caseraw/OpenShiftDemoTime'
+        - name: REVISION
+          value: $(params.REVISION)
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: output
+          workspace: source
+    - name: create-namespace
+      params:
+        - name: SCRIPT
+          value: |-
+            if ! oc get project $(params.tenant) > /dev/null 2>&1; then
+                oc new-project $(params.tenant)
+            else
+                echo "Project $(params.tenant) already exists"
+            fi
+        - name: VERSION
+          value: latest
+      runAfter:
+        - git-clone
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: manifest_dir
+          workspace: source
+    - name: provision
+      params:
+        - name: SCRIPT
+          value: oc create -k scenarios/uc04-container-as-a-service/build-from-$(params.build) -n $(params.tenant)
+        - name: VERSION
+          value: latest
+      runAfter:
+        - create-namespace
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: manifest_dir
+          workspace: source
+  workspaces:
+    - name: source
