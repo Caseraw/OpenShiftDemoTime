@@ -4,7 +4,7 @@ ENV LANGUAGE='en_US:en'
 
 
 #COPY target/lib/* /deployments/lib/
-COPY jar/app.jar /app.jar
+COPY ../jar/app.jar /app.jar
 
 EXPOSE 8080
 USER 185
