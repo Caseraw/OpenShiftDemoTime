@@ -23,7 +23,7 @@ spec:
     git:
       uri: 'https://github.com/Caseraw/OpenShiftDemoTime'
       ref: UC04--Container-as-a-service
-    contextDir: /scenarios/uc04-container-as-a-service/app
+    contextDir: /scenarios/uc04-container-as-a-service/jar
   triggers:
     - type: ImageChange
       imageChange: {}
