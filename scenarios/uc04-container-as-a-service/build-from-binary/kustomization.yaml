@@ -19,6 +19,12 @@ patches:
     - op: replace
       path: /metadata/name
       value: demo-binary
+  target:
+    kind: BuildConfig
+    kind: Deployment
+    kind: ImageStream
+    kind: Service
+    kind: Route
 - patch: |-
     - op: replace
       path: /spec/to/name
