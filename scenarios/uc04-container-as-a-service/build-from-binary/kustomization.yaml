@@ -16,7 +16,7 @@ patches:
   target:
     kind: Deployment
 - patch: |-
-    - replace
+    - op: replace
       path: /metadata/name
       value: demo-binary
 - patch: |-
