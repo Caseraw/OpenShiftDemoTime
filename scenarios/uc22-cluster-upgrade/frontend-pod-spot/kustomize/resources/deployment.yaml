@@ -1,0 +1,21 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-pod-spot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-pod-spot
+  template:
+    metadata:
+      labels:
+        app: frontend-pod-spot
+    spec:
+      containers:
+      - name: frontend-pod-spot
+        image: image-registry.openshift-image-registry.svc:5000/frontend-pod-spot/frontend-pod-spot:1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
