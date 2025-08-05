@@ -38,16 +38,16 @@ patches:
     - op: replace
       path: /spec/selector/labels/0
       value: demo-binary
-      - op: replace
+    - op: replace
       path: /spec/template/metadata/labels/0
       value: demo-binary
-      - op: replace
+    - op: replace
       path: /spec/template/metadata/labels/1
       value: demo-binary
-      - op: replace
+    - op: replace
       path: /spec/template/spec/containers/0/name
       value: demo-binary
-      - op: replace
+    - op: replace
       path: /spec/template/spec/containers/0/image
       value: 'image-registry.openshift-image-registry.svc:5000/demo/demo-binary'
   target:
