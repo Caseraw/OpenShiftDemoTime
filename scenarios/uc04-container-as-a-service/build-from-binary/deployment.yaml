@@ -24,7 +24,7 @@ spec:
               protocol: TCP
           env:
             - name: BUILD
-              value: source
+              value: Binary
           resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
