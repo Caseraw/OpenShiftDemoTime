@@ -16,11 +16,7 @@ gets upgraded. The following has to be set in place.
 - Follow the Use Case 01 (Cluster as a Service) storyline and spin up a new
   Spoke Cluster.
 
-If not done already, login on the Hub cluster and run:
-
-```shell
-$ ./scenarios/uc01-cluster-as-a-service/bootstrap-demo-part-01.sh
-```
+If not done already, go ahead and do so. Link to the [UC01 - README.md](../uc01-cluster-as-a-service/README.md) file.
 
 ## Run the scenario
 
