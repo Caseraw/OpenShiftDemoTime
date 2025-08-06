@@ -24,7 +24,7 @@ spec:
         velero.io/exclude-from-backup: "true"
     spec:
       destination:
-        namespace: cluster-config
+        namespace: demo-pipelines
         server: "{{server}}"
       project: default
       sources:

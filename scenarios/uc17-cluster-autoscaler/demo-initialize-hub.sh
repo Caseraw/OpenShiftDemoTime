@@ -16,7 +16,7 @@ show_msg "show-date" "INFO" "Bootstrap - Deploy the first ArgoCD Applications to
 KUSTOMIZE_BASE="argocd-applications/bootstrap"
 show_msg "show-date" "INFO" "Running Kustomize build..."
 kustomize build "$SCENARIO_BASE/argocd-applications/bootstrap-spoke" | oc apply -f -
-# kustomize build "$SCENARIO_BASE/argocd-applications/demo-pipelines-hub" | oc apply -f -
-# kustomize build "$SCENARIO_BASE/argocd-applications/demo-pipelines-spoke" | oc apply -f -
+kustomize build "$SCENARIO_BASE/argocd-applications/demo-pipelines-hub" | oc apply -f -
+kustomize build "$SCENARIO_BASE/argocd-applications/demo-pipelines-spoke" | oc apply -f -
 
 show_msg "show-date" "INFO" "Bootstrap - Deploy the first ArgoCD Applications to initiate" "Completed" "✅"
