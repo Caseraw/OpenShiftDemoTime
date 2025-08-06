@@ -16,6 +16,4 @@ spec:
       taskRef:
         kind: Task
         name: demo-ocp-cli
-  params: []
-  workspaces: []
-  finally: []
+
