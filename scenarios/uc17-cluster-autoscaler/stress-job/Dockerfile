@@ -1,4 +1,4 @@
-FROM registry.redhat.io/ubi9-minimal:latest
+FROM registry.redhat.io/ubi9:latest
 
 USER 0
 RUN dnf install -y epel-release && \
