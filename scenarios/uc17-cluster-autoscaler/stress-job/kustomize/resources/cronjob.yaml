@@ -2,15 +2,15 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: stress-test-cronjob
+  name: stress-job-cronjob
 spec:
   schedule: "0 0 * * *"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
-      completions: 10
-      parallelism: 10
+      completions: 20
+      parallelism: 20
       backoffLimit: 3
       template:
         spec:
@@ -21,8 +21,8 @@ spec:
             imagePullPolicy: Always
             resources:
               requests:
-                cpu: "500m"
-                memory: "500Mi"
+                cpu: "2"
+                memory: "4Gi"
               limits:
-                cpu: "500m"
-                memory: "500Mi"
+                cpu: "2"
+                memory: "4Gi"

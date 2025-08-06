@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: managed-cluster-config
+  name: demo-pipelines
   namespace: openshift-gitops
 spec:
   generators:
@@ -10,11 +10,11 @@ spec:
         configMapRef: acm-placement
         labelSelector:
           matchLabels:
-            cluster.open-cluster-management.io/placement: managed-cluster-config-placement
+            cluster.open-cluster-management.io/placement: demo-pipelines-placement
         requeueAfterSeconds: 180
   template:
     metadata:
-      name: managed-cluster-config-{{name}}
+      name: demo-pipelines-{{name}}
       annotations:
         apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
         apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
@@ -28,7 +28,7 @@ spec:
         server: "{{server}}"
       project: default
       sources:
-        - path: scenarios/uc17-cluster-autoscaler/kustomize/base/cluster-config
+        - path: scenarios/uc17-cluster-autoscaler/kustomize/base/demo-pipelines
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
           targetRevision: UC17-cluster-autoscaler
           repositoryType: git
