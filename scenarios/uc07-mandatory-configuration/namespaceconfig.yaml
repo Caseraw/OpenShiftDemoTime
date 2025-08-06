@@ -1,11 +1,11 @@
 kind: NamespaceConfig
 apiVersion: redhatcop.redhat.io/v1alpha1
 metadata:
-  name: tenant-namespaceconfig
+  name: standard-tenant-namespaceconfig
 spec:
   labelSelector:
     matchLabels:
-      type: tenant
+      type: standard-tenant
   templates:
     - objectTemplate: |
         apiVersion: rbac.authorization.k8s.io/v1
@@ -47,3 +47,62 @@ spec:
           ingress:
             - from:
                 - podSelector: {}
+---
+kind: NamespaceConfig
+apiVersion: redhatcop.redhat.io/v1alpha1
+metadata:
+  name: advanced-tenant-namespaceconfig
+spec:
+  labelSelector:
+    matchLabels:
+      type: advanced-tenant
+  templates:
+    - objectTemplate: |
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        metadata:
+          name: pipeline-admin
+          namespace: {{ .Name }}
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: admin
+        subjects:
+        - kind: ServiceAccount
+          name: pipeline
+          namespace: cicd     
+    - objectTemplate: |
+        apiVersion: v1
+        kind: ResourceQuota
+        metadata:
+          name: standard-tenant
+          namespace: {{ .Name }}
+        spec:
+          hard:
+            pods: "10" 
+            requests.cpu: "1" 
+            requests.memory: 1Gi 
+            requests.ephemeral-storage: 2Gi 
+            limits.cpu: "4" 
+            limits.memory: 8Gi 
+            limits.ephemeral-storage: 8Gi
+    - objectTemplate: |
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        metadata:
+          name: deny-other-namespaces
+          namespace: {{ .Name }}
+        spec:
+          podSelector: {}
+          ingress:
+            - from:
+                - podSelector: {}
+    - objectTemplate: |
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: db-credentials
+          namespace: {{ .Name }}
+        stringData:
+          username: dbuser
+          password: dbpassword
