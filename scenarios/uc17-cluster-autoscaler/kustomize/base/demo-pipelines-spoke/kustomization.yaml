@@ -9,3 +9,4 @@ resources:
   - resources/clusterrolebinding.yaml
   - resources/task-git-clone-project.yaml
   - resources/task-ocp-cli.yaml
+  - resources/pipeline-run-stress-job.yaml

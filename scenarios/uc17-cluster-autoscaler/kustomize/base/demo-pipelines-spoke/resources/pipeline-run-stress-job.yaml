@@ -1,0 +1,21 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: run-stress-job
+spec:
+  tasks:
+    - name: demo-ocp-cli
+      params:
+        - name: SCRIPT
+          value: >-
+            oc create job stress-job --from=cronjob/stress-job-cronjob -n
+            stress-job
+        - name: VERSION
+          value: latest
+      taskRef:
+        kind: Task
+        name: demo-ocp-cli
+  params: []
+  workspaces: []
+  finally: []
