@@ -4,8 +4,8 @@ kind: Job
 metadata:
   name: manual-stress-job
 spec:
-  completions: 10
-  parallelism: 10
+  completions: 30
+  parallelism: 30
   backoffLimit: 3
   template:
     spec:
