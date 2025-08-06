@@ -11,7 +11,7 @@ spec:
         labelSelector:
           matchLabels:
             cluster.open-cluster-management.io/placement: demo-pipelines-hub-placement
-        requeueAfterSeconds: 180
+        requeueAfterSeconds: 10
   template:
     metadata:
       name: demo-pipelines-hub-{{name}}
@@ -20,7 +20,6 @@ spec:
         apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
         argocd.argoproj.io/skip-reconcile: "true"
       labels:
-        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
         velero.io/exclude-from-backup: "true"
     spec:
       destination:

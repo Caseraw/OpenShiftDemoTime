@@ -11,7 +11,7 @@ spec:
         labelSelector:
           matchLabels:
             cluster.open-cluster-management.io/placement: managed-cluster-config-placement
-        requeueAfterSeconds: 180
+        requeueAfterSeconds: 10
   template:
     metadata:
       name: managed-cluster-config-{{name}}

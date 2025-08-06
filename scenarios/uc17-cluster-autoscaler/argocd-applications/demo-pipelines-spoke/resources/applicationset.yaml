@@ -11,7 +11,7 @@ spec:
         labelSelector:
           matchLabels:
             cluster.open-cluster-management.io/placement: demo-pipelines-spoke-placement
-        requeueAfterSeconds: 180
+        requeueAfterSeconds: 10
   template:
     metadata:
       name: demo-pipelines-spoke-{{name}}
