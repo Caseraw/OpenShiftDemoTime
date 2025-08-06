@@ -10,7 +10,7 @@ spec:
   predicates:
     - requiredClusterSelector:
         labelSelector:
-          matchExpressions: 
+          matchExpressions:
             - key: local-cluster
               operator: In
               values:
