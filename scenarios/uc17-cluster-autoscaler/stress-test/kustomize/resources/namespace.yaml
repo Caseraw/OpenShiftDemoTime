@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: stress-job
+  labels:
+    kubernetes.io/metadata.name: stress-job
+  annotations:
+    openshift.io/description: "stress-job"
+    openshift.io/display-name: "stress-job"

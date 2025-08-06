@@ -1,0 +1,22 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: stress-test-job
+spec:
+  completions: 10
+  parallelism: 10
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: stress
+        image: image-registry.openshift-image-registry.svc:5000/stress-job/stress-custom:1.0
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "500Mi"
+          limits:
+            cpu: "500m"
+            memory: "500Mi"
