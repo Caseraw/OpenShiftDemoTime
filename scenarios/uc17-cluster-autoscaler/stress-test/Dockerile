@@ -1,4 +1,4 @@
-FROM image-registry.openshift-image-registry.svc:5000/openshift/python:3.12-ubi9
+FROM registry.redhat.io/ubi9-minimal:latest
 
 USER 0
 RUN dnf install -y epel-release && \
