@@ -32,3 +32,4 @@ assets/slack-command/node_modules
 scenarios/uc05--cloud-native-as-a-service/azure-service-op-secret.yaml
 **/*.token
 **/.DS_Store
+**/github.env
