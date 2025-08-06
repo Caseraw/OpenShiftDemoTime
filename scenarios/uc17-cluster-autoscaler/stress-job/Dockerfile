@@ -1,8 +1,9 @@
 FROM registry.redhat.io/ubi9:latest
 
 USER 0
-RUN curl -o /etc/yum.repos.d/epel.repo https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
-    rpm -ivh /etc/yum.repos.d/epel-release-latest-9.noarch.rpm && \
+
+RUN subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms &&\
+    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm &&\
     dnf install -y stress && \
     dnf clean all
 
