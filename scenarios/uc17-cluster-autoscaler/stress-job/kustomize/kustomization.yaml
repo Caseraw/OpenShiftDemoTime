@@ -9,3 +9,4 @@ resources:
   - resources/buildconfig.yaml
   - resources/imagestream.yaml
   - resources/cronjob.yaml
+  # - resources/job.yaml
