@@ -3,4 +3,4 @@ apiVersion: v1
 metadata:
   name: TENANT
   labels:
-    type: TENANTTYPE-tenant
+    type: TYPE-tenant

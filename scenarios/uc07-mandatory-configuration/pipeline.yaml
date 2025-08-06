@@ -68,7 +68,7 @@ spec:
     - name: create-namespace
       params:
         - name: SCRIPT
-          value:  sed -e 's/TENANT/$(params.tenant)/g' -e 's/TENANTTYPE/$(params.tenanttype)/g' scenarios/uc07-mandatory-configuration/namespace.yaml | oc create -f -
+          value:  sed -e 's/TENANT/$(params.tenant)/g' -e 's/TYPE/$(params.tenanttype)/g' scenarios/uc07-mandatory-configuration/namespace.yaml | oc create -f -
         - name: VERSION
           value: latest
       runAfter:
