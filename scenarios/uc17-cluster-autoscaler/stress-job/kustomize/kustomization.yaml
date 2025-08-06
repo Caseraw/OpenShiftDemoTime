@@ -8,3 +8,4 @@ resources:
   - resources/namespace.yaml
   - resources/buildconfig.yaml
   - resources/imagestream.yaml
+  - resources/cronjob.yaml

@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: stress-test-job
+  name: manual-stress-job
 spec:
   completions: 10
   parallelism: 10
@@ -12,7 +12,8 @@ spec:
       restartPolicy: Never
       containers:
       - name: stress
-        image: image-registry.openshift-image-registry.svc:5000/stress-job/stress-custom:1.0
+        image: image-registry.openshift-image-registry.svc:5000/stress-job/stress-job:1.0
+        imagePullPolicy: Always
         resources:
           requests:
             cpu: "500m"
