@@ -11,7 +11,7 @@ spec:
     type: Git
     git:
       uri: "https://github.com/Caseraw/OpenShiftDemoTime.git"
-      ref: "UC22-cluster-autoscaler"
+      ref: "UC17-cluster-autoscaler"
     contextDir: scenarios/uc17-cluster-autoscaler/stress-test
   strategy:
     type: Docker
