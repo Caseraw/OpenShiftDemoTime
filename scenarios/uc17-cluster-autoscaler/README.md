@@ -36,6 +36,13 @@ $ ./scenarios/demo-rhacm-cluster/bootstrap-demo.sh
 > resemble somewhat of an idempotency by stating desired configuration
 > accompanied by some (chrono-)logical checkpoints.
 
+When the Hub Cluster is setup you need to initialize the demo parts on it. Run
+this script (with an active `oc` login session with the Hub Cluster).
+
+```shell
+$ ./scenarios/uc17-cluster-autoscaler/demo-initialize-hub.sh
+```
+
 ### AWS - Spoke Cluster
 
 #### Deploy an AWS Spoke Cluster
@@ -60,7 +67,7 @@ login with the `oc` CLI command before running the below command.
 Run:
 
 ```shell
-$ ./scenarios/uc17-cluster-autoscaler/bootstrap-managed-cluster.sh
+$ ./scenarios/uc17-cluster-autoscaler/bootstrap-spoke-cluster.sh
 ```
 
 ## Demo storyline
