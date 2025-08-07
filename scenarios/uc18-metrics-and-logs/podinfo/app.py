@@ -66,10 +66,9 @@ def periodic_logger():
         )
         time.sleep(2)
 
-@app.before_first_request
-def activate_periodic_logger():
-    t = threading.Thread(target=periodic_logger, daemon=True)
-    t.start()
+# --- Start the periodic logger as a background thread immediately (Flask 3.x safe) ---
+t = threading.Thread(target=periodic_logger, daemon=True)
+t.start()
 
 @app.route("/")
 def index():

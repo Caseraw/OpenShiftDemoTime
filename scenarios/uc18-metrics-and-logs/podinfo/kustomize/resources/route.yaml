@@ -1,0 +1,13 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: podinfo
+spec:
+  to:
+    kind: Service
+    name: podinfo
+  port:
+    targetPort: 80
+  tls:
+    termination: edge
