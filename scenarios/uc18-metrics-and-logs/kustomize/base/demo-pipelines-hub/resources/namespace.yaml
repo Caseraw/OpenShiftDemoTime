@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-pipelines
+  labels:
+    kubernetes.io/metadata.name: demo-pipelines
+  annotations:
+    openshift.io/description: "demo-pipelines"
+    openshift.io/display-name: "demo-pipelines"
