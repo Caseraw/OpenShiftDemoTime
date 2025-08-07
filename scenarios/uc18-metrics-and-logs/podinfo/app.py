@@ -93,87 +93,115 @@ def index():
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Podinfo Demo App 🚀</title>
+        <title>Podinfo Demo App</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
         <style>
             body {{
-                background: #f4f6fa;
+                background: linear-gradient(120deg, #e9f2fa 0%, #f7faff 100%);
+                min-height: 100vh;
             }}
-            .pod-header {{
-                background: linear-gradient(90deg,#0052cc,#00b8d9);
-                color: white;
-                padding: 24px 0 16px 0;
-                margin-bottom: 36px;
+            .main-title {{
+                font-size: 2.6em;
+                font-weight: 700;
+                letter-spacing: 1px;
+                margin: 38px 0 12px 0;
                 text-align: center;
-                box-shadow: 0 2px 8px #0052cc22;
+                color: #0a2a49;
+                background: linear-gradient(90deg, #0a2a49, #00b8d9 70%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
             }}
-            .metric-card {{
-                border-radius: 20px;
-                box-shadow: 0 2px 16px #0052cc18;
-                margin-bottom: 24px;
-                padding: 18px 28px 12px 28px;
-            }}
-            .footer {{
-                margin-top: 48px;
-                color: #999;
+            .subtitle {{
                 text-align: center;
-                font-size: 0.97em;
+                color: #0077b6;
+                margin-bottom: 38px;
+                font-size: 1.1em;
+                font-weight: 400;
+                letter-spacing: 0.4px;
+            }}
+            .section-card {{
+                background: #fff;
+                border-radius: 22px;
+                box-shadow: 0 2px 18px #0052cc0a;
+                padding: 34px 36px 16px 36px;
+                margin-bottom: 30px;
+                max-width: 520px;
+                margin-left: auto;
+                margin-right: auto;
             }}
             .section-title {{
-                font-size: 1.3em;
-                margin-bottom: 0.5em;
-                color: #0052cc;
+                font-size: 1.22em;
                 font-weight: 500;
+                color: #0069c0;
+                margin-bottom: 18px;
+                display: flex;
+                align-items: center;
+                gap: 0.7em;
+            }}
+            .metric-list {{
+                padding-left: 0;
+                list-style: none;
             }}
             .metric-list li {{
-                margin-bottom: 0.3em;
+                font-size: 1.09em;
+                margin-bottom: 0.7em;
+                color: #313d4d;
             }}
-            code {{
-                background: #eef;
-                border-radius: 4px;
-                padding: 1px 5px;
+            .metric-list code {{
                 font-size: 1em;
+                background: #eef6fc;
+                border-radius: 4px;
+                padding: 1px 7px;
+                color: #1565c0;
+            }}
+            .btn-metrics {{
+                background: linear-gradient(90deg,#0052cc,#00b8d9);
+                color: #fff;
+                font-weight: 500;
+                border-radius: 1.4em;
+                padding: 0.48em 1.9em;
+                border: none;
+                transition: 0.2s;
+                margin-top: 8px;
+                margin-bottom: 6px;
+            }}
+            .btn-metrics:hover {{
+                background: linear-gradient(90deg,#00b8d9,#0052cc);
+                color: #fff;
             }}
         </style>
     </head>
     <body>
-        <div class="pod-header">
-            <h1>Podinfo Demo App <span style='font-size:1.3em;'>🚀</span></h1>
-            <div>OpenShift &amp; Kubernetes Metrics and Logs Demo</div>
+        <div class="main-title">Podinfo Demo <span style='font-size:1.12em;'>🚀</span></div>
+        <div class="subtitle">OpenShift &amp; Kubernetes | Metrics &amp; Logs</div>
+        <div class="section-card">
+            <div class="section-title">🧩 Pod Information</div>
+            <ul class="metric-list">
+                <li><b>Pod Name:</b> <code>{pod_name}</code></li>
+                <li><b>Pod IP:</b> <code>{pod_ip}</code></li>
+                <li><b>Namespace:</b> <code>{namespace}</code></li>
+                <li><b>Service Account:</b> <code>{service_account}</code></li>
+                <li><b>Container Start Time:</b> <code>{start_time}</code></li>
+                <li><b>Service Account Token:</b> <code>{token_short}</code></li>
+            </ul>
         </div>
-        <div class="container">
-            <div class="metric-card bg-white">
-                <div class="section-title"><span>🧩 Pod Information</span></div>
-                <ul class="metric-list">
-                    <li><b>Pod Name:</b> <code>{pod_name}</code></li>
-                    <li><b>Pod IP:</b> <code>{pod_ip}</code></li>
-                    <li><b>Namespace:</b> <code>{namespace}</code></li>
-                    <li><b>Service Account:</b> <code>{service_account}</code></li>
-                    <li><b>Container Start Time:</b> <code>{start_time}</code></li>
-                    <li><b>Service Account Token:</b> <code>{token_short}</code></li>
-                </ul>
-            </div>
-            <div class="metric-card bg-light">
-                <div class="section-title"><span>💻 System Metrics</span></div>
-                <ul class="metric-list">
-                    <li><b>Memory Usage:</b> {mem_info.rss / (1024*1024):.2f} <span class="text-muted">MB</span></li>
-                    <li><b>CPU Usage:</b> {cpu_percent} <span class="text-muted">%</span></li>
-                    <li><b>Uptime:</b> {uptime}</li>
-                </ul>
-            </div>
-            <div class="metric-card bg-white">
-                <div class="section-title"><span>📊 Custom Metrics</span></div>
-                <ul class="metric-list">
-                    <li><b>Demo page requests:</b> {DEMO_REQUESTS._value.get()}</li>
-                    <li><b>Random metric:</b> {RANDOM_METRIC._value.get():.2f}</li>
-                    <li><b>Last request time:</b> {datetime.fromtimestamp(LAST_REQUEST_TS._value.get())}</li>
-                </ul>
-                <a class="btn btn-primary btn-sm mt-2" href="/metrics" target="_blank">Prometheus Metrics Endpoint</a>
-            </div>
+        <div class="section-card">
+            <div class="section-title">💻 System Metrics</div>
+            <ul class="metric-list">
+                <li><b>Memory Usage:</b> {mem_info.rss / (1024*1024):.2f} <span style="color:#91b4cc;">MB</span></li>
+                <li><b>CPU Usage:</b> {cpu_percent} <span style="color:#91b4cc;">%</span></li>
+                <li><b>Uptime:</b> {uptime}</li>
+            </ul>
         </div>
-        <div class="footer">
-            <hr>
-            Demo app by <b>Cas</b> &middot; Powered by <span style="color:#0052cc;">OpenShift</span> | <a href="https://github.com/Caseraw/OpenShiftDemoTime" target="_blank">GitHub</a>
+        <div class="section-card">
+            <div class="section-title">📊 Custom Metrics</div>
+            <ul class="metric-list">
+                <li><b>Demo page requests:</b> <code>{DEMO_REQUESTS._value.get()}</code></li>
+                <li><b>Random metric:</b> <code>{RANDOM_METRIC._value.get():.2f}</code></li>
+                <li><b>Last request time:</b> <code>{datetime.fromtimestamp(LAST_REQUEST_TS._value.get())}</code></li>
+            </ul>
+            <a class="btn btn-metrics" href="/metrics" target="_blank">View Prometheus Metrics</a>
         </div>
     </body>
     </html>
