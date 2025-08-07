@@ -1,0 +1,50 @@
+# mandatory cicd namespace policy
+# This policy ensures that the cicd namespace exists on all DC clusters.
+# It is applied to the openshift-gitops namespace and is intended to be used in
+# conjunction with the GitOps operator to manage the cicd namespace.
+# The policy is defined to be informative, meaning it will not block the deployment
+# of resources but will inform if the cicd namespace is missing.
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: cicd-ns
+  namespace: openshift-gitops
+  annotations:
+    policy.open-cluster-management.io/description: cicd-ns must exist on all DC clusters
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+spec:
+  disabled: false
+  remediationAction: inform
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-namespace
+        spec:
+          remediationAction: inform
+          severity: low
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                kind: Namespace
+                apiVersion: v1
+                metadata:
+                  name: cicd
+          pruneObjectBehavior: None
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: cicd-ns-placement
+  namespace: openshift-gitops
+placementRef:
+  name: dc-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: cicd-ns
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy

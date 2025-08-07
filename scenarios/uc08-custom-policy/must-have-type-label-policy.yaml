@@ -1,0 +1,25 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: type-labels-on-tenant-ns
+  namespace: cicd
+spec:
+  remediationAction: inform 
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: constraints.gatekeeper.sh/v1beta1
+        kind: K8sRequiredLabels
+        metadata:
+          name: ns-must-have-type-label
+          annotations:
+            policy.open-cluster-management.io/severity: low 
+        spec:
+          enforcementAction: dryrun
+          match:
+            kinds:
+              - apiGroups: [""]
+                kinds: ["Namespace"]
+            name: "team*"
+          parameters:
+            labels: ["type"]
