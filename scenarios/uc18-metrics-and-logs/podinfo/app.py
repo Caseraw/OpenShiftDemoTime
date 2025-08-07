@@ -89,121 +89,121 @@ def index():
     )
 
     return f"""
-    <!DOCTYPE html>
+    <!doctype html>
     <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Podinfo Demo App</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Podinfo Demo</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
         <style>
-            body {{
-                background: linear-gradient(120deg, #e9f2fa 0%, #f7faff 100%);
-                min-height: 100vh;
-            }}
-            .main-title {{
-                font-size: 2.6em;
-                font-weight: 700;
-                letter-spacing: 1px;
-                margin: 38px 0 12px 0;
-                text-align: center;
-                color: #0a2a49;
-                background: linear-gradient(90deg, #0a2a49, #00b8d9 70%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-            }}
-            .subtitle {{
-                text-align: center;
-                color: #0077b6;
-                margin-bottom: 38px;
-                font-size: 1.1em;
-                font-weight: 400;
-                letter-spacing: 0.4px;
-            }}
-            .section-card {{
-                background: #fff;
-                border-radius: 22px;
-                box-shadow: 0 2px 18px #0052cc0a;
-                padding: 34px 36px 16px 36px;
-                margin-bottom: 30px;
-                max-width: 520px;
-                margin-left: auto;
-                margin-right: auto;
-            }}
-            .section-title {{
-                font-size: 1.22em;
-                font-weight: 500;
-                color: #0069c0;
-                margin-bottom: 18px;
-                display: flex;
-                align-items: center;
-                gap: 0.7em;
-            }}
-            .metric-list {{
-                padding-left: 0;
-                list-style: none;
-            }}
-            .metric-list li {{
-                font-size: 1.09em;
-                margin-bottom: 0.7em;
-                color: #313d4d;
-            }}
-            .metric-list code {{
-                font-size: 1em;
-                background: #eef6fc;
-                border-radius: 4px;
-                padding: 1px 7px;
-                color: #1565c0;
-            }}
-            .btn-metrics {{
-                background: linear-gradient(90deg,#0052cc,#00b8d9);
-                color: #fff;
-                font-weight: 500;
-                border-radius: 1.4em;
-                padding: 0.48em 1.9em;
-                border: none;
-                transition: 0.2s;
-                margin-top: 8px;
-                margin-bottom: 6px;
-            }}
-            .btn-metrics:hover {{
-                background: linear-gradient(90deg,#00b8d9,#0052cc);
-                color: #fff;
-            }}
+          body {{
+            background: #f8fafc;
+          }}
+          .container {{
+            max-width: 900px;
+          }}
+          .top-bar {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 40px;
+            margin-bottom: 30px;
+          }}
+          .main-title {{
+            font-size: 2.2em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 0.25em;
+          }}
+          .subtitle {{
+            font-size: 1.1em;
+            color: #6c757d;
+            margin-bottom: 0.5em;
+            font-weight: 400;
+            letter-spacing: 0.4px;
+          }}
+          .metric-card {{
+            border-radius: 1.25rem;
+            box-shadow: 0 2px 12px #007bff0e;
+            margin-bottom: 2rem;
+            padding: 2.4rem 2.1rem 1.2rem 2.1rem;
+            border: 1px solid #e0e8ef;
+            background: #fff;
+          }}
+          .metric-card h4 {{
+            font-size: 1.19em;
+            margin-bottom: 1em;
+            font-weight: 500;
+            color: #2064bc;
+            letter-spacing: 0.04em;
+          }}
+          .metric-list {{
+            padding-left: 0;
+            list-style: none;
+          }}
+          .metric-list li {{
+            font-size: 1.06em;
+            margin-bottom: 0.68em;
+            color: #374151;
+          }}
+          .metric-list code {{
+            font-size: 1em;
+            background: #f4f8ff;
+            border-radius: 4px;
+            padding: 1px 7px;
+            color: #0052cc;
+          }}
         </style>
-    </head>
-    <body>
-        <div class="main-title">Podinfo Demo <span style='font-size:1.12em;'>🚀</span></div>
-        <div class="subtitle">OpenShift &amp; Kubernetes | Metrics &amp; Logs</div>
-        <div class="section-card">
-            <div class="section-title">🧩 Pod Information</div>
-            <ul class="metric-list">
-                <li><b>Pod Name:</b> <code>{pod_name}</code></li>
-                <li><b>Pod IP:</b> <code>{pod_ip}</code></li>
-                <li><b>Namespace:</b> <code>{namespace}</code></li>
-                <li><b>Service Account:</b> <code>{service_account}</code></li>
-                <li><b>Container Start Time:</b> <code>{start_time}</code></li>
-                <li><b>Service Account Token:</b> <code>{token_short}</code></li>
-            </ul>
+      </head>
+      <body>
+        <div class="container py-3">
+          <div class="top-bar">
+            <div>
+              <div class="main-title">Podinfo Demo <span style='font-size:1.05em;'>🚀</span></div>
+              <div class="subtitle">OpenShift &amp; Kubernetes · Metrics &amp; Logs</div>
+            </div>
+            <div>
+              <a href="/metrics" target="_blank" class="btn btn-outline-primary btn-sm fw-semibold">Prometheus Metrics</a>
+            </div>
+          </div>
+          <div class="row g-4">
+            <div class="col-md-4">
+              <div class="metric-card h-100">
+                <h4>🧩 Pod Information</h4>
+                <ul class="metric-list">
+                  <li><b>Pod Name:</b> <code>{pod_name}</code></li>
+                  <li><b>Pod IP:</b> <code>{pod_ip}</code></li>
+                  <li><b>Namespace:</b> <code>{namespace}</code></li>
+                  <li><b>Service Account:</b> <code>{service_account}</code></li>
+                  <li><b>Container Start Time:</b> <code>{start_time}</code></li>
+                  <li><b>SA Token:</b> <code>{token_short}</code></li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="metric-card h-100">
+                <h4>💻 System Metrics</h4>
+                <ul class="metric-list">
+                  <li><b>Memory Usage:</b> {mem_info.rss / (1024*1024):.2f} <span style="color:#9db2c8;">MB</span></li>
+                  <li><b>CPU Usage:</b> {cpu_percent} <span style="color:#9db2c8;">%</span></li>
+                  <li><b>Uptime:</b> {uptime}</li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="metric-card h-100">
+                <h4>📊 Custom Metrics</h4>
+                <ul class="metric-list">
+                  <li><b>Demo page requests:</b> <code>{DEMO_REQUESTS._value.get()}</code></li>
+                  <li><b>Random metric:</b> <code>{RANDOM_METRIC._value.get():.2f}</code></li>
+                  <li><b>Last request:</b> <code>{datetime.fromtimestamp(LAST_REQUEST_TS._value.get())}</code></li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="section-card">
-            <div class="section-title">💻 System Metrics</div>
-            <ul class="metric-list">
-                <li><b>Memory Usage:</b> {mem_info.rss / (1024*1024):.2f} <span style="color:#91b4cc;">MB</span></li>
-                <li><b>CPU Usage:</b> {cpu_percent} <span style="color:#91b4cc;">%</span></li>
-                <li><b>Uptime:</b> {uptime}</li>
-            </ul>
-        </div>
-        <div class="section-card">
-            <div class="section-title">📊 Custom Metrics</div>
-            <ul class="metric-list">
-                <li><b>Demo page requests:</b> <code>{DEMO_REQUESTS._value.get()}</code></li>
-                <li><b>Random metric:</b> <code>{RANDOM_METRIC._value.get():.2f}</code></li>
-                <li><b>Last request time:</b> <code>{datetime.fromtimestamp(LAST_REQUEST_TS._value.get())}</code></li>
-            </ul>
-            <a class="btn btn-metrics" href="/metrics" target="_blank">View Prometheus Metrics</a>
-        </div>
-    </body>
+      </body>
     </html>
     """
 
