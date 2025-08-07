@@ -22,7 +22,7 @@ spec:
       sources:
         - repositoryType: git
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: HEAD
+          targetRevision: main
           path: scenarios/uc17-cluster-autoscaler/kustomize/base/demo-pipelines-hub
       destination:
         namespace: demo-pipelines
