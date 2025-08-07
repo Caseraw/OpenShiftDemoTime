@@ -1,0 +1,3 @@
+Flask==3.0.3
+psutil==5.9.8
+prometheus_client==0.20.0
