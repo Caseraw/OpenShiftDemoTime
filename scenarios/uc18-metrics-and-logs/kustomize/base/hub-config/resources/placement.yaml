@@ -78,3 +78,11 @@ spec:
       operator: Exists
   clusterSets:
     - default
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: environment
+              operator: In
+              values:
+                - dev
