@@ -11,7 +11,7 @@ spec:
     type: Git
     git:
       uri: "https://github.com/Caseraw/OpenShiftDemoTime.git"
-      ref: "UC22-cluster-upgrade"
+      ref: main
     contextDir: scenarios/uc22-cluster-upgrade/frontend-pod-spot
   strategy:
     type: Source
