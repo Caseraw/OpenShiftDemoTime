@@ -91,3 +91,34 @@ spec:
             sourceNamespace: openshift-marketplace
           upgradeApproval: Automatic
           versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-loki
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install Loki Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-loki
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: loki-operator
+            namespace: openshift-operators-redhat
+            channel: stable-6.3
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:

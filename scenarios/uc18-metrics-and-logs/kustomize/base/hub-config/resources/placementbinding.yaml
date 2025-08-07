@@ -40,3 +40,17 @@ subjects:
   - name: install-ocp-logging
     apiGroup: policy.open-cluster-management.io
     kind: Policy
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: install-loki-placement
+  namespace: spoke-config
+placementRef:
+  name: install-loki-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: install-loki
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
