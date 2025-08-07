@@ -30,7 +30,7 @@ spec:
       sources:
         - path: scenarios/uc17-cluster-autoscaler/kustomize/base/cluster-config
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: UC17-cluster-autoscaler
+          targetRevision: HEAD
           repositoryType: git
       syncPolicy:
         automated:
