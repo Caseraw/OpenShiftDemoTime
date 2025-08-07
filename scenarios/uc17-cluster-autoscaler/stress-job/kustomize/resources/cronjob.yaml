@@ -1,0 +1,28 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: stress-job-cronjob
+spec:
+  schedule: "0 0 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      completions: 20
+      parallelism: 20
+      backoffLimit: 3
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: stress
+            image: image-registry.openshift-image-registry.svc:5000/stress-job/stress-job:1.0
+            imagePullPolicy: Always
+            resources:
+              requests:
+                cpu: "2"
+                memory: "6Gi"
+              limits:
+                cpu: "2"
+                memory: "6Gi"

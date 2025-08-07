@@ -1,0 +1,36 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: demo-pipelines-hub
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: demo-pipelines-hub-placement
+        requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: demo-pipelines-hub-{{name}}
+      labels:
+        velero.io/exclude-from-backup: "true"
+    spec:
+      project: default
+      sources:
+        - repositoryType: git
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: main
+          path: scenarios/uc17-cluster-autoscaler/kustomize/base/demo-pipelines-hub
+      destination:
+        namespace: demo-pipelines
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true

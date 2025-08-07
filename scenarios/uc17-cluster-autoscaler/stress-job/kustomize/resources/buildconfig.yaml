@@ -1,0 +1,21 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: stress-job
+spec:
+  triggers:
+    - type: ConfigChange
+  source:
+    type: Git
+    git:
+      uri: "https://github.com/Caseraw/OpenShiftDemoTime.git"
+      ref: main
+    contextDir: scenarios/uc17-cluster-autoscaler/stress-job
+  strategy:
+    type: Docker
+    dockerStrategy: {}
+  output:
+    to:
+      kind: ImageStreamTag
+      name: stress-job:1.0
