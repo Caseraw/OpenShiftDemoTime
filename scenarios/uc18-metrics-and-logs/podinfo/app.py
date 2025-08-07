@@ -101,106 +101,96 @@ def index():
             background: #f8fafc;
           }}
           .container {{
-            max-width: 900px;
-          }}
-          .top-bar {{
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 40px;
-            margin-bottom: 30px;
+            max-width: 700px;
           }}
           .main-title {{
             font-size: 2.2em;
             font-weight: 700;
             letter-spacing: 1px;
-            margin-bottom: 0.25em;
+            margin-top: 48px;
+            margin-bottom: 0.19em;
+            text-align: left;
+            color: #0a2a49;
           }}
           .subtitle {{
-            font-size: 1.1em;
+            font-size: 1.04em;
             color: #6c757d;
-            margin-bottom: 0.5em;
+            margin-bottom: 2.1em;
             font-weight: 400;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.2px;
+            text-align: left;
           }}
-          .metric-card {{
-            border-radius: 1.25rem;
-            box-shadow: 0 2px 12px #007bff0e;
-            margin-bottom: 2rem;
-            padding: 2.4rem 2.1rem 1.2rem 2.1rem;
+          .card-demo {{
+            border-radius: 1.3rem;
+            box-shadow: 0 2px 14px #007bff12;
+            padding: 1.4rem 2.2rem 1.8rem 2.2rem;
             border: 1px solid #e0e8ef;
             background: #fff;
           }}
-          .metric-card h4 {{
-            font-size: 1.19em;
-            margin-bottom: 1em;
+          .table-demo {{
+            font-size: 1.07em;
+            background: #fff;
+            border-radius: 0.5em;
+            overflow: hidden;
+          }}
+          .table-demo th {{
+            background: #f2f7fa;
             font-weight: 500;
-            color: #2064bc;
-            letter-spacing: 0.04em;
+            color: #1c4366;
+            border: none;
           }}
-          .metric-list {{
-            padding-left: 0;
-            list-style: none;
+          .table-demo td {{
+            vertical-align: middle;
+            border: none;
+            color: #344356;
+            word-break: break-all;
           }}
-          .metric-list li {{
-            font-size: 1.06em;
-            margin-bottom: 0.68em;
-            color: #374151;
+          .table-demo tr:not(:last-child) td {{
+            border-bottom: 1px solid #f0f1f3;
           }}
-          .metric-list code {{
-            font-size: 1em;
-            background: #f4f8ff;
-            border-radius: 4px;
-            padding: 1px 7px;
-            color: #0052cc;
+          @media (max-width: 600px) {{
+            .main-title, .subtitle {{
+              text-align: center;
+            }}
+            .card-demo {{
+              padding: 1.2rem 0.4rem;
+            }}
           }}
         </style>
       </head>
       <body>
         <div class="container py-3">
-          <div class="top-bar">
+          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <div>
               <div class="main-title">Podinfo Demo <span style='font-size:1.05em;'>🚀</span></div>
-              <div class="subtitle">OpenShift &amp; Kubernetes · Metrics &amp; Logs</div>
+              <div class="subtitle">Example application that displays some information, exposes metrics and generates logs entries.</div>
             </div>
             <div>
               <a href="/metrics" target="_blank" class="btn btn-outline-primary btn-sm fw-semibold">Prometheus Metrics</a>
             </div>
           </div>
-          <div class="row g-4">
-            <div class="col-md-4">
-              <div class="metric-card h-100">
-                <h4>🧩 Pod Information</h4>
-                <ul class="metric-list">
-                  <li><b>Pod Name:</b> <code>{pod_name}</code></li>
-                  <li><b>Pod IP:</b> <code>{pod_ip}</code></li>
-                  <li><b>Namespace:</b> <code>{namespace}</code></li>
-                  <li><b>Service Account:</b> <code>{service_account}</code></li>
-                  <li><b>Container Start Time:</b> <code>{start_time}</code></li>
-                  <li><b>SA Token:</b> <code>{token_short}</code></li>
-                </ul>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="metric-card h-100">
-                <h4>💻 System Metrics</h4>
-                <ul class="metric-list">
-                  <li><b>Memory Usage:</b> {mem_info.rss / (1024*1024):.2f} <span style="color:#9db2c8;">MB</span></li>
-                  <li><b>CPU Usage:</b> {cpu_percent} <span style="color:#9db2c8;">%</span></li>
-                  <li><b>Uptime:</b> {uptime}</li>
-                </ul>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="metric-card h-100">
-                <h4>📊 Custom Metrics</h4>
-                <ul class="metric-list">
-                  <li><b>Demo page requests:</b> <code>{DEMO_REQUESTS._value.get()}</code></li>
-                  <li><b>Random metric:</b> <code>{RANDOM_METRIC._value.get():.2f}</code></li>
-                  <li><b>Last request:</b> <code>{datetime.fromtimestamp(LAST_REQUEST_TS._value.get())}</code></li>
-                </ul>
-              </div>
-            </div>
+          <div class="card-demo">
+            <table class="table table-demo mb-0">
+              <thead>
+                <tr>
+                  <th colspan="2" class="text-center fs-5"><span style="font-size:1.1em;">🧩</span> Pod &amp; Metrics Information</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><b>Pod Name</b></td><td><code>{pod_name}</code></td></tr>
+                <tr><td><b>Pod IP</b></td><td><code>{pod_ip}</code></td></tr>
+                <tr><td><b>Namespace</b></td><td><code>{namespace}</code></td></tr>
+                <tr><td><b>Service Account</b></td><td><code>{service_account}</code></td></tr>
+                <tr><td><b>Container Start Time</b></td><td><code>{start_time}</code></td></tr>
+                <tr><td><b>Service Account Token</b></td><td><code>{token_short}</code></td></tr>
+                <tr><td><b>Memory Usage</b></td><td>{mem_info.rss / (1024*1024):.2f} <span class="text-secondary">MB</span></td></tr>
+                <tr><td><b>CPU Usage</b></td><td>{cpu_percent} <span class="text-secondary">%</span></td></tr>
+                <tr><td><b>Uptime</b></td><td>{uptime}</td></tr>
+                <tr><td><b>Demo Page Requests</b></td><td><code>{DEMO_REQUESTS._value.get()}</code></td></tr>
+                <tr><td><b>Random Metric</b></td><td><code>{RANDOM_METRIC._value.get():.2f}</code></td></tr>
+                <tr><td><b>Last Request Time</b></td><td><code>{datetime.fromtimestamp(LAST_REQUEST_TS._value.get())}</code></td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </body>
