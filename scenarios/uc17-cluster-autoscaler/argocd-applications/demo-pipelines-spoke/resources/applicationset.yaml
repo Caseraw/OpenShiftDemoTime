@@ -1,0 +1,41 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: demo-pipelines-spoke
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: demo-pipelines-spoke-placement
+        requeueAfterSeconds: 10
+  template:
+    metadata:
+      name: demo-pipelines-spoke-{{name}}
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+        velero.io/exclude-from-backup: "true"
+    spec:
+      destination:
+        namespace: demo-pipelines
+        server: "{{server}}"
+      project: default
+      sources:
+        - path: scenarios/uc17-cluster-autoscaler/kustomize/base/demo-pipelines-spoke
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: UC17-cluster-autoscaler
+          repositoryType: git
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
