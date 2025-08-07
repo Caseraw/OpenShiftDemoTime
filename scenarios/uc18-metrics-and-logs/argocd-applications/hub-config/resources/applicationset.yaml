@@ -1,0 +1,36 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: hub-config
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: hub-config-placement
+        requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: hub-config-{{name}}
+      labels:
+        velero.io/exclude-from-backup: "true"
+    spec:
+      destination:
+        namespace: spoke-config
+        server: "{{server}}"
+      project: default
+      sources:
+        - path: scenarios/uc18-metrics-and-logs/kustomize/base/hub-config
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: UC18-metrics-and-logs
+          repositoryType: git
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true

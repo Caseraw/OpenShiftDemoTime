@@ -1,0 +1,10 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - resources/namespace.yaml
+  - resources/managedclusterbinding.yaml
+  - resources/placement.yaml
+  - resources/placementbinding.yaml
+  - resources/policy.yaml

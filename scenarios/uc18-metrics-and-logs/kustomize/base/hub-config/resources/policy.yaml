@@ -1,0 +1,93 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-gitops
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install GitOps Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-gitops
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: openshift-gitops-operator
+            namespace: openshift-gitops-operator
+            channel: latest
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-pipelines
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install OpenShift Pipelines Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-pipelines
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: openshift-pipelines-operator-rh
+            namespace: openshift-operators
+            channel: latest
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-logging
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Installe the OpenShift Logging Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-logging
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: cluster-logging
+            namespace: openshift-logging
+            channel: stable-6.3
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
