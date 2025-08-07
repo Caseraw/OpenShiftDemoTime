@@ -104,21 +104,13 @@ def index():
             max-width: 700px;
           }}
           .main-title {{
-            font-size: 2.2em;
+            font-size: 2.4em;
             font-weight: 700;
             letter-spacing: 1px;
             margin-top: 48px;
-            margin-bottom: 0.19em;
-            text-align: left;
+            margin-bottom: 38px;
+            text-align: center;
             color: #0a2a49;
-          }}
-          .subtitle {{
-            font-size: 1.04em;
-            color: #6c757d;
-            margin-bottom: 2.1em;
-            font-weight: 400;
-            letter-spacing: 0.2px;
-            text-align: left;
           }}
           .card-demo {{
             border-radius: 1.3rem;
@@ -148,9 +140,13 @@ def index():
           .table-demo tr:not(:last-child) td {{
             border-bottom: 1px solid #f0f1f3;
           }}
+          .footer-link {{
+            margin-top: 38px;
+            text-align: center;
+          }}
           @media (max-width: 600px) {{
-            .main-title, .subtitle {{
-              text-align: center;
+            .main-title {{
+              font-size: 2em;
             }}
             .card-demo {{
               padding: 1.2rem 0.4rem;
@@ -160,15 +156,7 @@ def index():
       </head>
       <body>
         <div class="container py-3">
-          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-            <div>
-              <div class="main-title">Podinfo Demo <span style='font-size:1.05em;'>🚀</span></div>
-              <div class="subtitle">Example application that displays some information, exposes metrics and generates logs entries.</div>
-            </div>
-            <div>
-              <a href="/metrics" target="_blank" class="btn btn-outline-primary btn-sm fw-semibold">Prometheus Metrics</a>
-            </div>
-          </div>
+          <div class="main-title">Podinfo Demo <span style='font-size:1.05em;'>🚀</span></div>
           <div class="card-demo">
             <table class="table table-demo mb-0">
               <thead>
@@ -191,6 +179,11 @@ def index():
                 <tr><td><b>Last Request Time</b></td><td><code>{datetime.fromtimestamp(LAST_REQUEST_TS._value.get())}</code></td></tr>
               </tbody>
             </table>
+          </div>
+          <div class="footer-link">
+            <a href="/metrics" target="_blank" class="btn btn-outline-primary btn-sm fw-semibold mt-3">
+              Prometheus Metrics
+            </a>
           </div>
         </div>
       </body>
