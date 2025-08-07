@@ -11,7 +11,7 @@ spec:
     - requiredClusterSelector:
         labelSelector:
           matchExpressions:
-            - key: environment
+            - key: local-cluster
               operator: In
               values:
-                - dev
+                - "true"
