@@ -41,7 +41,7 @@ When the Hub Cluster is setup you need to initialize the demo parts on it. Run
 this script (with an active `oc` login session with the Hub Cluster).
 
 ```shell
-$ ./scenarios/uc18-metrics-and-logs/demo-initialize-hub.sh
+$ ./scenarios/uc18-metrics-and-logs/bootstrap-hub-cluster.sh
 ```
 
 ### AWS - Spoke Cluster
