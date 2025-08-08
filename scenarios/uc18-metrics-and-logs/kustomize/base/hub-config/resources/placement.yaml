@@ -3,7 +3,7 @@ apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
   name: spoke-clusters-placement
-  namespace: openshift-gitops
+  namespace: spoke-config
 spec:
   tolerations:
     - key: cluster.open-cluster-management.io/unreachable
