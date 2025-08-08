@@ -4,6 +4,7 @@ kind: Kustomization
 
 resources:
   - resources/namespace.yaml
+  - resources/clusterrolebinding.yaml
   - resources/managedclusterbinding.yaml
   - resources/placement.yaml
   - resources/placementbinding.yaml

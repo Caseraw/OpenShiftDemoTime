@@ -18,19 +18,19 @@ spec:
       labels:
         velero.io/exclude-from-backup: "true"
     spec:
+      project: default
+      sources:
+        - repositoryType: git
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: UC18-metrics-and-logs
+          path: scenarios/uc18-metrics-and-logs/kustomize/base/hub-config
       destination:
         namespace: spoke-config
         server: "{{server}}"
-      project: default
-      sources:
-        - path: scenarios/uc18-metrics-and-logs/kustomize/base/hub-config
-          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: UC18-metrics-and-logs
-          repositoryType: git
       syncPolicy:
         automated:
-          prune: true
           selfHeal: true
+          prune: true
         syncOptions:
           - CreateNamespace=true
           - PruneLast=true
