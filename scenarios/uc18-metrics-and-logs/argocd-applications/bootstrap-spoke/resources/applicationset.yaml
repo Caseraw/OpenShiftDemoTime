@@ -65,11 +65,11 @@ spec:
         velero.io/exclude-from-backup: "true"
     spec:
       destination:
-        namespace: cluster-config
+        namespace: spoke-config
         server: "{{server}}"
       project: default
       sources:
-        - path: scenarios/uc18-metrics-and-logs/kustomize/base/cluster-config
+        - path: scenarios/assets/kustomize/base/openshift-logging
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
           targetRevision: UC18-metrics-and-logs
           repositoryType: git
