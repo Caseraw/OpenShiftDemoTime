@@ -69,7 +69,7 @@ spec:
         server: "{{server}}"
       project: default
       sources:
-        - path: scenarios/assets/kustomize/base/openshift-logging
+        - path: assets/kustomize/base/openshift-logging
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
           targetRevision: UC18-metrics-and-logs
           repositoryType: git
