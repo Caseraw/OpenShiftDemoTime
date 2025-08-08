@@ -41,7 +41,7 @@ When the Hub Cluster is setup you need to initialize the demo parts on it. Run
 this script (with an active `oc` login session with the Hub Cluster).
 
 ```shell
-$ ./scenarios/uc18-cluster-autoscaler/demo-initialize-hub.sh
+$ ./scenarios/uc18-metrics-and-logs/demo-initialize-hub.sh
 ```
 
 ### AWS - Spoke Cluster
@@ -57,7 +57,18 @@ Optionally deploy this resource to automatically kick of a `PipelineRun`.
 
 ```yaml
 ---
-
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: deploy-aws-cluster
+  namespace: demo-pipelines
+spec:
+  pipelineRef:
+    name: deploy-aws-cluster
+  taskRunTemplate:
+    serviceAccountName: pipeline
+  timeouts:
+    pipeline: 1h0m0s
 ```
 
 #### Configure the AWS Spoke Cluster
@@ -68,7 +79,7 @@ login with the `oc` CLI command before running the below command.
 Run:
 
 ```shell
-$ ./scenarios/uc17-cluster-autoscaler/bootstrap-spoke-cluster.sh
+$ ./scenarios/uc18-metrics-and-logs/bootstrap-spoke-cluster.sh
 ```
 
 ## Demo storyline

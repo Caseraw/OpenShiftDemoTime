@@ -23,18 +23,26 @@ show_msg "show-date" "INFO" "Script" "$SCRIPT"
 source "$SCRIPT"
 show_msg "show-date" "INFO" "Bootstrap - Login to OpenShift" "Completed" "✅"
 
-# 1) Setup the OpenShift GitOps Operator
-SCRIPT="$COMPONENTS_BASE/openshift-gitops/setup.sh"
+# # 1) Setup the OpenShift GitOps Operator
+# SCRIPT="$COMPONENTS_BASE/openshift-gitops/setup.sh"
 
-show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "⏳"
+# show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "⏳"
+# show_msg "show-date" "INFO" "Script" "$SCRIPT"
+# source "$SCRIPT"
+# show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "Completed" "✅"
+
+# # 2) Setup the OpenShift Pipelines Operator
+# SCRIPT="$COMPONENTS_BASE/openshift-pipelines/setup.sh"
+
+# show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Pipelines Operator" "⏳"
+# show_msg "show-date" "INFO" "Script" "$SCRIPT"
+# source "$SCRIPT"
+# show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Pipelines Operator" "Completed" "✅"
+
+# 1) Setup S3 for Loki
+SCRIPT="$COMPONENTS_BASE/openshift-logging-loki/create-s3-and-secret-for-loki.sh"
+
+show_msg "show-date" "INFO" "Bootstrap - Setup S3 for Loki" "⏳"
 show_msg "show-date" "INFO" "Script" "$SCRIPT"
 source "$SCRIPT"
-show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "Completed" "✅"
-
-# 2) Setup the OpenShift Pipelines Operator
-SCRIPT="$COMPONENTS_BASE/openshift-pipelines/setup.sh"
-
-show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Pipelines Operator" "⏳"
-show_msg "show-date" "INFO" "Script" "$SCRIPT"
-source "$SCRIPT"
-show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Pipelines Operator" "Completed" "✅"
+show_msg "show-date" "INFO" "Bootstrap - Setup S3 for Loki" "Completed" "✅"

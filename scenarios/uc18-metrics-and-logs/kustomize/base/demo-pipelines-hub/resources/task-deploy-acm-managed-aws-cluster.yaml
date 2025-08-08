@@ -82,7 +82,7 @@ spec:
                 iops: 4000
                 size: 300
                 type: io1
-              type: m5.xlarge
+              type: m5.4xlarge
         compute:
         - hyperthreading: Enabled
           architecture: amd64
@@ -94,7 +94,7 @@ spec:
                 iops: 2000
                 size: 100
                 type: io1
-              type: m5.xlarge
+              type: m5.4xlarge
         networking:
           networkType: OVNKubernetes
           clusterNetwork:
@@ -201,7 +201,7 @@ spec:
                 iops: 2000
                 size: 100
                 type: io1
-              type: m5.xlarge
+              type: m5.4xlarge
           replicas: 3
         ---
         apiVersion: v1
