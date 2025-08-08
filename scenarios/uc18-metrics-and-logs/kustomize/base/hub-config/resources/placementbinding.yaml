@@ -2,55 +2,22 @@
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
-  name: install-ocp-gitops-placement
+  name: spoke-clusters-placement
   namespace: spoke-config
 placementRef:
-  name: install-ocp-gitops-placement
+  name: spoke-clusters-placement
   apiGroup: cluster.open-cluster-management.io
   kind: Placement
 subjects:
   - name: install-ocp-gitops
     apiGroup: policy.open-cluster-management.io
     kind: Policy
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  name: install-ocp-pipelines-placement
-  namespace: spoke-config
-placementRef:
-  name: install-ocp-pipelines-placement
-  apiGroup: cluster.open-cluster-management.io
-  kind: Placement
-subjects:
   - name: install-ocp-pipelines
     apiGroup: policy.open-cluster-management.io
     kind: Policy
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  name: install-ocp-logging-placement
-  namespace: spoke-config
-placementRef:
-  name: install-ocp-logging-placement
-  apiGroup: cluster.open-cluster-management.io
-  kind: Placement
-subjects:
   - name: install-ocp-logging
     apiGroup: policy.open-cluster-management.io
     kind: Policy
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  name: install-loki-placement
-  namespace: spoke-config
-placementRef:
-  name: install-loki-placement
-  apiGroup: cluster.open-cluster-management.io
-  kind: Placement
-subjects:
   - name: install-loki
     apiGroup: policy.open-cluster-management.io
     kind: Policy

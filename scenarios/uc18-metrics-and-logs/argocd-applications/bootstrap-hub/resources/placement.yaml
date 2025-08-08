@@ -2,7 +2,7 @@
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: podinfo-placement
+  name: hub-cluster-placement
   namespace: openshift-gitops
 spec:
   clusterSets:
@@ -11,7 +11,7 @@ spec:
     - requiredClusterSelector:
         labelSelector:
           matchExpressions:
-            - key: environment
+            - key: local-cluster
               operator: In
               values:
-                - dev
+                - "true"
