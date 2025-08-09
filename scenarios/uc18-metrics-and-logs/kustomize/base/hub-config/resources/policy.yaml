@@ -158,7 +158,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
   name: openshift-monitoring-enableuserworkload
-  namespace: acm-policies
+  namespace: spoke-config
 spec:
   remediationAction: enforce
   disabled: false
