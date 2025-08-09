@@ -1,0 +1,164 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: spoke-cluster-config
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: spoke-clusters-placement
+        requeueAfterSeconds: 10
+  template:
+    metadata:
+      name: spoke-cluster-config-{{name}}
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+        velero.io/exclude-from-backup: "true"
+    spec:
+      destination:
+        namespace: spoke-config
+        server: "{{server}}"
+      project: default
+      sources:
+        - path: scenarios/uc18-metrics-and-logs/kustomize/base/spoke-config
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: UC18-metrics-and-logs
+          repositoryType: git
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: openshift-logging-config
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: spoke-clusters-placement
+        requeueAfterSeconds: 10
+  template:
+    metadata:
+      name: openshift-logging-config-{{name}}
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+        velero.io/exclude-from-backup: "true"
+    spec:
+      destination:
+        namespace: spoke-config
+        server: "{{server}}"
+      project: default
+      sources:
+        - path: assets/kustomize/base/openshift-logging-loki
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: UC18-metrics-and-logs
+          repositoryType: git
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: openshift-logging-coo-config
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: spoke-clusters-placement
+        requeueAfterSeconds: 10
+  template:
+    metadata:
+      name: openshift-logging-coo-config-{{name}}
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+        velero.io/exclude-from-backup: "true"
+    spec:
+      destination:
+        namespace: spoke-config
+        server: "{{server}}"
+      project: default
+      sources:
+        - path: assets/kustomize/base/openshift-logging-coo
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: UC18-metrics-and-logs
+          repositoryType: git
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: podinfo
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: spoke-clusters-placement
+        requeueAfterSeconds: 10
+  template:
+    metadata:
+      name: podinfo-{{name}}
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+        velero.io/exclude-from-backup: "true"
+    spec:
+      destination:
+        namespace: podinfo
+        server: "{{server}}"
+      project: default
+      sources:
+        - path: scenarios/uc18-metrics-and-logs/podinfo/kustomize
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: UC18-metrics-and-logs
+          repositoryType: git
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true

@@ -1,0 +1,299 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-gitops
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install GitOps Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-gitops
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: openshift-gitops-operator
+            namespace: openshift-gitops-operator
+            channel: latest
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-pipelines
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install OpenShift Pipelines Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-pipelines
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: openshift-pipelines-operator-rh
+            namespace: openshift-operators
+            channel: latest
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-logging
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Installe the OpenShift Logging Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-logging
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: cluster-logging
+            namespace: openshift-logging
+            channel: stable-6.3
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-loki
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install Loki Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-loki
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: loki-operator
+            namespace: openshift-operators-redhat
+            channel: stable-6.3
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-coo
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install the Cluster Observability Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-coo
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: cluster-observability-operator
+            namespace: openshift-cluster-observability-operator
+            channel: stable
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: openshift-monitoring-enableuserworkload
+  namespace: spoke-config
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: openshift-monitoring-enableuserworkload
+        spec:
+          remediationAction: enforce
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: ServiceAccount
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+                rules:
+                  - apiGroups: [""]
+                    resources: ["configmaps"]
+                    verbs: ["get","list","create","update","patch"]
+
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: RoleBinding
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+                subjects:
+                  - kind: ServiceAccount
+                    name: openshift-monitoring-enableuserworkload
+                    namespace: openshift-monitoring
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: Role
+                  name: openshift-monitoring-enableuserworkload
+
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: batch/v1
+                kind: Job
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+                  labels:
+                    patcher: "true"
+                  annotations:
+                    policy.open-cluster-management.io/created-by: "openshift-monitoring-enableuserworkload"
+                spec:
+                  backoffLimit: 0
+                  activeDeadlineSeconds: 120
+                  template:
+                    spec:
+                      serviceAccountName: openshift-monitoring-enableuserworkload
+                      restartPolicy: Never
+                      containers:
+                        - name: patch
+                          image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+                          command: ["/bin/bash","-ceu","--"]
+                          args:
+                            - |
+                              set -euo pipefail
+                              NS=openshift-monitoring
+                              TARGET_CM=cluster-monitoring-config
+                              KEY="config.yaml"
+                              FLAG_CM=openshift-monitoring-enableuserworkload-flag
+                              NOW="$(date -u +%FT%TZ)"
+
+                              CUR="$(oc -n "$NS" get cm "$TARGET_CM" -o jsonpath='{.data.config\.yaml}' 2>/dev/null || true || :)"
+                              CUR="$(printf "%s" "${CUR:-}" | tr -d '\r')"
+
+                              is_config_ok() {
+                                printf "%s\n" "${CUR:-}" | grep -Eq '^[[:space:]]*enableUserWorkload[[:space:]]*:[[:space:]]*true([[:space:]]*($|#))'
+                              }
+
+                              if is_config_ok; then
+                                echo "Config already set (enableUserWorkload: true). No changes."
+                                oc -n "$NS" create cm "$FLAG_CM" \
+                                  --from-literal=last_ok="$NOW" >/dev/null 2>&1 || \
+                                oc -n "$NS" patch cm "$FLAG_CM" --type=merge -p "{\"data\":{\"last_ok\":\"$NOW\"}}" >/dev/null 2>&1 || true
+                                exit 0
+                              fi
+
+                              echo "Config not set. Updating..."
+                              if [ -z "${CUR:-}" ]; then
+                                NEW_CONTENT="enableUserWorkload: true"$'\n'
+                              else
+                                if printf "%s\n" "$CUR" | grep -qE '^[[:space:]]*enableUserWorkload[[:space:]]*:'; then
+                                  NEW_CONTENT="$(printf "%s\n" "$CUR" \
+                                    | awk 'BEGIN{done=0}
+                                           /^[[:space:]]*enableUserWorkload[[:space:]]*:/ && done==0 { print "enableUserWorkload: true"; done=1; next }
+                                           { print }')"
+                                else
+                                  if [ -n "$CUR" ] && [ "$(printf "%s" "$CUR" | tail -c1 || true | wc -c)" -ne 0 ]; then
+                                    CUR="$CUR"$'\n'
+                                  fi
+                                  NEW_CONTENT="${CUR}enableUserWorkload: true"$'\n'
+                                fi
+                              fi
+
+                              if [ "${NEW_CONTENT:-}" = "${CUR:-}" ]; then
+                                echo "No difference after merge; exiting."
+                                exit 0
+                              fi
+
+                              TMP="$(mktemp)"
+                              {
+                                cat <<'EOF'
+                              apiVersion: v1
+                              kind: ConfigMap
+                              metadata:
+                                name: cluster-monitoring-config
+                                namespace: openshift-monitoring
+                              data:
+                                config.yaml: |
+                              EOF
+                                # IMPORTANT: indent the payload by **four** spaces so it belongs to the block scalar
+                                printf "%s" "$NEW_CONTENT" | sed 's/^/    /'
+                                echo
+                              } > "$TMP"
+
+                              echo "Applying updated ConfigMap..."
+                              oc apply -f "$TMP"
+
+                              oc -n "$NS" create cm "$FLAG_CM" \
+                                --from-literal=last_update="$NOW" >/dev/null 2>&1 || \
+                              oc -n "$NS" patch cm "$FLAG_CM" --type=merge -p "{\"data\":{\"last_update\":\"$NOW\"}}" >/dev/null 2>&1 || true

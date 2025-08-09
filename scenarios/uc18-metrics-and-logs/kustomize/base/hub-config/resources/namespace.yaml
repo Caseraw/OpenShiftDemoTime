@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: spoke-config
+  labels:
+    kubernetes.io/metadata.name: spoke-config
+  annotations:
+    openshift.io/description: spoke-config
+    openshift.io/display-name: spoke-config

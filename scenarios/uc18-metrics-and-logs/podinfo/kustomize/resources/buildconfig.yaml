@@ -1,0 +1,32 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: podinfo
+spec:
+  triggers:
+    - type: ConfigChange
+  source:
+    type: Git
+    git:
+      uri: "https://github.com/Caseraw/OpenShiftDemoTime.git"
+      ref: UC18-metrics-and-logs
+    contextDir: scenarios/uc18-metrics-and-logs/podinfo
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: python:3.12-ubi9
+        namespace: openshift
+  output:
+    to:
+      kind: ImageStreamTag
+      name: podinfo:1.0
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
