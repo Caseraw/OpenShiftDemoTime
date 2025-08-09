@@ -20,6 +20,6 @@
 - Go to Observe => Logs on the left hand side and explore the default landing page.
 - Perform a demo query.
     - Filter on pod logs with a certain uptime.
-        - `{ k8s_namespace_name="podinfo" } |= "uptime=2:18:42.6726"`
+        - `{ k8s_namespace_name="podinfo" } |= "uptime=8:09:49.73356"`
 - Checkout the Node logs.
 - Checkout the logs from ACM point of view, pod, node etc.
