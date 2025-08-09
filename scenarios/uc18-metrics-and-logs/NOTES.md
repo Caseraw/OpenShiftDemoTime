@@ -11,6 +11,7 @@
 - Checkout the custom metrics of "podinfo" on the frontend.
 - Checkout the custom metrics in the metrics query page.
 - Perform some query for demo purposes.
+    - demo_random_metric{namespace="podinfo"}
 
 ## Logs
 

@@ -10,4 +10,5 @@ resources:
   - resources/imagestream.yaml
   - resources/deployment.yaml
   - resources/service.yaml
+  - resources/servicemonitor.yaml
   - resources/route.yaml
