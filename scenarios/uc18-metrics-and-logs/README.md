@@ -55,7 +55,8 @@ Namespace: `demo-pipelines`
 
 Optionally deploy this resource to automatically kick of a `PipelineRun`.
 
-```yaml
+```shell
+oc apply -f - <<EOF
 ---
 apiVersion: tekton.dev/v1
 kind: PipelineRun
@@ -69,6 +70,7 @@ spec:
     serviceAccountName: pipeline
   timeouts:
     pipeline: 1h0m0s
+EOF
 ```
 
 #### Configure the AWS Spoke Cluster
