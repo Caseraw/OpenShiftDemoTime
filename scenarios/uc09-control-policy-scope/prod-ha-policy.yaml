@@ -86,7 +86,7 @@ spec:
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
-  name: prod-ha-policy-placement
+  name: dev-ha-policy-placement
   namespace: cicd
 placementRef:
   name: dev-placement
