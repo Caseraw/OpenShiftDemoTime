@@ -171,6 +171,7 @@ spec:
         spec:
           remediationAction: enforce
           object-templates:
+            # ServiceAccount
             - complianceType: musthave
               objectDefinition:
                 apiVersion: v1
@@ -179,6 +180,7 @@ spec:
                   name: openshift-monitoring-enableuserworkload
                   namespace: openshift-monitoring
 
+            # Role
             - complianceType: musthave
               objectDefinition:
                 apiVersion: rbac.authorization.k8s.io/v1
@@ -191,6 +193,7 @@ spec:
                     resources: ["configmaps"]
                     verbs: ["get","list","create","update","patch"]
 
+            # RoleBinding
             - complianceType: musthave
               objectDefinition:
                 apiVersion: rbac.authorization.k8s.io/v1
@@ -207,6 +210,7 @@ spec:
                   kind: Role
                   name: openshift-monitoring-enableuserworkload
 
+            # Job
             - complianceType: musthave
               objectDefinition:
                 apiVersion: batch/v1
@@ -234,47 +238,67 @@ spec:
                               set -euo pipefail
                               NS=openshift-monitoring
                               TARGET_CM=cluster-monitoring-config
-                              KEY="config.yaml"
                               FLAG_CM=openshift-monitoring-enableuserworkload-flag
                               NOW="$(date -u +%FT%TZ)"
 
+                              # Read current config.yaml (may be empty/missing)
                               CUR="$(oc -n "$NS" get cm "$TARGET_CM" -o jsonpath='{.data.config\.yaml}' 2>/dev/null || true || :)"
                               CUR="$(printf "%s" "${CUR:-}" | tr -d '\r')"
 
-                              is_config_ok() {
-                                printf "%s\n" "${CUR:-}" | grep -Eq '^[[:space:]]*enableUserWorkload[[:space:]]*:[[:space:]]*true([[:space:]]*($|#))'
-                              }
+                              # --- enableUserWorkload ---
+                              if printf "%s\n" "$CUR" | grep -Eq '^[[:space:]]*enableUserWorkload[[:space:]]*:[[:space:]]*true([[:space:]]*($|#))'; then
+                                EUW_OK=true
+                              else
+                                EUW_OK=false
+                              fi
 
-                              if is_config_ok; then
-                                echo "Config already set (enableUserWorkload: true). No changes."
+                              # --- alertmanagerMain.enableUserAlertmanagerConfig ---
+                              if printf "%s\n" "$CUR" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*$' && \
+                                 printf "%s\n" "$CUR" | awk '/^[[:space:]]*alertmanagerMain:/ {found=1; next} found && /^[^[:space:]]/{found=0} found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:[[:space:]]*true/{exit 0} END{exit 1}'; then
+                                AM_OK=true
+                              else
+                                AM_OK=false
+                              fi
+
+                              # If both already OK → exit
+                              if [ "$EUW_OK" = true ] && [ "$AM_OK" = true ]; then
+                                echo "Both keys already set correctly. No changes."
                                 oc -n "$NS" create cm "$FLAG_CM" \
                                   --from-literal=last_ok="$NOW" >/dev/null 2>&1 || \
                                 oc -n "$NS" patch cm "$FLAG_CM" --type=merge -p "{\"data\":{\"last_ok\":\"$NOW\"}}" >/dev/null 2>&1 || true
                                 exit 0
                               fi
 
-                              echo "Config not set. Updating..."
-                              if [ -z "${CUR:-}" ]; then
-                                NEW_CONTENT="enableUserWorkload: true"$'\n'
-                              else
-                                if printf "%s\n" "$CUR" | grep -qE '^[[:space:]]*enableUserWorkload[[:space:]]*:'; then
-                                  NEW_CONTENT="$(printf "%s\n" "$CUR" \
-                                    | awk 'BEGIN{done=0}
-                                           /^[[:space:]]*enableUserWorkload[[:space:]]*:/ && done==0 { print "enableUserWorkload: true"; done=1; next }
-                                           { print }')"
+                              NEW_CONTENT="$CUR"
+
+                              # Patch enableUserWorkload
+                              if [ "$EUW_OK" = false ]; then
+                                if printf "%s\n" "$NEW_CONTENT" | grep -qE '^[[:space:]]*enableUserWorkload[[:space:]]*:'; then
+                                  NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
+                                    | awk 'BEGIN{done=0} /^[[:space:]]*enableUserWorkload[[:space:]]*:/ && done==0 { print "enableUserWorkload: true"; done=1; next } { print }')"
                                 else
-                                  if [ -n "$CUR" ] && [ "$(printf "%s" "$CUR" | tail -c1 || true | wc -c)" -ne 0 ]; then
-                                    CUR="$CUR"$'\n'
-                                  fi
-                                  NEW_CONTENT="${CUR}enableUserWorkload: true"$'\n'
+                                  [ -n "$NEW_CONTENT" ] && [ "$(printf "%s" "$NEW_CONTENT" | tail -c1)" != "" ] && NEW_CONTENT="$NEW_CONTENT"$'\n'
+                                  NEW_CONTENT="enableUserWorkload: true"$'\n'"$NEW_CONTENT"
                                 fi
                               fi
 
-                              if [ "${NEW_CONTENT:-}" = "${CUR:-}" ]; then
-                                echo "No difference after merge; exiting."
-                                exit 0
+                              # Patch alertmanagerMain.enableUserAlertmanagerConfig
+                              if [ "$AM_OK" = false ]; then
+                                if printf "%s\n" "$NEW_CONTENT" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*$'; then
+                                  if printf "%s\n" "$NEW_CONTENT" | awk '/^[[:space:]]*alertmanagerMain:/ {found=1; next} found && /^[^[:space:]]/{found=0} found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/ {exit 0} END{exit 1}'; then
+                                    NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
+                                      | awk '/^[[:space:]]*alertmanagerMain:/ {print; found=1; next} found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/ {print "  enableUserAlertmanagerConfig: true"; found=0; next} {print}')"
+                                  else
+                                    NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
+                                      | awk '/^[[:space:]]*alertmanagerMain:/ {print; print "  enableUserAlertmanagerConfig: true"; next} {print}')"
+                                  fi
+                                else
+                                  [ -n "$NEW_CONTENT" ] && [ "$(printf "%s" "$NEW_CONTENT" | tail -c1)" != "" ] && NEW_CONTENT="$NEW_CONTENT"$'\n'
+                                  NEW_CONTENT="$NEW_CONTENT"$'alertmanagerMain:\n  enableUserAlertmanagerConfig: true\n'
+                                fi
                               fi
 
+                              # Write back with correct indentation for block scalar
                               TMP="$(mktemp)"
                               {
                                 cat <<'EOF'
@@ -285,8 +309,7 @@ spec:
                                 namespace: openshift-monitoring
                               data:
                                 config.yaml: |
-                              EOF
-                                # IMPORTANT: indent the payload by **four** spaces so it belongs to the block scalar
+EOF
                                 printf "%s" "$NEW_CONTENT" | sed 's/^/    /'
                                 echo
                               } > "$TMP"
@@ -294,6 +317,7 @@ spec:
                               echo "Applying updated ConfigMap..."
                               oc apply -f "$TMP"
 
+                              # Record update time
                               oc -n "$NS" create cm "$FLAG_CM" \
                                 --from-literal=last_update="$NOW" >/dev/null 2>&1 || \
                               oc -n "$NS" patch cm "$FLAG_CM" --type=merge -p "{\"data\":{\"last_update\":\"$NOW\"}}" >/dev/null 2>&1 || true
