@@ -7,7 +7,7 @@
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: cicd-ns
+  name: cicd-ns-policy
   namespace: openshift-gitops
   annotations:
     policy.open-cluster-management.io/description: cicd-ns must exist on all DC clusters
@@ -45,6 +45,6 @@ placementRef:
   apiGroup: cluster.open-cluster-management.io
   kind: Placement
 subjects:
-  - name: cicd-ns
+  - name: cicd-ns-policy
     apiGroup: policy.open-cluster-management.io
     kind: Policy

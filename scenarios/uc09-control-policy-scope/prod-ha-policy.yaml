@@ -1,0 +1,98 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: prod-ha-policy
+  namespace: cicd
+spec:
+  emediationAction: inform
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: ha
+        spec:
+          remediationAction: enforce
+          severity: low
+          namespaceSelector:
+            include:
+              - team*
+            exclude:
+              - openshift-*
+              - kube-*
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                  labels:
+                    sla: ha
+                spec:
+                  replicas: 2
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: prod-ha-policy-placement
+  namespace: cicd
+placementRef:
+  name: prod-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: prod-ha-policy
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: dev-ha-policy
+  namespace: cicd
+spec:
+  emediationAction: inform
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: ha
+        spec:
+          remediationAction: inform
+          severity: high
+          namespaceSelector:
+            include:
+              - dev-ns
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                  labels:
+                    sla: ha
+                spec:
+                  replicas: 2
+          labelSelector:
+            matchExpressions:
+              - key: sla
+                operator: In
+                values:
+                  - ha                  
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: prod-ha-policy-placement
+  namespace: cicd
+placementRef:
+  name: dev-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: dev-ha-policy
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
