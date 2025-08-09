@@ -167,7 +167,7 @@ spec:
         apiVersion: batch/v1
         kind: Job
         metadata:
-          name: openshift-monitoring-enableuserworkload-v2
+          name: openshift-monitoring-enableuserworkload
           namespace: openshift-monitoring
           labels:
             patcher: "true"
