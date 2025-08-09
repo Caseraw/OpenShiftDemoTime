@@ -158,7 +158,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
   name: openshift-monitoring-enableuserworkload
-  namespace: spoke-config
+  namespace: acm-policies
 spec:
   remediationAction: enforce
   disabled: false
@@ -309,7 +309,7 @@ spec:
                                 namespace: openshift-monitoring
                               data:
                                 config.yaml: |
-EOF
+                              EOF
                                 printf "%s" "$NEW_CONTENT" | sed 's/^/    /'
                                 echo
                               } > "$TMP"
