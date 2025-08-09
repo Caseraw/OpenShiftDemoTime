@@ -164,179 +164,117 @@ spec:
   disabled: false
   policy-templates:
     - objectDefinition:
-        apiVersion: policy.open-cluster-management.io/v1
-        kind: ConfigurationPolicy
+        apiVersion: batch/v1
+        kind: Job
         metadata:
-          name: openshift-monitoring-enableuserworkload
+          name: openshift-monitoring-enableuserworkload-v2
+          namespace: openshift-monitoring
+          labels:
+            patcher: "true"
+          annotations:
+            policy.open-cluster-management.io/created-by: "openshift-monitoring-enableuserworkload"
         spec:
-          remediationAction: enforce
-          object-templates:
-            # ServiceAccount
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: v1
-                kind: ServiceAccount
-                metadata:
-                  name: openshift-monitoring-enableuserworkload
-                  namespace: openshift-monitoring
+          backoffLimit: 0
+          activeDeadlineSeconds: 120
+          template:
+            spec:
+              serviceAccountName: openshift-monitoring-enableuserworkload
+              restartPolicy: Never
+              containers:
+                - name: patch
+                  image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+                  command: ["/bin/bash","-ceu","--"]
+                  args:
+                    - |
+                      set -euo pipefail
+                      NS=openshift-monitoring
+                      TARGET_CM=cluster-monitoring-config
+                      FLAG_CM=openshift-monitoring-enableuserworkload-flag
+                      NOW="$(date -u +%FT%TZ)"
 
-            # Role
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: rbac.authorization.k8s.io/v1
-                kind: Role
-                metadata:
-                  name: openshift-monitoring-enableuserworkload
-                  namespace: openshift-monitoring
-                rules:
-                  - apiGroups: [""]
-                    resources: ["configmaps"]
-                    verbs: ["get","list","create","update","patch"]
+                      # Read current config.yaml (may be empty)
+                      CUR="$(oc -n "$NS" get cm "$TARGET_CM" -o jsonpath='{.data.config\.yaml}' 2>/dev/null || true || :)"
+                      CUR="$(printf "%s" "${CUR:-}" | tr -d '\r')"
 
-            # RoleBinding
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: rbac.authorization.k8s.io/v1
-                kind: RoleBinding
-                metadata:
-                  name: openshift-monitoring-enableuserworkload
-                  namespace: openshift-monitoring
-                subjects:
-                  - kind: ServiceAccount
-                    name: openshift-monitoring-enableuserworkload
-                    namespace: openshift-monitoring
-                roleRef:
-                  apiGroup: rbac.authorization.k8s.io
-                  kind: Role
-                  name: openshift-monitoring-enableuserworkload
+                      euw_ok() { printf "%s\n" "${CUR:-}" | grep -Eq '^[[:space:]]*enableUserWorkload[[:space:]]*:[[:space:]]*true([[:space:]]*($|#))'; }
+                      am_ok() {
+                        printf "%s\n" "${CUR:-}" \
+                        | awk '
+                            BEGIN{found=0; ok=0}
+                            /^[[:space:]]*alertmanagerMain:[[:space:]]*$/ {found=1; next}
+                            found && /^[^[:space:]]/ {found=0}
+                            found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:[[:space:]]*true([[:space:]]*($|#))/ {ok=1}
+                            END{exit ok?0:1}
+                          '
+                      }
 
-            # Job
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: batch/v1
-                kind: Job
-                metadata:
-                  name: openshift-monitoring-enableuserworkload
-                  namespace: openshift-monitoring
-                  labels:
-                    patcher: "true"
-                  annotations:
-                    policy.open-cluster-management.io/created-by: "openshift-monitoring-enableuserworkload"
-                spec:
-                  backoffLimit: 0
-                  activeDeadlineSeconds: 120
-                  template:
-                    spec:
-                      serviceAccountName: openshift-monitoring-enableuserworkload
-                      restartPolicy: Never
-                      containers:
-                        - name: patch
-                          image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-                          command: ["/bin/bash","-ceu","--"]
-                          args:
-                            - |
-                              set -euo pipefail
-                              NS=openshift-monitoring
-                              TARGET_CM=cluster-monitoring-config
-                              FLAG_CM=openshift-monitoring-enableuserworkload-flag
-                              NOW="$(date -u +%FT%TZ)"
+                      EUW_OK=false; euw_ok && EUW_OK=true
+                      AM_OK=false;  am_ok  && AM_OK=true
 
-                              # Read current config.yaml (may be empty/missing)
-                              CUR="$(oc -n "$NS" get cm "$TARGET_CM" -o jsonpath='{.data.config\.yaml}' 2>/dev/null || true || :)"
-                              CUR="$(printf "%s" "${CUR:-}" | tr -d '\r')"
+                      echo "Status: enableUserWorkload=$EUW_OK, alertmanagerMain.enableUserAlertmanagerConfig=$AM_OK"
 
-                              # Helpers
-                              am_ok() { # alertmanagerMain.enableUserAlertmanagerConfig == true
-                                printf "%s\n" "${CUR:-}" \
-                                | awk '
-                                    BEGIN{found=0; ok=0}
-                                    /^[[:space:]]*alertmanagerMain:[[:space:]]*$/ {found=1; next}
-                                    found && /^[^[:space:]]/ {found=0}   # next top-level key ends section
-                                    found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:[[:space:]]*true([[:space:]]*($|#))/ {ok=1}
-                                    END{exit ok?0:1}
-                                  '
-                              }
+                      # Only exit if BOTH are already true
+                      if "$EUW_OK" && "$AM_OK"; then
+                        echo "Both keys already set correctly. No changes."
+                        oc -n "$NS" create cm "$FLAG_CM" \
+                          --from-literal=last_ok="$NOW" >/dev/null 2>&1 || \
+                        oc -n "$NS" patch cm "$FLAG_CM" --type=merge -p "{\"data\":{\"last_ok\":\"$NOW\"}}" >/dev/null 2>&1 || true
+                        exit 0
+                      fi
 
-                              euw_ok() { # enableUserWorkload == true
-                                printf "%s\n" "${CUR:-}" | grep -Eq '^[[:space:]]*enableUserWorkload[[:space:]]*:[[:space:]]*true([[:space:]]*($|#))'
-                              }
+                      NEW_CONTENT="$CUR"
 
-                              EUW_OK=false; euw_ok && EUW_OK=true
-                              AM_OK=false;  am_ok  && AM_OK=true
+                      # Ensure enableUserWorkload: true (top-level)
+                      if ! "$EUW_OK"; then
+                        if printf "%s\n" "$NEW_CONTENT" | grep -qE '^[[:space:]]*enableUserWorkload[[:space:]]*:'; then
+                          NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
+                            | awk 'BEGIN{done=0}
+                                  /^[[:space:]]*enableUserWorkload[[:space:]]*:/ && done==0 { print "enableUserWorkload: true"; done=1; next }
+                                  { print }')"
+                        else
+                          [ -n "$NEW_CONTENT" ] && [ "$(printf "%s" "$NEW_CONTENT" | tail -c1 || true | wc -c)" -ne 0 ] && NEW_CONTENT="$NEW_CONTENT"$'\n'
+                          NEW_CONTENT="enableUserWorkload: true"$'\n'"$NEW_CONTENT"
+                        fi
+                      fi
 
-                              if "$EUW_OK" && "$AM_OK"; then
-                                echo "Both keys already set correctly. No changes."
-                                oc -n "$NS" create cm "$FLAG_CM" \
-                                  --from-literal=last_ok="$NOW" >/dev/null 2>&1 || \
-                                oc -n "$NS" patch cm "$FLAG_CM" --type=merge -p "{\"data\":{\"last_ok\":\"$NOW\"}}" >/dev/null 2>&1 || true
-                                exit 0
-                              fi
+                      # Ensure alertmanagerMain.enableUserAlertmanagerConfig: true
+                      if ! "$AM_OK"; then
+                        if printf "%s\n" "$NEW_CONTENT" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*$'; then
+                          if printf "%s\n" "$NEW_CONTENT" | awk '/^[[:space:]]*alertmanagerMain:/ {found=1; next} found && /^[^[:space:]]/{found=0} found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/ {exit 0} END{exit 1}'; then
+                            NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
+                              | awk '/^[[:space:]]*alertmanagerMain:/ {print; found=1; next}
+                                    found && /^[^[:space:]]/ {found=0}
+                                    found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/ {print "  enableUserAlertmanagerConfig: true"; next}
+                                    {print}')"
+                          else
+                            NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
+                              | awk '/^[[:space:]]*alertmanagerMain:/ {print; print "  enableUserAlertmanagerConfig: true"; next} {print}')"
+                          fi
+                        else
+                          [ -n "$NEW_CONTENT" ] && [ "$(printf "%s" "$NEW_CONTENT" | tail -c1 || true | wc -c)" -ne 0 ] && NEW_CONTENT="$NEW_CONTENT"$'\n'
+                          NEW_CONTENT="$NEW_CONTENT"$'alertmanagerMain:\n  enableUserAlertmanagerConfig: true\n'
+                        fi
+                      fi
 
-                              NEW_CONTENT="$CUR"
-                              CHANGED=false
+                      # Apply updated CM with correct block-scalar indentation
+                      TMP="$(mktemp)"
+                      {
+                        cat <<'EOF'
+                      apiVersion: v1
+                      kind: ConfigMap
+                      metadata:
+                        name: cluster-monitoring-config
+                        namespace: openshift-monitoring
+                      data:
+                        config.yaml: |
+                      EOF
+                        printf "%s" "$NEW_CONTENT" | sed 's/^/    /'
+                        echo
+                      } > "$TMP"
 
-                              # --- ensure enableUserWorkload: true (top-level) ---
-                              if ! "$EUW_OK"; then
-                                if printf "%s\n" "$NEW_CONTENT" | grep -qE '^[[:space:]]*enableUserWorkload[[:space:]]*:'; then
-                                  NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
-                                    | awk 'BEGIN{done=0}
-                                          /^[[:space:]]*enableUserWorkload[[:space:]]*:/ && done==0 { print "enableUserWorkload: true"; done=1; next }
-                                          { print }')"
-                                else
-                                  [ -n "$NEW_CONTENT" ] && [ "$(printf "%s" "$NEW_CONTENT" | tail -c1 || true | wc -c)" -ne 0 ] && NEW_CONTENT="$NEW_CONTENT"$'\n'
-                                  NEW_CONTENT="enableUserWorkload: true"$'\n'"$NEW_CONTENT"
-                                fi
-                                CHANGED=true
-                              fi
+                      echo "Applying updated ConfigMap..."
+                      oc apply -f "$TMP"
 
-                              # --- ensure alertmanagerMain.enableUserAlertmanagerConfig: true ---
-                              if ! "$AM_OK"; then
-                                if printf "%s\n" "$NEW_CONTENT" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*$'; then
-                                  # Section exists
-                                  if printf "%s\n" "$NEW_CONTENT" | awk '/^[[:space:]]*alertmanagerMain:/ {found=1; next} found && /^[^[:space:]]/{found=0} found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/ {exit 0} END{exit 1}'; then
-                                    # Key exists -> replace its value with true
-                                    NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
-                                      | awk '/^[[:space:]]*alertmanagerMain:/ {print; found=1; next}
-                                            found && /^[^[:space:]]/ {found=0}
-                                            found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/ {print "  enableUserAlertmanagerConfig: true"; next}
-                                            {print}')"
-                                  else
-                                    # Add key under the section
-                                    NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
-                                      | awk '/^[[:space:]]*alertmanagerMain:/ {print; print "  enableUserAlertmanagerConfig: true"; next} {print}')"
-                                  fi
-                                else
-                                  # Create section + key
-                                  [ -n "$NEW_CONTENT" ] && [ "$(printf "%s" "$NEW_CONTENT" | tail -c1 || true | wc -c)" -ne 0 ] && NEW_CONTENT="$NEW_CONTENT"$'\n'
-                                  NEW_CONTENT="$NEW_CONTENT"$'alertmanagerMain:\n  enableUserAlertmanagerConfig: true\n'
-                                fi
-                                CHANGED=true
-                              fi
-
-                              if ! "$CHANGED"; then
-                                echo "Evaluated both keys; no mutation required."
-                                exit 0
-                              fi
-
-                              # Build manifest with correct block-scalar indentation
-                              TMP="$(mktemp)"
-                              {
-                                cat <<'EOF'
-                              apiVersion: v1
-                              kind: ConfigMap
-                              metadata:
-                                name: cluster-monitoring-config
-                                namespace: openshift-monitoring
-                              data:
-                                config.yaml: |
-                              EOF
-                                printf "%s" "$NEW_CONTENT" | sed 's/^/    /'
-                                echo
-                              } > "$TMP"
-
-                              echo "Applying updated ConfigMap..."
-                              oc apply -f "$TMP"
-
-                              oc -n "$NS" create cm "$FLAG_CM" \
-                                --from-literal=last_update="$NOW" >/dev/null 2>&1 || \
-                              oc -n "$NS" patch cm "$FLAG_CM" --type=merge -p "{\"data\":{\"last_update\":\"$NOW\"}}" >/dev/null 2>&1 || true
+                      oc -n "$NS" create cm "$FLAG_CM" \
+                        --from-literal=last_update="$NOW" >/dev/null 2>&1 || \
+                      oc -n "$NS" patch cm "$FLAG_CM" --type=merge -p "{\"data\":{\"last_update\":\"$NOW\"}}" >/dev/null 2>&1 || true
