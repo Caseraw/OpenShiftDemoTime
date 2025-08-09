@@ -286,7 +286,9 @@ spec:
                               data:
                                 config.yaml: |
                               EOF
-                                printf "%s" "$NEW_CONTENT" | sed 's/^/  /'
+                                # IMPORTANT: indent the payload by **four** spaces so it belongs to the block scalar
+                                printf "%s" "$NEW_CONTENT" | sed 's/^/    /'
+                                echo
                               } > "$TMP"
 
                               echo "Applying updated ConfigMap..."
