@@ -167,7 +167,7 @@ spec:
         apiVersion: batch/v1
         kind: Job
         metadata:
-          name: openshift-monitoring-enableuserworkload
+          name: openshift-monitoring-enableuserworkload-v3
           namespace: openshift-monitoring
           labels:
             patcher: "true"
@@ -202,7 +202,7 @@ spec:
                         | awk '
                             BEGIN{found=0; ok=0}
                             /^[[:space:]]*alertmanagerMain:[[:space:]]*$/ {found=1; next}
-                            found && /^[^[:space:]]/ {found=0}
+                            found && /^[^[:space:]]/ {found=0}   # next top-level key ends section
                             found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:[[:space:]]*true([[:space:]]*($|#))/ {ok=1}
                             END{exit ok?0:1}
                           '
@@ -210,21 +210,18 @@ spec:
 
                       EUW_OK=false; euw_ok && EUW_OK=true
                       AM_OK=false;  am_ok  && AM_OK=true
+                      echo "Current: enableUserWorkload=$EUW_OK, alertmanagerMain.enableUserAlertmanagerConfig=$AM_OK"
 
-                      echo "Status: enableUserWorkload=$EUW_OK, alertmanagerMain.enableUserAlertmanagerConfig=$AM_OK"
-
-                      # Only exit if BOTH are already true
                       if "$EUW_OK" && "$AM_OK"; then
                         echo "Both keys already set correctly. No changes."
-                        oc -n "$NS" create cm "$FLAG_CM" \
-                          --from-literal=last_ok="$NOW" >/dev/null 2>&1 || \
+                        oc -n "$NS" create cm "$FLAG_CM" --from-literal=last_ok="$NOW" >/dev/null 2>&1 || \
                         oc -n "$NS" patch cm "$FLAG_CM" --type=merge -p "{\"data\":{\"last_ok\":\"$NOW\"}}" >/dev/null 2>&1 || true
                         exit 0
                       fi
 
                       NEW_CONTENT="$CUR"
 
-                      # Ensure enableUserWorkload: true (top-level)
+                      # --- ensure enableUserWorkload: true (top-level) ---
                       if ! "$EUW_OK"; then
                         if printf "%s\n" "$NEW_CONTENT" | grep -qE '^[[:space:]]*enableUserWorkload[[:space:]]*:'; then
                           NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
@@ -232,42 +229,46 @@ spec:
                                   /^[[:space:]]*enableUserWorkload[[:space:]]*:/ && done==0 { print "enableUserWorkload: true"; done=1; next }
                                   { print }')"
                         else
+                          # Prepend as a top-level key
                           [ -n "$NEW_CONTENT" ] && [ "$(printf "%s" "$NEW_CONTENT" | tail -c1 || true | wc -c)" -ne 0 ] && NEW_CONTENT="$NEW_CONTENT"$'\n'
                           NEW_CONTENT="enableUserWorkload: true"$'\n'"$NEW_CONTENT"
                         fi
                       fi
 
-                      # Ensure alertmanagerMain.enableUserAlertmanagerConfig: true
+                      # --- ensure alertmanagerMain.enableUserAlertmanagerConfig: true ---
                       if ! "$AM_OK"; then
                         if printf "%s\n" "$NEW_CONTENT" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*$'; then
+                          # Section exists
                           if printf "%s\n" "$NEW_CONTENT" | awk '/^[[:space:]]*alertmanagerMain:/ {found=1; next} found && /^[^[:space:]]/{found=0} found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/ {exit 0} END{exit 1}'; then
+                            # Key exists -> force to true
                             NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
                               | awk '/^[[:space:]]*alertmanagerMain:/ {print; found=1; next}
                                     found && /^[^[:space:]]/ {found=0}
                                     found && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/ {print "  enableUserAlertmanagerConfig: true"; next}
                                     {print}')"
                           else
+                            # Add key under section
                             NEW_CONTENT="$(printf "%s\n" "$NEW_CONTENT" \
                               | awk '/^[[:space:]]*alertmanagerMain:/ {print; print "  enableUserAlertmanagerConfig: true"; next} {print}')"
                           fi
                         else
+                          # Create section + key at end
                           [ -n "$NEW_CONTENT" ] && [ "$(printf "%s" "$NEW_CONTENT" | tail -c1 || true | wc -c)" -ne 0 ] && NEW_CONTENT="$NEW_CONTENT"$'\n'
                           NEW_CONTENT="$NEW_CONTENT"$'alertmanagerMain:\n  enableUserAlertmanagerConfig: true\n'
                         fi
                       fi
 
-                      # Apply updated CM with correct block-scalar indentation
+                      # Build manifest (no heredoc indentation pitfalls)
                       TMP="$(mktemp)"
                       {
-                        cat <<'EOF'
-                      apiVersion: v1
-                      kind: ConfigMap
-                      metadata:
-                        name: cluster-monitoring-config
-                        namespace: openshift-monitoring
-                      data:
-                        config.yaml: |
-                      EOF
+                        printf '%s\n' \
+                          'apiVersion: v1' \
+                          'kind: ConfigMap' \
+                          'metadata:' \
+                          '  name: cluster-monitoring-config' \
+                          '  namespace: openshift-monitoring' \
+                          'data:' \
+                          '  config.yaml: |'
                         printf "%s" "$NEW_CONTENT" | sed 's/^/    /'
                         echo
                       } > "$TMP"
@@ -275,6 +276,5 @@ spec:
                       echo "Applying updated ConfigMap..."
                       oc apply -f "$TMP"
 
-                      oc -n "$NS" create cm "$FLAG_CM" \
-                        --from-literal=last_update="$NOW" >/dev/null 2>&1 || \
-                      oc -n "$NS" patch cm "$FLAG_CM" --type=merge -p "{\"data\":{\"last_update\":\"$NOW\"}}" >/dev/null 2>&1 || true
+                      oc -n "$NS" create cm "$FLAG_CM" --from-literal=last_update="$NOW" >/dev/null 2>&1 || \
+                      oc -n "$NS" patch cm "$FLAG_CM" --type=merge -p "{\"data\":{\"last_
