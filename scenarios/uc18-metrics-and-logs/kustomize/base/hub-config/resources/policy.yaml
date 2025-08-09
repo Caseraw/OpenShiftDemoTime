@@ -174,8 +174,6 @@ spec:
           activeDeadlineSeconds: 180
           template:
             spec:
-              # You may need RBAC if the default SA can't patch configmaps in this ns.
-              # serviceAccountName: openshift-monitoring-enableuserworkload
               restartPolicy: Never
               containers:
                 - name: patch
@@ -188,6 +186,28 @@ spec:
                       CM=cluster-monitoring-config
                       KEY="config.yaml"
 
+                      # If the CM does not exist at all, create with minimal desired content
+                      if ! oc -n "$NS" get cm "$CM" >/dev/null 2>&1; then
+                        echo "ConfigMap $CM not found. Creating with required keys."
+                        TMP="$(mktemp)"
+                        {
+                          printf '%s\n' \
+                            'apiVersion: v1' \
+                            'kind: ConfigMap' \
+                            'metadata:' \
+                            '  name: cluster-monitoring-config' \
+                            '  namespace: openshift-monitoring' \
+                            'data:' \
+                            '  config.yaml: |' \
+                            '    enableUserWorkload: true' \
+                            '    alertmanagerMain:' \
+                            '      enableUserAlertmanagerConfig: true'
+                        } > "$TMP"
+                        oc apply -f "$TMP"
+                        echo "Created."
+                        exit 0
+                      fi
+
                       # Read current embedded YAML (may be empty/missing)
                       CUR="$(oc -n "$NS" get cm "$CM" -o jsonpath='{.data.config\.yaml}' 2>/dev/null || true || :)"
                       CUR="$(printf "%s" "${CUR:-}" | tr -d '\r')"
@@ -196,70 +216,56 @@ spec:
                       printf "%s\n" "${CUR:-<empty>}"
                       echo "================"
 
-                      # --- helpers to detect current state ---
-                      euw_ok() {
-                        printf "%s\n" "${CUR:-}" | grep -Eq '^[[:space:]]*enableUserWorkload[[:space:]]*:[[:space:]]*true([[:space:]]*($|#))'
-                      }
-                      am_ok() {
-                        printf "%s\n" "${CUR:-}" | awk '
-                          BEGIN{insec=0; ok=0}
-                          /^[[:space:]]*alertmanagerMain:[[:space:]]*$/ {insec=1; next}
-                          insec && /^[^[:space:]]/ {insec=0}
-                          insec && /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:[[:space:]]*true([[:space:]]*($|#))/ {ok=1}
-                          END{exit ok?0:1}
-                        '
-                      }
-
-                      EUW_OK=false; euw_ok && EUW_OK=true
-                      AM_OK=false;  am_ok  && AM_OK=true
-                      echo "Detected: enableUserWorkload=$EUW_OK, alertmanagerMain.enableUserAlertmanagerConfig=$AM_OK"
-
+                      # Start from current
                       NEW="$CUR"
 
-                      # --- ensure enableUserWorkload: true (top-level) ---
-                      if ! "$EUW_OK"; then
-                        if printf "%s\n" "$NEW" | grep -qE '^[[:space:]]*enableUserWorkload[[:space:]]*:'; then
-                          NEW="$(printf "%s\n" "$NEW" \
-                            | awk 'BEGIN{done=0}
-                                  /^[[:space:]]*enableUserWorkload[[:space:]]*:/ && !done { print "enableUserWorkload: true"; done=1; next }
-                                  { print }')"
-                        else
-                          # Append as a top-level key (ordering not important)
-                          [ -n "$NEW" ] && [ "$(printf "%s" "$NEW" | tail -c1 || true | wc -c)" -ne 0 ] && NEW="$NEW"$'\n'
-                          NEW="$NEW"$'enableUserWorkload: true\n'
-                        fi
+                      # ---------- ensure enableUserWorkload: true (top-level) ----------
+                      if printf "%s\n" "$NEW" | grep -Eq '^[[:space:]]*enableUserWorkload[[:space:]]*:'; then
+                        # replace the first occurrence with true
+                        NEW="$(printf "%s\n" "$NEW" \
+                          | awk 'BEGIN{done=0}
+                                /^[[:space:]]*enableUserWorkload[[:space:]]*:/ && !done { print "enableUserWorkload: true"; done=1; next }
+                                { print }')"
+                      else
+                        # append as a top-level key
+                        [ -n "$NEW" ] && [ "$(printf "%s" "$NEW" | tail -c1 || true | wc -c)" -ne 0 ] && NEW="$NEW"$'\n'
+                        NEW="$NEW"$'enableUserWorkload: true\n'
                       fi
 
-                      # --- ensure alertmanagerMain.enableUserAlertmanagerConfig: true (nested) ---
-                      if ! "$AM_OK"; then
-                        if printf "%s\n" "$NEW" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*$'; then
-                          # Section exists: replace if key exists; otherwise insert under the header
-                          NEW="$(printf "%s\n" "$NEW" | awk '
-                            BEGIN{insec=0; replaced=0; inserted=0}
-                            function insert_line(){ print "  enableUserAlertmanagerConfig: true"; inserted=1 }
-                            /^[[:space:]]*alertmanagerMain:[[:space:]]*$/ { print; insec=1; next }
-                            insec && /^[^[:space:]]/ {
-                              if(!replaced && !inserted) insert_line();
-                              insec=0
-                            }
-                            {
-                              if(insec && $0 ~ /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/){
-                                print "  enableUserAlertmanagerConfig: true"; replaced=1; next
-                              }
-                              print
-                            }
-                            END{
-                              if(insec && !replaced && !inserted) insert_line()
-                            }
-                          ')"
-                        else
-                          # Section missing: append it at the end
-                          [ -n "$NEW" ] && [ "$(printf "%s" "$NEW" | tail -c1 || true | wc -c)" -ne 0 ] && NEW="$NEW"$'\n'
-                          NEW="$NEW"$'alertmanagerMain:\n  enableUserAlertmanagerConfig: true\n'
-                        fi
+                      # ---------- ensure alertmanagerMain.enableUserAlertmanagerConfig: true ----------
+                      # Normalize any inline '{}' header to a plain header line to simplify processing
+                      if printf "%s\n" "$NEW" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*\{\}[[:space:]]*$'; then
+                        NEW="$(printf "%s\n" "$NEW" \
+                          | sed -E 's/^[[:space:]]*alertmanagerMain:[[:space:]]*\{\}[[:space:]]*$/alertmanagerMain:/')"
                       fi
 
-                      # No change? exit cleanly
+                      if printf "%s\n" "$NEW" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*$'; then
+                        # Section exists; ensure/replace the key inside it
+                        NEW="$(printf "%s\n" "$NEW" | awk '
+                          BEGIN{insec=0; inserted=0; replaced=0}
+                          function insert_line(){ print "  enableUserAlertmanagerConfig: true"; inserted=1 }
+                          /^[[:space:]]*alertmanagerMain:[[:space:]]*$/ { print; insec=1; next }
+                          insec && /^[^[:space:]]/ {
+                            if(!inserted && !replaced) insert_line();
+                            insec=0
+                          }
+                          {
+                            if(insec && $0 ~ /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/){
+                              print "  enableUserAlertmanagerConfig: true"; replaced=1; next
+                            }
+                            print
+                          }
+                          END{
+                            if(insec && !inserted && !replaced) insert_line()
+                          }
+                        ')"
+                      else
+                        # Section missing: append it at the end
+                        [ -n "$NEW" ] && [ "$(printf "%s" "$NEW" | tail -c1 || true | wc -c)" -ne 0 ] && NEW="$NEW"$'\n'
+                        NEW="$NEW"$'alertmanagerMain:\n  enableUserAlertmanagerConfig: true\n'
+                      fi
+
+                      # If nothing changed, exit
                       if [ "${NEW:-}" = "${CUR:-}" ]; then
                         echo "No changes required."
                         exit 0
@@ -269,7 +275,7 @@ spec:
                       printf "%s\n" "$NEW"
                       echo "================================"
 
-                      # Build a manifest with correct block-scalar indentation
+                      # Build manifest with correct block-scalar indentation
                       TMP="$(mktemp)"
                       {
                         printf '%s\n' \
@@ -286,5 +292,4 @@ spec:
 
                       echo "Applying updated ConfigMap..."
                       oc apply -f "$TMP"
-
                       echo "Done."
