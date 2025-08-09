@@ -21,3 +21,6 @@ subjects:
   - name: install-loki
     apiGroup: policy.open-cluster-management.io
     kind: Policy
+  - name: install-coo
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
