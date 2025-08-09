@@ -10,7 +10,7 @@ spec:
     type: Git
     git:
       uri: "https://github.com/Caseraw/OpenShiftDemoTime.git"
-      ref: UC18-metrics-and-logs
+      ref: main
     contextDir: scenarios/uc18-metrics-and-logs/podinfo
   strategy:
     type: Source
