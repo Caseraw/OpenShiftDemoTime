@@ -22,8 +22,8 @@ spec:
       sources:
         - repositoryType: git
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: main
-          path: scenarios/uc18-metrics-and-logs/kustomize/base/hub-config
+          targetRevision: UC19-network-graphs
+          path: scenarios/uc19-network-graphs/kustomize/base/hub-config
       destination:
         namespace: hub-config
         server: "{{server}}"
@@ -58,8 +58,8 @@ spec:
       sources:
         - repositoryType: git
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: main
-          path: scenarios/uc18-metrics-and-logs/kustomize/base/demo-pipelines-hub
+          targetRevision: UC19-network-graphs
+          path: scenarios/uc19-network-graphs/kustomize/base/demo-pipelines-hub
       destination:
         namespace: demo-pipelines
         server: "{{server}}"
