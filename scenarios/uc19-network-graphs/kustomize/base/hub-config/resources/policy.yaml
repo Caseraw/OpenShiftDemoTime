@@ -218,9 +218,10 @@ spec:
                     patcher: "true"
                   annotations:
                     policy.open-cluster-management.io/created-by: "openshift-monitoring-enableuserworkload"
+                    script-version: "v7"           # helps you confirm the new pod is running
                 spec:
                   backoffLimit: 0
-                  activeDeadlineSeconds: 120
+                  activeDeadlineSeconds: 180
                   template:
                     spec:
                       serviceAccountName: openshift-monitoring-enableuserworkload
@@ -239,58 +240,34 @@ spec:
                               CUR="$(oc -n "$NS" get cm "$CM" -o jsonpath='{.data.config\.yaml}' 2>/dev/null || true || :)"
                               CUR="$(printf "%s" "${CUR:-}" | tr -d '\r')"
 
-                              # Helper: ensure a trailing newline (no arithmetic, no wc)
-                              ensure_trailing_nl() {
-                                if [ -n "${1-}" ] && [ "${1: -1}" != $'\n' ]; then
-                                  printf "%s\n" "$1"
-                                else
-                                  printf "%s" "$1"
-                                fi
-                              }
+                              # Ensure trailing newline so we never glue our key to the last line
+                              ensure_nl() { if [ -n "${1-}" ] && [ "${1: -1}" != $'\n' ]; then printf "%s\n" "$1"; else printf "%s" "$1"; fi; }
 
-                              NEW="$(ensure_trailing_nl "${CUR:-}")"
+                              # 1) scrub any existing occurrences of the keys we manage
+                              CLEAN="$(printf "%s" "$(ensure_nl "${CUR:-}")" | awk '
+                                /^[[:space:]]*enableUserWorkload[[:space:]]*:/ {next}
+                                /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/ {next}
+                                {print}
+                              ')"
 
-                              # --- enableUserWorkload: true (top-level) ---
-                              if printf "%s\n" "$NEW" | grep -qE '^[[:space:]]*enableUserWorkload[[:space:]]*:'; then
-                                # replace first occurrence
-                                NEW="$(printf "%s" "$NEW" \
-                                  | awk 'BEGIN{done=0}
-                                        /^[[:space:]]*enableUserWorkload[[:space:]]*:/ && !done { print "enableUserWorkload: true"; done=1; next }
-                                        { print }')"
-                              else
-                                NEW="${NEW}enableUserWorkload: true"$'\n'
-                              fi
-
-                              # --- alertmanagerMain.enableUserAlertmanagerConfig: true ---
-                              # Normalize inline {} to block if present
-                              NEW="$(printf "%s" "$NEW" | sed -E 's/^[[:space:]]*alertmanagerMain:[[:space:]]*\{\}[[:space:]]*$/alertmanagerMain:/')"
-
-                              if printf "%s\n" "$NEW" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*$'; then
-                                # Section exists → insert/replace the nested key
-                                NEW="$(printf "%s\n" "$NEW" | awk '
-                                  BEGIN{insec=0; done=0}
+                              # 2) ensure alertmanagerMain section + nested key
+                              CLEAN="$(printf "%s" "$CLEAN" | sed -E 's/^[[:space:]]*alertmanagerMain:[[:space:]]*\{\}[[:space:]]*$/alertmanagerMain:/')"
+                              if printf "%s\n" "$CLEAN" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*$'; then
+                                CLEAN="$(printf "%s\n" "$CLEAN" | awk '
+                                  BEGIN{insec=0; inserted=0}
                                   /^[[:space:]]*alertmanagerMain:[[:space:]]*$/ { print; insec=1; next }
-                                  insec && /^[^[:space:]]/ {
-                                    if(!done){ print "  enableUserAlertmanagerConfig: true"; done=1 }
-                                    insec=0
-                                  }
-                                  {
-                                    if(insec && $0 ~ /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/){
-                                      print "  enableUserAlertmanagerConfig: true"; done=1; next
-                                    }
-                                    print
-                                  }
-                                  END{
-                                    if(insec && !done) print "  enableUserAlertmanagerConfig: true"
-                                  }
+                                  insec && /^[^[:space:]]/ { if(!inserted){ print "  enableUserAlertmanagerConfig: true"; inserted=1 } ; insec=0 }
+                                  { print }
+                                  END { if(insec && !inserted) print "  enableUserAlertmanagerConfig: true" }
                                 ')"
                               else
-                                # Section missing → append it
-                                NEW="$(ensure_trailing_nl "$NEW")"
-                                NEW+=$'alertmanagerMain:\n  enableUserAlertmanagerConfig: true\n'
+                                CLEAN="$(ensure_nl "$CLEAN")"$'alertmanagerMain:\n  enableUserAlertmanagerConfig: true\n'
                               fi
 
-                              # Build CM manifest with correct block-scalar indentation and apply
+                              # 3) put enableUserWorkload: true at the top (deterministic)
+                              NEW="enableUserWorkload: true"$'\n'"$CLEAN"
+
+                              # 4) build manifest (correct 4-space indent under block scalar) and apply
                               TMP="$(mktemp)"
                               {
                                 printf '%s\n' \
@@ -305,6 +282,5 @@ spec:
                                 echo
                               } > "$TMP"
 
-                              echo "Applying updated ConfigMap..."
-                              oc apply -f "$TMP"
-                              echo "Done."
+                              echo "Applying updated ConfigMap (script-version v7)..."
+                              oc appl
