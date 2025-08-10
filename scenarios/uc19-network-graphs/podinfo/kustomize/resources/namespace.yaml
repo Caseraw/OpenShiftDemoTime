@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: podinfo
+  labels:
+    kubernetes.io/metadata.name: podinfo
+  annotations:
+    openshift.io/description: "podinfo"
+    openshift.io/display-name: "podinfo"

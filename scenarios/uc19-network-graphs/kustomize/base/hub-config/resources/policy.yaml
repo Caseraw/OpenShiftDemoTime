@@ -1,0 +1,310 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-gitops
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install GitOps Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-gitops
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: openshift-gitops-operator
+            namespace: openshift-gitops-operator
+            channel: latest
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-pipelines
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install OpenShift Pipelines Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-pipelines
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: openshift-pipelines-operator-rh
+            namespace: openshift-operators
+            channel: latest
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-logging
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Installe the OpenShift Logging Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-logging
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: cluster-logging
+            namespace: openshift-logging
+            channel: stable-6.3
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-loki
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install Loki Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-loki
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: loki-operator
+            namespace: openshift-operators-redhat
+            channel: stable-6.3
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-coo
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install the Cluster Observability Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-coo
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: cluster-observability-operator
+            namespace: openshift-cluster-observability-operator
+            channel: stable
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: openshift-monitoring-enableuserworkload
+  namespace: spoke-config
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: openshift-monitoring-enableuserworkload
+        spec:
+          remediationAction: enforce
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: ServiceAccount
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+                rules:
+                  - apiGroups: [""]
+                    resources: ["configmaps"]
+                    verbs: ["get","list","create","update","patch"]
+
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: RoleBinding
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+                subjects:
+                  - kind: ServiceAccount
+                    name: openshift-monitoring-enableuserworkload
+                    namespace: openshift-monitoring
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: Role
+                  name: openshift-monitoring-enableuserworkload
+
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: batch/v1
+                kind: Job
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+                  labels:
+                    patcher: "true"
+                  annotations:
+                    policy.open-cluster-management.io/created-by: "openshift-monitoring-enableuserworkload"
+                spec:
+                  backoffLimit: 0
+                  activeDeadlineSeconds: 120
+                  template:
+                    spec:
+                      serviceAccountName: openshift-monitoring-enableuserworkload
+                      restartPolicy: Never
+                      containers:
+                        - name: patch
+                          image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+                          command: ["/bin/bash","-ceu","--"]
+                          args:
+                            - |
+                              set -euo pipefail
+                              NS=openshift-monitoring
+                              CM=cluster-monitoring-config
+
+                              # Read current embedded YAML (may be empty/missing)
+                              CUR="$(oc -n "$NS" get cm "$CM" -o jsonpath='{.data.config\.yaml}' 2>/dev/null || true || :)"
+                              CUR="$(printf "%s" "${CUR:-}" | tr -d '\r')"
+
+                              # Helper: ensure a trailing newline (no arithmetic, no wc)
+                              ensure_trailing_nl() {
+                                if [ -n "${1-}" ] && [ "${1: -1}" != $'\n' ]; then
+                                  printf "%s\n" "$1"
+                                else
+                                  printf "%s" "$1"
+                                fi
+                              }
+
+                              NEW="$(ensure_trailing_nl "${CUR:-}")"
+
+                              # --- enableUserWorkload: true (top-level) ---
+                              if printf "%s\n" "$NEW" | grep -qE '^[[:space:]]*enableUserWorkload[[:space:]]*:'; then
+                                # replace first occurrence
+                                NEW="$(printf "%s" "$NEW" \
+                                  | awk 'BEGIN{done=0}
+                                        /^[[:space:]]*enableUserWorkload[[:space:]]*:/ && !done { print "enableUserWorkload: true"; done=1; next }
+                                        { print }')"
+                              else
+                                NEW="${NEW}enableUserWorkload: true"$'\n'
+                              fi
+
+                              # --- alertmanagerMain.enableUserAlertmanagerConfig: true ---
+                              # Normalize inline {} to block if present
+                              NEW="$(printf "%s" "$NEW" | sed -E 's/^[[:space:]]*alertmanagerMain:[[:space:]]*\{\}[[:space:]]*$/alertmanagerMain:/')"
+
+                              if printf "%s\n" "$NEW" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*$'; then
+                                # Section exists → insert/replace the nested key
+                                NEW="$(printf "%s\n" "$NEW" | awk '
+                                  BEGIN{insec=0; done=0}
+                                  /^[[:space:]]*alertmanagerMain:[[:space:]]*$/ { print; insec=1; next }
+                                  insec && /^[^[:space:]]/ {
+                                    if(!done){ print "  enableUserAlertmanagerConfig: true"; done=1 }
+                                    insec=0
+                                  }
+                                  {
+                                    if(insec && $0 ~ /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/){
+                                      print "  enableUserAlertmanagerConfig: true"; done=1; next
+                                    }
+                                    print
+                                  }
+                                  END{
+                                    if(insec && !done) print "  enableUserAlertmanagerConfig: true"
+                                  }
+                                ')"
+                              else
+                                # Section missing → append it
+                                NEW="$(ensure_trailing_nl "$NEW")"
+                                NEW+=$'alertmanagerMain:\n  enableUserAlertmanagerConfig: true\n'
+                              fi
+
+                              # Build CM manifest with correct block-scalar indentation and apply
+                              TMP="$(mktemp)"
+                              {
+                                printf '%s\n' \
+                                  'apiVersion: v1' \
+                                  'kind: ConfigMap' \
+                                  'metadata:' \
+                                  '  name: cluster-monitoring-config' \
+                                  '  namespace: openshift-monitoring' \
+                                  'data:' \
+                                  '  config.yaml: |'
+                                printf "%s" "$NEW" | sed 's/^/    /'
+                                echo
+                              } > "$TMP"
+
+                              echo "Applying updated ConfigMap..."
+                              oc apply -f "$TMP"
+                              echo "Done."
