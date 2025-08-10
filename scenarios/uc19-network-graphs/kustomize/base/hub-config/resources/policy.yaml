@@ -171,6 +171,7 @@ spec:
         spec:
           remediationAction: enforce
           object-templates:
+            # SA
             - complianceType: musthave
               objectDefinition:
                 apiVersion: v1
@@ -179,6 +180,7 @@ spec:
                   name: openshift-monitoring-enableuserworkload
                   namespace: openshift-monitoring
 
+            # RBAC (configmaps)
             - complianceType: musthave
               objectDefinition:
                 apiVersion: rbac.authorization.k8s.io/v1
@@ -207,6 +209,7 @@ spec:
                   kind: Role
                   name: openshift-monitoring-enableuserworkload
 
+            # Job (fixed 'apply', adds both keys)
             - complianceType: musthave
               objectDefinition:
                 apiVersion: batch/v1
@@ -218,7 +221,7 @@ spec:
                     patcher: "true"
                   annotations:
                     policy.open-cluster-management.io/created-by: "openshift-monitoring-enableuserworkload"
-                    script-version: "v7"           # helps you confirm the new pod is running
+                    script-version: "v8"
                 spec:
                   backoffLimit: 0
                   activeDeadlineSeconds: 180
@@ -236,14 +239,14 @@ spec:
                               NS=openshift-monitoring
                               CM=cluster-monitoring-config
 
-                              # Read current embedded YAML (may be empty/missing)
+                              # Read existing embedded YAML (may be empty)
                               CUR="$(oc -n "$NS" get cm "$CM" -o jsonpath='{.data.config\.yaml}' 2>/dev/null || true || :)"
                               CUR="$(printf "%s" "${CUR:-}" | tr -d '\r')"
 
                               # Ensure trailing newline so we never glue our key to the last line
                               ensure_nl() { if [ -n "${1-}" ] && [ "${1: -1}" != $'\n' ]; then printf "%s\n" "$1"; else printf "%s" "$1"; fi; }
 
-                              # 1) scrub any existing occurrences of the keys we manage
+                              # 1) scrub any existing occurrences we manage
                               CLEAN="$(printf "%s" "$(ensure_nl "${CUR:-}")" | awk '
                                 /^[[:space:]]*enableUserWorkload[[:space:]]*:/ {next}
                                 /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/ {next}
@@ -267,7 +270,7 @@ spec:
                               # 3) put enableUserWorkload: true at the top (deterministic)
                               NEW="enableUserWorkload: true"$'\n'"$CLEAN"
 
-                              # 4) build manifest (correct 4-space indent under block scalar) and apply
+                              # 4) build manifest (correct 4-space indent) and apply
                               TMP="$(mktemp)"
                               {
                                 printf '%s\n' \
@@ -282,5 +285,6 @@ spec:
                                 echo
                               } > "$TMP"
 
-                              echo "Applying updated ConfigMap (script-version v7)..."
-                              oc appl
+                              echo "Applying updated ConfigMap (script-version v8)..."
+                              oc apply -f "$TMP"
+                              echo "Done."
