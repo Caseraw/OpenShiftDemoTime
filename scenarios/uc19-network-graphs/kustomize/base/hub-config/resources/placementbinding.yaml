@@ -9,12 +9,6 @@ placementRef:
   apiGroup: cluster.open-cluster-management.io
   kind: Placement
 subjects:
-  - name: install-ocp-gitops
-    apiGroup: policy.open-cluster-management.io
-    kind: Policy
-  - name: install-ocp-pipelines
-    apiGroup: policy.open-cluster-management.io
-    kind: Policy
   - name: install-ocp-acs-hub
     apiGroup: policy.open-cluster-management.io
     kind: Policy
