@@ -2,6 +2,7 @@ apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
   name: php-crud
+  namespace: uc26
 spec:
   lookupPolicy:
     local: false
@@ -21,6 +22,7 @@ kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
   name: php-crud
+  namespace: uc26
 spec:
   nodeSelector: null
   output:
@@ -59,6 +61,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: php-crud
+  namespace: uc26  
 spec:
   replicas: 1
   selector:
@@ -123,6 +126,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: php-crud
+  namespace: uc26
 spec:
   ports:
     - name: 8080-tcp
@@ -145,6 +149,7 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: php-crud
+  namespace: uc26
 spec:
   to:
     kind: Service
