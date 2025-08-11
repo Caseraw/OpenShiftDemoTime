@@ -65,7 +65,7 @@ data:
 
     # NOTE: No --expires-in (not supported in your roxctl build)
     roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
-      central init-bundles generate "${BUNDLE_NAME}" > /bundle/bundle.yaml
+      central init-bundles generate "${BUNDLE_NAME}" --output-secrets /bundle/bundle.yaml
 
     [ -s /bundle/bundle.yaml ]
     chmod 0600 /bundle/bundle.yaml
