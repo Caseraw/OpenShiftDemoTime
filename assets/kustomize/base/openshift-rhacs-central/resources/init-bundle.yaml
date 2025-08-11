@@ -63,20 +63,24 @@ data:
     ENDPOINT="$CENTRAL_HOST"; [[ "$ENDPOINT" == *:* ]] || ENDPOINT="${CENTRAL_HOST}:443"
     : "${BUNDLE_NAME:=hub-central}"
 
-    # Skip generation if an init-bundle with the same name already exists in Central
+    # Skip generation if the bundle already exists in Central.
+    # - tail -n +3   -> drop the two header lines
+    # - awk '{print $1}' -> take the Name column
     if roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
-         central init-bundles list | awk -v name="${BUNDLE_NAME}" 'NR>1 && $1==name {exit 0} END{exit 1}'; then
-      echo "Init-bundle '${BUNDLE_NAME}' already exists in Central; skipping generation."
+         central init-bundles list \
+         | tail -n +3 \
+         | awk '{print $1}' \
+         | grep -Fxq "${BUNDLE_NAME}"; then
+      echo "Init-bundle '${BUNDLE_NAME}' already exists; skipping generation."
       exit 0
     fi
 
-    # Generate new init-bundle
+    # Generate new init-bundle (no --expires-in on your roxctl build)
     roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
       central init-bundles generate "${BUNDLE_NAME}" --output-secrets /bundle/bundle.yaml
 
     [ -s /bundle/bundle.yaml ]
     chmod 0600 /bundle/bundle.yaml
-
   apply.sh: |
     #!/usr/bin/env bash
     set -euo pipefail
