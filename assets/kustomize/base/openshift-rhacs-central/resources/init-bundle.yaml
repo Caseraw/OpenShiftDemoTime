@@ -52,21 +52,24 @@ data:
     set -euo pipefail
     NS="${NAMESPACE:-stackrox}"
 
-    # Wait for the Route to exist (per your command)
-    oc -n "$NS" wait route central --for=jsonpath='{.metadata.name}'=central
+    # Loop until the Route is created by another process (no failure on NotFound)
+    until oc -n "$NS" get route/central >/dev/null 2>&1; do
+      sleep 3
+    done
+
+    # Best-effort wait for the jsonpath condition; ignore timeout/errs
+    oc -n "$NS" wait route/central --for=jsonpath='{.metadata.name}'=central --timeout=10m || true
 
     pw_b64="$(oc -n "$NS" get secret central-htpasswd -o jsonpath='{.data.password}')"
     pw_decoded="$(printf %s "$pw_b64" | base64 -d)"
     host="$(oc -n "$NS" get route central -o jsonpath='{.spec.host}')"
 
-    # 1) Create/refresh audit ConfigMap (not mounted)
     oc -n "$NS" create configmap roxctl-prereqs \
       --from-literal=central_host="$host" \
       --from-literal=password="$pw_decoded" \
       --from-literal=password_b64="$pw_b64" \
       --dry-run=client -o yaml | oc apply -f -
 
-    # 2) Hand-off to tmpfs for next step
     umask 077
     mkdir -p /handoff
     printf %s "$host"       > /handoff/central_host
