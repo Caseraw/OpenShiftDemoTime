@@ -46,6 +46,7 @@ data:
     pw_b64="$(oc -n "$NS" get secret central-htpasswd -o jsonpath='{.data.password}')"
     pw_decoded="$(printf %s "$pw_b64" | base64 -d)"
     host="$(oc -n "$NS" get route central -o jsonpath='{.spec.host}')"
+
     oc -n "$NS" create configmap roxctl-prereqs \
       --from-literal=central_host="$host" \
       --from-literal=password="$pw_decoded" \
@@ -56,13 +57,16 @@ data:
     set -euo pipefail
     umask 077
     mkdir -p /bundle
+
     CENTRAL_HOST="$(cat /prereqs/central_host)"
     PASS="$(cat /prereqs/password)"
     ENDPOINT="$CENTRAL_HOST"; [[ "$ENDPOINT" == *:* ]] || ENDPOINT="${CENTRAL_HOST}:443"
     : "${BUNDLE_NAME:=hub-central}"
-    : "${EXPIRES_IN:=365d}"
+
+    # NOTE: No --expires-in (not supported in your roxctl build)
     roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
-      central init-bundles generate "${BUNDLE_NAME}" --expires-in "${EXPIRES_IN}" > /bundle/bundle.yaml
+      central init-bundles generate "${BUNDLE_NAME}" > /bundle/bundle.yaml
+
     [ -s /bundle/bundle.yaml ]
     chmod 0600 /bundle/bundle.yaml
   apply.sh: |
@@ -70,6 +74,7 @@ data:
     set -euo pipefail
     NS="${NAMESPACE:-stackrox}"
     [ -s /bundle/bundle.yaml ]
+
     oc -n "${NS}" create secret generic rox-init-bundle \
       --from-file=bundle.yaml=/bundle/bundle.yaml \
       --dry-run=client -o yaml | oc apply -f -
@@ -86,47 +91,76 @@ spec:
       serviceAccountName: roxctl-prereqs
       restartPolicy: Never
       securityContext:
-        seccompProfile: { type: RuntimeDefault }  # <- keep, but remove fsGroup
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
+        # Step 1: create/refresh roxctl-prereqs (with oc)
         - name: prereqs
           image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
           command: ["/bin/sh","-c","/scripts/prep.sh"]
           env:
             - name: NAMESPACE
-              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
           volumeMounts:
-            - { name: scripts, mountPath: /scripts }
-          securityContext: { allowPrivilegeEscalation: false }
+            - name: scripts
+              mountPath: /scripts
+          securityContext:
+            allowPrivilegeEscalation: false
 
+        # Step 2: generate init-bundle to shared tmpfs (with roxctl)
         - name: roxctl-generate
           image: registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8:4.8
           command: ["/bin/sh","-c","/scripts/generate.sh"]
           env:
-            - { name: BUNDLE_NAME, value: "hub-central" }
-            - { name: EXPIRES_IN, value: "365d" }
+            - name: BUNDLE_NAME
+              value: "hub-central"
           volumeMounts:
-            - { name: scripts,  mountPath: /scripts }
-            - { name: prereqs,  mountPath: /prereqs, readOnly: true }
-            - { name: bundle,   mountPath: /bundle }
-          securityContext: { allowPrivilegeEscalation: false }
-
+            - name: scripts
+              mountPath: /scripts
+            - name: prereqs
+              mountPath: /prereqs
+              readOnly: true
+            - name: bundle
+              mountPath: /bundle
+          securityContext:
+            allowPrivilegeEscalation: false
       containers:
+        # Step 3: store bundle as a single Secret (with oc)
         - name: apply-secret
           image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
           command: ["/bin/sh","-c","/scripts/apply.sh"]
           env:
             - name: NAMESPACE
-              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
           volumeMounts:
-            - { name: scripts, mountPath: /scripts }
-            - { name: bundle,  mountPath: /bundle, readOnly: true }
-          securityContext: { allowPrivilegeEscalation: false }
-
+            - name: scripts
+              mountPath: /scripts
+            - name: bundle
+              mountPath: /bundle
+              readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+              ephemeral-storage: 8Mi
+            limits:
+              memory: 128Mi
+              ephemeral-storage: 64Mi
       volumes:
         - name: scripts
-          configMap: { name: roxctl-job-scripts, defaultMode: 0755 }
+          configMap:
+            name: roxctl-job-scripts
+            defaultMode: 0755
         - name: prereqs
-          configMap: { name: roxctl-prereqs, defaultMode: 0444 }
+          configMap:
+            name: roxctl-prereqs
+            defaultMode: 0444
         - name: bundle
           emptyDir:
             medium: Memory
