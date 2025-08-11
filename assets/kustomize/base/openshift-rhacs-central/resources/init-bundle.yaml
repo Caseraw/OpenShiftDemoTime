@@ -80,6 +80,17 @@ data:
     ENDPOINT="$CENTRAL_HOST"; [[ "$ENDPOINT" == *:* ]] || ENDPOINT="${CENTRAL_HOST}:443"
     : "${BUNDLE_NAME:=hub-central}"
 
+    echo "[wait] Waiting for Central API to become ready..."
+    ready=0
+    for i in $(seq 1 600); do  # up to 10 minutes
+      if roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
+           central init-bundles list >/dev/null 2>&1; then
+        ready=1; break
+      fi
+      sleep 1
+    done
+    [ "$ready" -eq 1 ] || { echo "Central not ready after timeout"; exit 1; }
+
     # Skip if bundle already exists in Central
     if roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
          central init-bundles list \
@@ -88,7 +99,7 @@ data:
       exit 0
     fi
 
-    # Generate new bundle (no --expires-in for your roxctl build)
+    echo "[gen] Creating init-bundle '${BUNDLE_NAME}'..."
     roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
       central init-bundles generate "${BUNDLE_NAME}" --output-secrets /bundle/bundle.yaml
 
