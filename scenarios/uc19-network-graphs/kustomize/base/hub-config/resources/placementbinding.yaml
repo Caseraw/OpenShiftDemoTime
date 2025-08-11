@@ -15,6 +15,9 @@ subjects:
   - name: acs-central-endpoint-bootstrap
     apiGroup: policy.open-cluster-management.io
     kind: Policy
+  - name: stackrox-secured-cluster
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding

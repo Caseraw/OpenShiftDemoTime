@@ -583,3 +583,80 @@ spec:
                               data:
                                 endpoint: "${H}:443"
                               EOF
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: stackrox-secured-cluster
+  namespace: hub-config
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: stackrox-secured-cluster-config
+        spec:
+          remediationAction: enforce
+          severity: low
+          pruneObjectBehavior: DeleteIfCreated
+          object-templates-raw: |-
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: stackrox
+
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: platform.stackrox.io/v1alpha1
+                kind: SecuredCluster
+                metadata:
+                  name: stackrox-secured-cluster
+                  namespace: stackrox
+                spec:
+                  clusterName: aws-cluster-01
+                  monitoring:
+                    openshift:
+                      enabled: true
+                  auditLogs:
+                    collection: Auto
+                  centralEndpoint: '{{hub ((lookup "v1" "ConfigMap" "spoke-config" "acs-central-endpoint").data.endpoint) | quote hub}}'
+                  network:
+                    policies: Enabled
+                  admissionControl:
+                    bypass: BreakGlassAnnotation
+                    contactImageScanners: DoNotScanInline
+                    listenOnCreates: true
+                    listenOnEvents: true
+                    listenOnUpdates: true
+                    replicas: 3
+                    timeoutSeconds: 10
+                  scannerV4:
+                    db:
+                      persistence:
+                        persistentVolumeClaim:
+                          claimName: scanner-v4-db
+                    indexer:
+                      scaling:
+                        autoScaling: Enabled
+                        maxReplicas: 5
+                        minReplicas: 2
+                        replicas: 3
+                  scanner:
+                    analyzer:
+                      scaling:
+                        autoScaling: Enabled
+                        maxReplicas: 5
+                        minReplicas: 2
+                        replicas: 3
+                    scannerComponent: AutoSense
+                  perNode:
+                    collector:
+                      collection: CORE_BPF
+                      forceCollection: false
+                      imageFlavor: Regular
+                    taintToleration: TolerateTaints
