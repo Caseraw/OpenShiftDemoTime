@@ -2,6 +2,23 @@
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
+  name: hub-cluster-placement
+  namespace: hub-config
+placementRef:
+  name: hub-cluster-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: install-ocp-gitops
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+  - name: install-ocp-acs
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
   name: spoke-clusters-placement
   namespace: spoke-config
 placementRef:
