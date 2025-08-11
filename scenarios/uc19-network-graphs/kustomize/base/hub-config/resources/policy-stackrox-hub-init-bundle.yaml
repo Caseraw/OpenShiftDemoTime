@@ -81,15 +81,15 @@ spec:
           remediationAction: enforce
           pruneObjectBehavior: DeleteIfCreated
           severity: low
-          object-templates-raw: |
-            {{hub -}}
+          object-templates-raw: |-
+            {{- hub -}}
             {{- $raw := fromSecret "stackrox" "rox-init-bundle" "bundle.yaml" | base64dec -}}
             {{- range (splitList "\n---\n" $raw) -}}
             {{- $doc := trim . -}}
             {{- if $doc -}}
-- complianceType: musthave
-  objectDefinition:
-{{ $doc | indent 4 }}
+            - complianceType: musthave
+              objectDefinition:
+{{ $doc | indent 14 }}
             {{- end -}}
             {{- end -}}
             {{- hub -}}
