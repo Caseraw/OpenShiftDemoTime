@@ -2,7 +2,7 @@
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: spoke-clusters-placement
+  name: stackrox-init-bundle-placement
   namespace: stackrox
 spec:
   clusterSets:
@@ -26,21 +26,21 @@ spec:
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
-  name: acs-init-bundle-binding
+  name: stackrox-init-bundle-binding
   namespace: stackrox
 placementRef:
   apiGroup: cluster.open-cluster-management.io
   kind: Placement
-  name: spoke-clusters-placement
+  name: stackrox-init-bundle-placement
 subjects:
   - apiGroup: policy.open-cluster-management.io
     kind: Policy
-    name: acs-init-bundle-secrets
+    name: stackrox-init-bundle-secrets
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: acs-init-bundle-secrets
+  name: stackrox-init-bundle-secrets
   namespace: stackrox
   annotations:
     policy.open-cluster-management.io/description: Distribute RHACS init-bundle to spokes
