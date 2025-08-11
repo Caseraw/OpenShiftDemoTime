@@ -5,3 +5,4 @@ kind: Kustomization
 resources:
   - resources/central.yaml
   - resources/namespace.yaml
+  - resources/init-bundle.yaml
