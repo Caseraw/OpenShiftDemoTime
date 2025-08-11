@@ -43,7 +43,7 @@ placementRef:
 subjects:
   - apiGroup: policy.open-cluster-management.io
     kind: Policy
-    name: stackrox-init-bundle-secrets
+    name: stackrox-init-bundle-copy
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
