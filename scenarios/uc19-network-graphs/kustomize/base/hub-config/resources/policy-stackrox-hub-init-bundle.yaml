@@ -71,7 +71,7 @@ spec:
                 kind: Namespace
                 metadata:
                   name: stackrox
-    # 2) Render/apply the three Secrets from the hub Secret's data.bundle.yaml
+    # 2) Expand the 3 Secrets from hub Secret data.bundle.yaml and apply to spokes
     - objectDefinition:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
@@ -84,12 +84,12 @@ spec:
           object-templates-raw: |
             {{hub -}}
             {{- $raw := fromSecret "stackrox" "rox-init-bundle" "bundle.yaml" | base64dec -}}
-            {{- range (splitList "\n---\n" $raw) }}
+            {{- range (splitList "\n---\n" $raw) -}}
             {{- $doc := trim . -}}
-            {{- if $doc }}
-            - complianceType: musthave
-              objectDefinition:
-            {{ $doc | indent 12 }}
-            {{- end }}
-            {{- end }}
-            {{- hub}}
+            {{- if $doc -}}
+- complianceType: musthave
+  objectDefinition:
+{{ $doc | indent 4 }}
+            {{- end -}}
+            {{- end -}}
+            {{- hub -}}
