@@ -482,17 +482,14 @@ spec:
           remediationAction: enforce
           severity: low
           pruneObjectBehavior: DeleteIfCreated
-          object-templates-raw: |
-            {{hub -}}
-            {{- $r := lookup "route.openshift.io/v1" "Route" "stackrox" "central" -}}
-            {{- $centralHost := $r.spec.host | default "" -}}
-            {{- $clusterName := fromClusterClaim "name" | default "unknown-cluster" -}}
+          object-templates-raw: |-
             - complianceType: musthave
               objectDefinition:
                 apiVersion: v1
                 kind: Namespace
                 metadata:
                   name: stackrox
+
             - complianceType: musthave
               objectDefinition:
                 apiVersion: platform.stackrox.io/v1alpha1
@@ -501,15 +498,13 @@ spec:
                   name: stackrox-secured-cluster
                   namespace: stackrox
                 spec:
-                  # Uses the managed cluster's name; change to a fixed value if desired.
-                  clusterName: {{ $clusterName | quote }}
+                  clusterName: '{{ fromClusterClaim "name" | default "unknown-cluster" }}'
                   monitoring:
                     openshift:
                       enabled: true
                   auditLogs:
                     collection: Auto
-                  # Central route discovered on the HUB
-                  centralEndpoint: {{ printf "%s:443" $centralHost | quote }}
+                  centralEndpoint: '{{hub (printf "%s:443" ((lookup "route.openshift.io/v1" "Route" "stackrox" "central").spec.host)) | quote hub}}'
                   network:
                     policies: Enabled
                   admissionControl:
@@ -545,4 +540,3 @@ spec:
                       forceCollection: false
                       imageFlavor: Regular
                     taintToleration: TolerateTaints
-            {{- hub}}
