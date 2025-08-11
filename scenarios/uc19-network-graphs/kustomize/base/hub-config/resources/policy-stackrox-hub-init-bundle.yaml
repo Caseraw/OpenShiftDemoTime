@@ -7,14 +7,14 @@ metadata:
 spec:
   clusterSet: default
 ---
+---
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
   name: stackrox-init-bundle-placement
   namespace: stackrox
 spec:
-  clusterSets:
-    - default
+  clusterSets: [default]
   tolerations:
     - key: cluster.open-cluster-management.io/unreachable
       operator: Exists
@@ -55,14 +55,14 @@ metadata:
 spec:
   disabled: false
   policy-templates:
+    # 1) Ensure target namespace exists on spokes
     - objectDefinition:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: acs-init-bundle-secrets
+          name: stackrox-namespace
         spec:
           remediationAction: enforce
-          pruneObjectBehavior: DeleteIfCreated
           severity: low
           object-templates:
             - complianceType: musthave
@@ -71,5 +71,15 @@ spec:
                 kind: Namespace
                 metadata:
                   name: stackrox
+    # 2) Render/apply the three Secrets from the hub Secret's data.bundle.yaml
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: stackrox-init-bundle
+        spec:
+          remediationAction: enforce
+          pruneObjectBehavior: DeleteIfCreated
+          severity: low
           object-templates-raw: |
             {{hub fromSecret "stackrox" "rox-init-bundle" "bundle.yaml" | base64dec | autoindent hub}}
