@@ -1,4 +1,4 @@
-# user1 view cluster wide resources
+# view cluster wide resources
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -12,9 +12,7 @@ subjects:
   kind: User
   name: kasra
 ---
-# user1 view cluster wide resources  
-# Dev Env
-# -- wael/admin --
+# Dev Env / admin RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -29,7 +27,7 @@ subjects:
   kind: User
   name: wael
 ---
-# -- marc/edit --
+# Dev Env / edit RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -44,8 +42,7 @@ subjects:
   kind: User
   name: marc
 ---
-# SIT Env
-# -- marc/admin --
+# Dev sit / admin RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -60,8 +57,7 @@ subjects:
   kind: User
   name: marc  
 ---
-# PROD Env
-# -- kasra/admin --
+# Dev prod / admin RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -76,7 +72,7 @@ subjects:
   kind: User
   name: kasra  
 ---
-# -- wael/view --
+# Dev prod / view RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:

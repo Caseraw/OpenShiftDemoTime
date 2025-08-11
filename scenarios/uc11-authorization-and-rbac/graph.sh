@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Generate the DOT file
 # ./graph.sh dev,sit,prod
 
 NAMESPACES=$1
