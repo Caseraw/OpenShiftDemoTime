@@ -294,6 +294,37 @@ spec:
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
+  name: install-ocp-acs-hub
+  namespace: hub-config
+  annotations:
+    policy.open-cluster-management.io/description: Install OpenShift Advanced Cluster Security Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-acs
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: rhacs-operator
+            namespace: rhacs-operator
+            channel: stable
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
   name: install-ocp-acs
   namespace: spoke-config
   annotations:
