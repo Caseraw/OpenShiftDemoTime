@@ -618,7 +618,7 @@ spec:
                   name: stackrox-secured-cluster
                   namespace: stackrox
                 spec:
-                  clusterName: aws-cluster-01
+                  clusterName: '{{ fromClusterClaim "name" | default "unknown-cluster" }}'
                   monitoring:
                     openshift:
                       enabled: true
