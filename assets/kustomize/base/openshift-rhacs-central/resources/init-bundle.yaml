@@ -63,17 +63,30 @@ data:
     ENDPOINT="$CENTRAL_HOST"; [[ "$ENDPOINT" == *:* ]] || ENDPOINT="${CENTRAL_HOST}:443"
     : "${BUNDLE_NAME:=hub-central}"
 
-    # NOTE: No --expires-in (not supported in your roxctl build)
+    # Skip generation if an init-bundle with the same name already exists in Central
+    if roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
+         central init-bundles list | awk -v name="${BUNDLE_NAME}" 'NR>1 && $1==name {exit 0} END{exit 1}'; then
+      echo "Init-bundle '${BUNDLE_NAME}' already exists in Central; skipping generation."
+      exit 0
+    fi
+
+    # Generate new init-bundle
     roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
-      central init-bundles generate "${BUNDLE_NAME}" --output-secrets /bundle/bundle.yaml
+      central init-bundles generate "${BUNDLE_NAME}" > /bundle/bundle.yaml
 
     [ -s /bundle/bundle.yaml ]
     chmod 0600 /bundle/bundle.yaml
+
   apply.sh: |
     #!/usr/bin/env bash
     set -euo pipefail
     NS="${NAMESPACE:-stackrox}"
-    [ -s /bundle/bundle.yaml ]
+
+    # If generation was skipped, there is no bundle to apply
+    if [ ! -s /bundle/bundle.yaml ]; then
+      echo "No bundle.yaml present; skipping Secret creation."
+      exit 0
+    fi
 
     oc -n "${NS}" create secret generic rox-init-bundle \
       --from-file=bundle.yaml=/bundle/bundle.yaml \
