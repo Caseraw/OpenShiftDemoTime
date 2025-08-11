@@ -1,5 +1,13 @@
 ---
 apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: ManagedClusterSetBinding
+metadata:
+  name: default
+  namespace: stackrox
+spec:
+  clusterSet: default
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
   name: stackrox-init-bundle-placement
