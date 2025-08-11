@@ -82,4 +82,14 @@ spec:
           pruneObjectBehavior: DeleteIfCreated
           severity: low
           object-templates-raw: |
-            {{hub fromSecret "stackrox" "rox-init-bundle" "bundle.yaml" | base64dec | autoindent hub}}
+            {{hub -}}
+            {{- $raw := fromSecret "stackrox" "rox-init-bundle" "bundle.yaml" | base64dec -}}
+            {{- range (splitList "\n---\n" $raw) }}
+            {{- $doc := trim . -}}
+            {{- if $doc }}
+            - complianceType: musthave
+              objectDefinition:
+    {{ $doc | indent 12 }}
+            {{- end }}
+            {{- end }}
+            {{- hub}}
