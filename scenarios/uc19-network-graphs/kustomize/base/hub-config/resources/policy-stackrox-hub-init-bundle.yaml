@@ -48,14 +48,14 @@ subjects:
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: stackrox-init-bundle-secrets
+  name: stackrox-init-bundle-copy
   namespace: stackrox
   annotations:
-    policy.open-cluster-management.io/description: Distribute RHACS init-bundle to spokes
+    policy.open-cluster-management.io/description: Copy the hub Secret stackrox/rox-init-bundle to spokes
 spec:
   disabled: false
   policy-templates:
-    # 1) Ensure target namespace exists on spokes
+    # Ensure namespace exists on spokes
     - objectDefinition:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
@@ -71,25 +71,29 @@ spec:
                 kind: Namespace
                 metadata:
                   name: stackrox
-    # 2) Expand the 3 Secrets from hub Secret data.bundle.yaml and apply to spokes
+    # Copy the Secret from hub -> spokes
     - objectDefinition:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: stackrox-init-bundle
+          name: stackrox-init-bundle-copy
         spec:
           remediationAction: enforce
           pruneObjectBehavior: DeleteIfCreated
           severity: low
           object-templates-raw: |-
-            {{hub
-            $raw := (fromSecret "stackrox" "rox-init-bundle" "bundle.yaml" | base64dec)
-            range (splitList "\n---\n" $raw)
-              $doc := trim .
-              if $doc
+            {{hub -}}
+            {{- $s := lookup "v1" "Secret" "stackrox" "rox-init-bundle" -}}
             - complianceType: musthave
               objectDefinition:
-              {{ $doc | indent 14 }}
-              end
-            end
-            hub}}
+                apiVersion: v1
+                kind: Secret
+                metadata:
+                  name: rox-init-bundle
+                  namespace: stackrox
+                type: {{ $s.type | default "Opaque" }}
+                data:
+                  {{- range $k, $v := $s.data }}
+                  {{ $k }}: {{ $v }}
+                  {{- end }}
+            {{- hub -}}
