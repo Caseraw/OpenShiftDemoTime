@@ -9,3 +9,4 @@ resources:
   - resources/placement.yaml
   - resources/placementbinding.yaml
   - resources/policy.yaml
+  - resources/policy-stackrox-hub-init-bundle.yaml

@@ -1,0 +1,67 @@
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: spoke-clusters-placement
+  namespace: stackrox
+spec:
+  clusterSets:
+    - default
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+    - key: cluster.open-cluster-management.io/unavailable
+      operator: Exists
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: environment
+              operator: In
+              values: ["dev"]
+            - key: local-cluster
+              operator: NotIn
+              values: ["true"]
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: acs-init-bundle-binding
+  namespace: stackrox
+placementRef:
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+  name: spoke-clusters-placement
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: acs-init-bundle-secrets
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: acs-init-bundle-secrets
+  namespace: stackrox
+  annotations:
+    policy.open-cluster-management.io/description: Distribute RHACS init-bundle to spokes
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: acs-init-bundle-secrets
+        spec:
+          remediationAction: enforce
+          pruneObjectBehavior: DeleteIfCreated
+          severity: low
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: stackrox
+          object-templates-raw: |
+            {{hub fromSecret "stackrox" "rox-init-bundle" "bundle.yaml" | base64dec | autoindent hub}}
