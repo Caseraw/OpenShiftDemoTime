@@ -79,29 +79,30 @@ data:
     PASS="$(cat /handoff/password)"
     ENDPOINT="$CENTRAL_HOST"; [[ "$ENDPOINT" == *:* ]] || ENDPOINT="${CENTRAL_HOST}:443"
     : "${BUNDLE_NAME:=hub-central}"
+    : "${WAIT_INTERVAL:=5}"   # seconds
 
-    echo "[wait] Waiting for Central API to become ready..."
-    ready=0
-    for i in $(seq 1 600); do  # up to 10 minutes
-      if roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
-           central init-bundles list >/dev/null 2>&1; then
-        ready=1; break
+    echo "[wait] Waiting for Central API to become ready (unlimited)..."
+    attempt=0
+    until roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
+           central init-bundles list >/dev/null 2>&1; do
+      attempt=$((attempt+1))
+      sleep "${WAIT_INTERVAL}"
+      if (( attempt % (60/WAIT_INTERVAL) == 0 )); then
+        echo "[wait] still waiting for Central... elapsed ~$((attempt*WAIT_INTERVAL))s"
       fi
-      sleep 1
     done
-    [ "$ready" -eq 1 ] || { echo "Central not ready after timeout"; exit 1; }
 
     # Skip if bundle already exists in Central
     if roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
          central init-bundles list \
          | tail -n +3 | awk '{print $1}' | grep -Fxq "${BUNDLE_NAME}"; then
-      echo "Init-bundle '${BUNDLE_NAME}' already exists; skipping generation."
+      echo "[gen] Init-bundle '${BUNDLE_NAME}' already exists; skipping generation."
       exit 0
     fi
 
     echo "[gen] Creating init-bundle '${BUNDLE_NAME}'..."
     roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
-      central init-bundles generate "${BUNDLE_NAME}" --output-secrets /bundle/bundle.yaml
+      central init-bundles generate "${BUNDLE_NAME}" > /bundle/bundle.yaml
 
     [ -s /bundle/bundle.yaml ]
     chmod 0600 /bundle/bundle.yaml
