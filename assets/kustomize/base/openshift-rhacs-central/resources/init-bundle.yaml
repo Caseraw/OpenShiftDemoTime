@@ -55,13 +55,13 @@ data:
       --from-literal=password_b64="$pw_b64" \
       --dry-run=client -o yaml | oc apply -f -
 
-    # 2) Write hand-off files to shared tmpfs for next step
+    # 2) Write hand-off files to shared tmpfs for next step (no chmod on mountpoint)
+    umask 077
     mkdir -p /handoff
-    chmod 0700 /handoff
-    printf %s "$host"        > /handoff/central_host
-    printf %s "$pw_decoded"  > /handoff/password
-    printf %s "$pw_b64"      > /handoff/password_b64
-    chmod 0600 /handoff/*
+    printf %s "$host"       > /handoff/central_host
+    printf %s "$pw_decoded" > /handoff/password
+    printf %s "$pw_b64"     > /handoff/password_b64
+    # (files are created 0600 due to umask; no directory chmod needed)
   generate.sh: |
     #!/usr/bin/env bash
     set -euo pipefail
@@ -83,7 +83,7 @@ data:
 
     # Generate new init-bundle (no --expires-in in this roxctl build)
     roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
-      central init-bundles generate "${BUNDLE_NAME}" > /bundle/bundle.yaml
+      central init-bundles generate "${BUNDLE_NAME}" --output-secrets /bundle/bundle.yaml
 
     [ -s /bundle/bundle.yaml ]
     chmod 0600 /bundle/bundle.yaml
