@@ -308,7 +308,7 @@ spec:
         apiVersion: policy.open-cluster-management.io/v1beta1
         kind: OperatorPolicy
         metadata:
-          name: install-ocp-acs
+          name: install-ocp-acs-hub
         spec:
           remediationAction: enforce
           severity: high
