@@ -467,8 +467,8 @@ spec:
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: stackrox-secured-cluster
-  namespace: spoke-config
+  name: acs-central-endpoint-bootstrap
+  namespace: hub-config
 spec:
   remediationAction: enforce
   disabled: false
@@ -477,66 +477,109 @@ spec:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: stackrox-secured-cluster-config
+          name: acs-central-endpoint-bootstrap-config
         spec:
           remediationAction: enforce
           severity: low
           pruneObjectBehavior: DeleteIfCreated
-          object-templates-raw: |-
+          object-templates:
             - complianceType: musthave
               objectDefinition:
                 apiVersion: v1
                 kind: Namespace
-                metadata:
-                  name: stackrox
-
+                metadata: { name: stackrox }
             - complianceType: musthave
               objectDefinition:
-                apiVersion: platform.stackrox.io/v1alpha1
-                kind: SecuredCluster
+                apiVersion: v1
+                kind: Namespace
+                metadata: { name: spoke-config }
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: ServiceAccount
                 metadata:
-                  name: stackrox-secured-cluster
+                  name: central-endpoint-writer
+                  namespace: stackrox
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: read-central-route
+                  namespace: stackrox
+                rules:
+                  - apiGroups: ["route.openshift.io"]
+                    resources: ["routes"]
+                    verbs: ["get","list","watch"]
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: RoleBinding
+                metadata:
+                  name: read-central-route
+                  namespace: stackrox
+                subjects:
+                  - kind: ServiceAccount
+                    name: central-endpoint-writer
+                    namespace: stackrox
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: Role
+                  name: read-central-route
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: write-acs-central-endpoint
+                  namespace: spoke-config
+                rules:
+                  - apiGroups: [""]
+                    resources: ["configmaps"]
+                    verbs: ["get","create","update","patch"]
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: RoleBinding
+                metadata:
+                  name: write-acs-central-endpoint
+                  namespace: spoke-config
+                subjects:
+                  - kind: ServiceAccount
+                    name: central-endpoint-writer
+                    namespace: stackrox
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: Role
+                  name: write-acs-central-endpoint
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: batch/v1
+                kind: Job
+                metadata:
+                  name: acs-central-endpoint-writer
                   namespace: stackrox
                 spec:
-                  clusterName: '{{ fromClusterClaim "name" | default "unknown-cluster" }}'
-                  monitoring:
-                    openshift:
-                      enabled: true
-                  auditLogs:
-                    collection: Auto
-                  centralEndpoint: '{{hub (printf "%s:443" ((lookup "route.openshift.io/v1" "Route" "stackrox" "central").spec.host)) | quote hub}}'
-                  network:
-                    policies: Enabled
-                  admissionControl:
-                    bypass: BreakGlassAnnotation
-                    contactImageScanners: DoNotScanInline
-                    listenOnCreates: true
-                    listenOnEvents: true
-                    listenOnUpdates: true
-                    replicas: 3
-                    timeoutSeconds: 10
-                  scannerV4:
-                    db:
-                      persistence:
-                        persistentVolumeClaim:
-                          claimName: scanner-v4-db
-                    indexer:
-                      scaling:
-                        autoScaling: Enabled
-                        maxReplicas: 5
-                        minReplicas: 2
-                        replicas: 3
-                  scanner:
-                    analyzer:
-                      scaling:
-                        autoScaling: Enabled
-                        maxReplicas: 5
-                        minReplicas: 2
-                        replicas: 3
-                    scannerComponent: AutoSense
-                  perNode:
-                    collector:
-                      collection: CORE_BPF
-                      forceCollection: false
-                      imageFlavor: Regular
-                    taintToleration: TolerateTaints
+                  ttlSecondsAfterFinished: 300
+                  backoffLimit: 1
+                  template:
+                    spec:
+                      serviceAccountName: central-endpoint-writer
+                      restartPolicy: Never
+                      containers:
+                        - name: writer
+                          image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+                          command: ["/bin/bash","-euo","pipefail","-c"]
+                          args:
+                            - |
+                              H=$(oc -n stackrox get route central -o jsonpath='{.spec.host}')
+                              [[ -n "${H:-}" ]] || { echo "central route not found"; exit 1; }
+                              cat <<EOF | oc apply -f -
+                              apiVersion: v1
+                              kind: ConfigMap
+                              metadata:
+                                name: acs-central-endpoint
+                                namespace: spoke-config
+                              data:
+                                endpoint: "${H}:443"
+                              EOF
