@@ -12,9 +12,6 @@ subjects:
   - name: install-ocp-acs-hub
     apiGroup: policy.open-cluster-management.io
     kind: Policy
-  - name: acs-init-bundle-secrets
-    apiGroup: policy.open-cluster-management.io
-    kind: Policy
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
@@ -45,5 +42,8 @@ subjects:
     apiGroup: policy.open-cluster-management.io
     kind: Policy
   - name: install-ocp-acs
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+  - name: acs-init-bundle-secrets
     apiGroup: policy.open-cluster-management.io
     kind: Policy
