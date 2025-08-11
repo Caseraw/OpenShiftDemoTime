@@ -2,7 +2,6 @@ apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
   name: php-crud
-  namespace: dev
 spec:
   lookupPolicy:
     local: false
@@ -73,7 +72,7 @@ spec:
     spec:
       containers:
         - name: php-crud
-          image: 'image-registry.openshift-image-registry.svc:5000/dev/php-crud:latest'
+          image: 'image-registry.openshift-image-registry.svc:5000/uc26/php-crud:latest'
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -81,7 +80,7 @@ spec:
               protocol: TCP
           env:
             - name: DATABASE_SERVICE_NAME
-              value: mysql.dev.svc.cluster.local
+              value: mysql.uc26.svc.cluster.local
             - name: DATABASE_NAME
               valueFrom:
                 secretKeyRef:
