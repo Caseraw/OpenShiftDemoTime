@@ -463,3 +463,86 @@ spec:
                             items:
                               - key: bundle.yaml   # key in Secret.data
                                 path: bundle.yaml  # file path in the container
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: stackrox-secured-cluster
+  namespace: spoke-config
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: stackrox-secured-cluster-config
+        spec:
+          remediationAction: enforce
+          severity: low
+          pruneObjectBehavior: DeleteIfCreated
+          object-templates-raw: |
+            {{hub -}}
+            {{- $r := lookup "route.openshift.io/v1" "Route" "stackrox" "central" -}}
+            {{- $centralHost := $r.spec.host | default "" -}}
+            {{- $clusterName := fromClusterClaim "name" | default "unknown-cluster" -}}
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: stackrox
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: platform.stackrox.io/v1alpha1
+                kind: SecuredCluster
+                metadata:
+                  name: stackrox-secured-cluster
+                  namespace: stackrox
+                spec:
+                  # Uses the managed cluster's name; change to a fixed value if desired.
+                  clusterName: {{ $clusterName | quote }}
+                  monitoring:
+                    openshift:
+                      enabled: true
+                  auditLogs:
+                    collection: Auto
+                  # Central route discovered on the HUB
+                  centralEndpoint: {{ printf "%s:443" $centralHost | quote }}
+                  network:
+                    policies: Enabled
+                  admissionControl:
+                    bypass: BreakGlassAnnotation
+                    contactImageScanners: DoNotScanInline
+                    listenOnCreates: true
+                    listenOnEvents: true
+                    listenOnUpdates: true
+                    replicas: 3
+                    timeoutSeconds: 10
+                  scannerV4:
+                    db:
+                      persistence:
+                        persistentVolumeClaim:
+                          claimName: scanner-v4-db
+                    indexer:
+                      scaling:
+                        autoScaling: Enabled
+                        maxReplicas: 5
+                        minReplicas: 2
+                        replicas: 3
+                  scanner:
+                    analyzer:
+                      scaling:
+                        autoScaling: Enabled
+                        maxReplicas: 5
+                        minReplicas: 2
+                        replicas: 3
+                    scannerComponent: AutoSense
+                  perNode:
+                    collector:
+                      collection: CORE_BPF
+                      forceCollection: false
+                      imageFlavor: Regular
+                    taintToleration: TolerateTaints
+            {{- hub}}

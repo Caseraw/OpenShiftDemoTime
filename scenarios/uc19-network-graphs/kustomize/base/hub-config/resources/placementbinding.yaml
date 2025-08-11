@@ -47,3 +47,6 @@ subjects:
   - name: stackrox-bundle-job
     apiGroup: policy.open-cluster-management.io
     kind: Policy
+  - name: stackrox-secured-cluster
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
