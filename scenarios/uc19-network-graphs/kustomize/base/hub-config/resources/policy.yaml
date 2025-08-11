@@ -579,7 +579,7 @@ spec:
                               kind: ConfigMap
                               metadata:
                                 name: acs-central-endpoint
-                                namespace: spoke-config
+                                namespace: hub-config
                               data:
                                 endpoint: "${H}:443"
                               EOF
@@ -624,7 +624,7 @@ spec:
                       enabled: true
                   auditLogs:
                     collection: Auto
-                  centralEndpoint: '{{hub ((lookup "v1" "ConfigMap" "spoke-config" "acs-central-endpoint").data.endpoint) | quote hub}}'
+                  centralEndpoint: '{{hub ((lookup "v1" "ConfigMap" "hub-config" "acs-central-endpoint").data.endpoint) | quote hub}}'
                   network:
                     policies: Enabled
                   admissionControl:
