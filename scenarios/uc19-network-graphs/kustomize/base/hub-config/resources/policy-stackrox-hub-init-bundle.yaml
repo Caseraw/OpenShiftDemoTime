@@ -93,7 +93,5 @@ spec:
                   namespace: stackrox
                 type: {{ $s.type | default "Opaque" }}
                 data:
-                  {{- range $k, $v := $s.data }}
-                  {{ $k }}: {{ $v }}
-                  {{- end }}
+                  {{ $s.data }}
             {{- hub -}}
