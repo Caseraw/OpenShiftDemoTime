@@ -102,7 +102,7 @@ data:
 
     echo "[gen] Creating init-bundle '${BUNDLE_NAME}'..."
     roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
-      central init-bundles generate "${BUNDLE_NAME}" > /bundle/bundle.yaml
+      central init-bundles generate "${BUNDLE_NAME}" --output-secrets /bundle/bundle.yaml
 
     [ -s /bundle/bundle.yaml ]
     chmod 0600 /bundle/bundle.yaml
