@@ -6,3 +6,5 @@ metadata:
   labels:
     kubernetes.io/metadata.name: stackrox
     openshift.io/cluster-monitoring: 'true'
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"

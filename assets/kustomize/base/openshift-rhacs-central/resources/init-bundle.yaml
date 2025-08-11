@@ -4,7 +4,7 @@ metadata:
   name: roxctl-prereqs
   namespace: stackrox
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "10"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -12,7 +12,7 @@ metadata:
   name: roxctl-prereqs
   namespace: stackrox
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "10"
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -30,7 +30,7 @@ metadata:
   name: roxctl-prereqs
   namespace: stackrox
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "10"
 subjects:
   - kind: ServiceAccount
     name: roxctl-prereqs
@@ -45,7 +45,7 @@ metadata:
   name: roxctl-job-scripts
   namespace: stackrox
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "10"
 data:
   prep.sh: |
     #!/usr/bin/env bash
@@ -125,10 +125,8 @@ metadata:
   name: roxctl-prep-generate-apply
   namespace: stackrox
   annotations:
-    # Run this as a Sync hook on wave 10
     argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/sync-wave: "10"
-    # Ensure Argo CD deletes the Job so it can re-run on future syncs
+    argocd.argoproj.io/sync-wave: "20"
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded,HookFailed
 spec:
   backoffLimit: 0
