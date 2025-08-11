@@ -89,7 +89,7 @@ spec:
             {{- if $doc }}
             - complianceType: musthave
               objectDefinition:
-    {{ $doc | indent 12 }}
+            {{ $doc | indent 12 }}
             {{- end }}
             {{- end }}
             {{- hub}}
