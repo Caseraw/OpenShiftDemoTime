@@ -44,3 +44,6 @@ subjects:
   - name: install-ocp-acs
     apiGroup: policy.open-cluster-management.io
     kind: Policy
+  - name: stackrox-bundle-job
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
