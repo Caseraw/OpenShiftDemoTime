@@ -357,7 +357,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
   name: stackrox-bundle-job
-  namespace: rhacm-policies
+  namespace: spoke-config
 spec:
   remediationAction: enforce
   disabled: false
