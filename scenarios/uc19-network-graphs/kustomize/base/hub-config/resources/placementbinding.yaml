@@ -27,3 +27,6 @@ subjects:
   - name: openshift-monitoring-enableuserworkload
     apiGroup: policy.open-cluster-management.io
     kind: Policy
+  - name: install-ocp-acs
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
