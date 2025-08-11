@@ -3,12 +3,16 @@ kind: ServiceAccount
 metadata:
   name: roxctl-prereqs
   namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: roxctl-prereqs
   namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -25,6 +29,8 @@ kind: RoleBinding
 metadata:
   name: roxctl-prereqs
   namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 subjects:
   - kind: ServiceAccount
     name: roxctl-prereqs
@@ -38,6 +44,8 @@ kind: ConfigMap
 metadata:
   name: roxctl-job-scripts
   namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 data:
   prep.sh: |
     #!/usr/bin/env bash
@@ -48,20 +56,19 @@ data:
     pw_decoded="$(printf %s "$pw_b64" | base64 -d)"
     host="$(oc -n "$NS" get route central -o jsonpath='{.spec.host}')"
 
-    # 1) Create/refresh the audit ConfigMap (not mounted)
+    # 1) Create/refresh audit ConfigMap (not mounted)
     oc -n "$NS" create configmap roxctl-prereqs \
       --from-literal=central_host="$host" \
       --from-literal=password="$pw_decoded" \
       --from-literal=password_b64="$pw_b64" \
       --dry-run=client -o yaml | oc apply -f -
 
-    # 2) Write hand-off files to shared tmpfs for next step (no chmod on mountpoint)
+    # 2) Hand-off to tmpfs for next step
     umask 077
     mkdir -p /handoff
     printf %s "$host"       > /handoff/central_host
     printf %s "$pw_decoded" > /handoff/password
     printf %s "$pw_b64"     > /handoff/password_b64
-    # (files are created 0600 due to umask; no directory chmod needed)
   generate.sh: |
     #!/usr/bin/env bash
     set -euo pipefail
@@ -73,7 +80,7 @@ data:
     ENDPOINT="$CENTRAL_HOST"; [[ "$ENDPOINT" == *:* ]] || ENDPOINT="${CENTRAL_HOST}:443"
     : "${BUNDLE_NAME:=hub-central}"
 
-    # Skip if bundle already exists (handles double-run safety)
+    # Skip if bundle already exists in Central
     if roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
          central init-bundles list \
          | tail -n +3 | awk '{print $1}' | grep -Fxq "${BUNDLE_NAME}"; then
@@ -81,7 +88,7 @@ data:
       exit 0
     fi
 
-    # Generate new init-bundle (no --expires-in in this roxctl build)
+    # Generate new bundle (no --expires-in for your roxctl build)
     roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
       central init-bundles generate "${BUNDLE_NAME}" --output-secrets /bundle/bundle.yaml
 
@@ -92,7 +99,6 @@ data:
     set -euo pipefail
     NS="${NAMESPACE:-stackrox}"
 
-    # If generation was skipped, there is no bundle to apply
     if [ ! -s /bundle/bundle.yaml ]; then
       echo "No bundle.yaml present; skipping Secret creation."
       exit 0
@@ -107,6 +113,12 @@ kind: Job
 metadata:
   name: roxctl-prep-generate-apply
   namespace: stackrox
+  annotations:
+    # Run this as a Sync hook on wave 10
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "10"
+    # Ensure Argo CD deletes the Job so it can re-run on future syncs
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded,HookFailed
 spec:
   backoffLimit: 0
   template:
@@ -151,8 +163,6 @@ spec:
         - name: scripts
           configMap: { name: roxctl-job-scripts, defaultMode: 0755 }
         - name: handoff
-          emptyDir:
-            medium: Memory
+          emptyDir: { medium: Memory }
         - name: bundle
-          emptyDir:
-            medium: Memory
+          emptyDir: { medium: Memory }
