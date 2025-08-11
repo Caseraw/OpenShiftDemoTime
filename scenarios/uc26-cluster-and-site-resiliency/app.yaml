@@ -1,0 +1,160 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: php-crud
+  namespace: dev
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - name: latest
+      annotations: null
+      from:
+        kind: DockerImage
+        name: php-crud
+      generation: 3
+      importPolicy:
+        importMode: Legacy
+      referencePolicy:
+        type: Source  
+---
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: php-crud
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'php-crud:latest'
+  resources: 
+    limits:
+      cpu: '512m'
+      memory: 512Mi
+    requests:
+      cpu: 128m
+      memory: 256Mi
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        namespace: openshift
+        name: 'php:8.2-ubi8'
+  postCommit: {}
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/wael2000/php-crud/'
+    contextDir: /
+  triggers:
+    - type: ImageChange
+      imageChange: {}
+    - type: ConfigChange
+  runPolicy: Serial
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: php-crud
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-crud
+  template:
+    metadata:
+      labels:
+        app: php-crud
+        deployment: php-crud
+    spec:
+      containers:
+        - name: php-crud
+          image: 'image-registry.openshift-image-registry.svc:5000/dev/php-crud:latest'
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+          env:
+            - name: DATABASE_SERVICE_NAME
+              value: mysql.dev.svc.cluster.local
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: database-name
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: database-user
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: database-password
+          resources: 
+            limits:
+              cpu: '512m'
+              memory: 512Mi
+            requests:
+              cpu: 128m
+              memory: 256Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: php-crud
+spec:
+  ports:
+    - name: 8080-tcp
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+    - name: 8443-tcp
+      protocol: TCP
+      port: 8443
+      targetPort: 8443
+  internalTrafficPolicy: Cluster
+  type: ClusterIP
+  ipFamilyPolicy: SingleStack
+  sessionAffinity: None
+  selector:
+    app: php-crud
+    deployment: php-crud
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: php-crud
+spec:
+  to:
+    kind: Service
+    name: php-crud
+    weight: 100
+  port:
+    targetPort: 8080-tcp
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+  
