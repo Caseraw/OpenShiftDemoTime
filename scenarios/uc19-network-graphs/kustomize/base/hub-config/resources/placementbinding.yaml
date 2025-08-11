@@ -15,7 +15,7 @@ subjects:
   - name: install-ocp-pipelines
     apiGroup: policy.open-cluster-management.io
     kind: Policy
-  - name: install-ocp-acs
+  - name: install-ocp-acs-hub
     apiGroup: policy.open-cluster-management.io
     kind: Policy
 ---
