@@ -131,7 +131,7 @@ fi
 # bind service on DC
 oc login --server=$DC_URL -u $DC_UID -p $DC_PWD --insecure-skip-tls-verify=true
 oc project $PROJECT
-skupper service bind postgresql service postgresqldb
+skupper service bind mysql service mysqldb
 menu_array["4"]="✅4) bind service"
 menu_array["7"]="  7) unbind service"
 ;;
@@ -141,7 +141,7 @@ menu_array["7"]="  7) unbind service"
 oc login --server=$AWS_URL -u $AWS_UID -p $AWS_PWD --insecure-skip-tls-verify=true
 oc project $PROJECT
 #skupper service bind rtgs-apis service rtgs-apis-rhsi
-skupper service bind postgresql service postgresqldb
+skupper service bind mysql service mysqldb
 menu_array["5"]="✅5) bind service"
 menu_array["8"]="  8) unbind service"
 ;;
@@ -151,7 +151,7 @@ menu_array["8"]="  8) unbind service"
 # bind service on AWS
 oc login --server=$AZURE_URL -u $AZURE_UID -p $AZURE_PWD --insecure-skip-tls-verify=true
 oc project $PROJECT
-skupper service bind postgresql service postgresqldb
+skupper service bind mysql service mysqldb
 menu_array["6"]="✅6) bind service\033[0m"
 menu_array["9"]="  9) unbind service"
 ;;
@@ -164,7 +164,7 @@ menu_array["9"]="  9) unbind service"
 # unbind the service in DC to see the impact
 oc login --server=$DC_URL -u $DC_UID -p $DC_PWD --insecure-skip-tls-verify=true
 oc project $PROJECT
-skupper service unbind postgresql service postgresqldb
+skupper service unbind mysql service mysqldb
 menu_array["7"]="✅7) unbind service"
 menu_array["4"]="  4) bind service"
 ;;
@@ -173,8 +173,7 @@ menu_array["4"]="  4) bind service"
 # unbind service on AWS
 oc login --server=$AWS_URL -u $AWS_UID -p $AWS_PWD --insecure-skip-tls-verify=true
 oc project $PROJECT
-#skupper service unbind rtgs-apis service rtgs-apis-rhsi
-skupper service unbind postgresql service postgresqldb
+skupper service unbind mysql service mysqldb
 menu_array["8"]="✅8) unbind service"
 menu_array["5"]="  5) bind service"
 ;;
@@ -183,8 +182,7 @@ menu_array["5"]="  5) bind service"
 # unbind service on Azure
 oc login --server=$AZURE_URL -u $AZURE_UID -p $AZURE_PWD --insecure-skip-tls-verify=true
 oc project $PROJECT
-#skupper service unbind rtgs-apis service rtgs-apis-rhsi
-skupper service unbind postgresql service postgresqldb
+skupper service unbind mysql service mysqldb
 menu_array["9"]="✅9) unbind service"
 menu_array["6"]="  6) bind service"
 ;;
