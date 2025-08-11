@@ -7,14 +7,14 @@ metadata:
 spec:
   clusterSet: default
 ---
----
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
   name: stackrox-init-bundle-placement
   namespace: stackrox
 spec:
-  clusterSets: [default]
+  clusterSets:
+    - default
   tolerations:
     - key: cluster.open-cluster-management.io/unreachable
       operator: Exists
