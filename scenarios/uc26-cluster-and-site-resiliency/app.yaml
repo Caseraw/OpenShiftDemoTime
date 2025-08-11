@@ -8,7 +8,6 @@ spec:
     local: false
   tags:
     - name: latest
-      annotations: null
       from:
         kind: DockerImage
         name: php-crud
