@@ -86,10 +86,8 @@ spec:
       serviceAccountName: roxctl-prereqs
       restartPolicy: Never
       securityContext:
-        seccompProfile: { type: RuntimeDefault }
-        fsGroup: 2000  # ensure writable /bundle on OpenShift
+        seccompProfile: { type: RuntimeDefault }  # <- keep, but remove fsGroup
       initContainers:
-        # Step 1: create/refresh roxctl-prereqs using oc
         - name: prereqs
           image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
           command: ["/bin/sh","-c","/scripts/prep.sh"]
@@ -99,22 +97,20 @@ spec:
           volumeMounts:
             - { name: scripts, mountPath: /scripts }
           securityContext: { allowPrivilegeEscalation: false }
-        # Step 2: generate init-bundle using roxctl
+
         - name: roxctl-generate
           image: registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8:4.8
           command: ["/bin/sh","-c","/scripts/generate.sh"]
           env:
-            - name: BUNDLE_NAME
-              value: "hub-central"
-            - name: EXPIRES_IN
-              value: "365d"
+            - { name: BUNDLE_NAME, value: "hub-central" }
+            - { name: EXPIRES_IN, value: "365d" }
           volumeMounts:
-            - { name: scripts, mountPath: /scripts }
-            - { name: prereqs, mountPath: /prereqs, readOnly: true }
-            - { name: bundle,  mountPath: /bundle }
+            - { name: scripts,  mountPath: /scripts }
+            - { name: prereqs,  mountPath: /prereqs, readOnly: true }
+            - { name: bundle,   mountPath: /bundle }
           securityContext: { allowPrivilegeEscalation: false }
+
       containers:
-        # Step 3: store bundle as one Secret using oc
         - name: apply-secret
           image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
           command: ["/bin/sh","-c","/scripts/apply.sh"]
@@ -125,9 +121,7 @@ spec:
             - { name: scripts, mountPath: /scripts }
             - { name: bundle,  mountPath: /bundle, readOnly: true }
           securityContext: { allowPrivilegeEscalation: false }
-          resources:
-            requests: { cpu: 20m, memory: 64Mi, ephemeral-storage: 8Mi }
-            limits:   { memory: 128Mi, ephemeral-storage: 64Mi }
+
       volumes:
         - name: scripts
           configMap: { name: roxctl-job-scripts, defaultMode: 0755 }
@@ -135,4 +129,4 @@ spec:
           configMap: { name: roxctl-prereqs, defaultMode: 0444 }
         - name: bundle
           emptyDir:
-            medium: Memory  # tmpfs: no node-disk persistence
+            medium: Memory
