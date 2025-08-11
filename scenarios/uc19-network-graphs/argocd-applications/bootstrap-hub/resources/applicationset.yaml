@@ -95,7 +95,7 @@ spec:
         - repositoryType: git
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
           targetRevision: UC19-network-graphs
-          path: assets/kustomize/openshift-rhacs-central
+          path: ssets/kustomize/base/openshift-rhacs-central
       destination:
         namespace: stackrox
         server: "{{server}}"
