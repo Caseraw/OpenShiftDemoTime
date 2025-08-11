@@ -12,6 +12,9 @@ subjects:
   - name: install-ocp-acs-hub
     apiGroup: policy.open-cluster-management.io
     kind: Policy
+  - name: acs-central-endpoint-bootstrap
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
