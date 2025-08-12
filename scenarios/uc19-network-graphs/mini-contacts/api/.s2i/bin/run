@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
-exec python -m uvicorn app.main:app --host 0.0.0.0 --port 8080 --workers "${UVICORN_WORKERS:-2}"
+set -euo pipefail
+APP_MODULE="${APP_MODULE:-app.main:app}"   # override to "main:app" if you keep a flat file
+WORKERS="${UVICORN_WORKERS:-1}"            # 1 while we sort imports; raise later
+exec python -m uvicorn "$APP_MODULE" --host 0.0.0.0 --port 8080 --workers "$WORKERS"
