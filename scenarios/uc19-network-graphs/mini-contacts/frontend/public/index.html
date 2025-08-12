@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mini Contacts</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:.5rem;border-bottom:1px solid #ddd}
+    input,button{padding:.5rem;margin:.25rem}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mini Contacts</h1>
+    <a href="/healthz" target="_blank" rel="noreferrer">FE health</a>
+  </header>
+
+  <section>
+    <form id="f">
+      <input id="name" placeholder="Name" required>
+      <input id="email" placeholder="Email" required>
+      <input id="note" placeholder="Note">
+      <button type="submit">Add</button>
+    </form>
+  </section>
+
+  <section>
+    <table>
+      <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Note</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
+
+  <script>
+    async function load(){
+      const res = await fetch('/api/contacts');
+      const data = await res.json();
+      const tbody = document.getElementById('rows');
+      tbody.innerHTML = data.map(c => `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.email}</td><td>${c.note ?? ""}</td></tr>`).join('');
+    }
+    document.getElementById('f').addEventListener('submit', async e => {
+      e.preventDefault();
+      const payload = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        note: document.getElementById('note').value
+      };
+      await fetch('/api/contacts', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      e.target.reset();
+      load();
+    });
+    load();
+  </script>
+</body>
+</html>

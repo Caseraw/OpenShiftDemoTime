@@ -52,7 +52,7 @@ spec:
   ingress:
     - from:
         - podSelector:
-            matchLabels: { app: frontend }   # we'll label the FE pods later
+            matchLabels: { app: frontend }
       ports:
         - protocol: TCP
           port: 8080
@@ -76,3 +76,20 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-router-to-frontend
+  namespace: mini-contacts-frontend
+spec:
+  podSelector: { matchLabels: { app: frontend } }
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              network.openshift.io/policy-group: ingress
+      ports:
+        - protocol: TCP
+          port: 8080

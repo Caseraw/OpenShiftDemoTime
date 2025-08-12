@@ -3,10 +3,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - resources/namespace.yaml
-  - resources/secret.yaml
+  - resources/buildconfig.yaml
   - resources/configmap.yaml
-  - resources/service.yaml
-  - resources/networkpolicy.yaml
+  - resources/deployment.yaml
+  - resources/imagestream.yaml
   - resources/job.yaml
+  - resources/namespace.yaml
+  - resources/networkpolicy.yaml
+  - resources/route.yaml
+  - resources/secret.yaml
+  - resources/service.yaml
   - resources/statefulset.yaml
