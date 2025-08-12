@@ -23,8 +23,8 @@ spec:
       name: mini-contacts-api:1.0
   triggers:
     - type: ConfigChange
-    - type: ImageChange
-    - type: Git
+    - imageChange: {}	
+      type: ImageChange
 ---
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
@@ -50,5 +50,5 @@ spec:
       name: mini-contacts-frontend:1.0
   triggers:
     - type: ConfigChange
-    - type: ImageChange
-    - type: Git
+    - imageChange: {}	
+      type: ImageChange
