@@ -30,7 +30,7 @@ spec:
       sources:
         - path: scenarios/uc19-network-graphs/kustomize/base/spoke-config
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: UC19-network-graphs
+          targetRevision: main
           repositoryType: git
       syncPolicy:
         automated:
@@ -71,7 +71,7 @@ spec:
       sources:
         - path: assets/kustomize/base/openshift-logging-loki
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: UC19-network-graphs
+          targetRevision: main
           repositoryType: git
       syncPolicy:
         automated:
@@ -112,7 +112,7 @@ spec:
       sources:
         - path: assets/kustomize/base/openshift-logging-coo
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: UC19-network-graphs
+          targetRevision: main
           repositoryType: git
       syncPolicy:
         automated:
@@ -153,7 +153,7 @@ spec:
       sources:
         - path: scenarios/uc19-network-graphs/mini-contacts/kustomize/frontend
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: UC19-network-graphs
+          targetRevision: main
           repositoryType: git
       syncPolicy:
         automated:
@@ -194,7 +194,7 @@ spec:
       sources:
         - path: scenarios/uc19-network-graphs/mini-contacts/kustomize/backend
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: UC19-network-graphs
+          targetRevision: main
           repositoryType: git
       syncPolicy:
         automated:

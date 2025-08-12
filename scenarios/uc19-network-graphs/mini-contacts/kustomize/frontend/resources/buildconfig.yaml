@@ -8,7 +8,7 @@ spec:
     type: Git
     git:
       uri: https://github.com/Caseraw/OpenShiftDemoTime.git
-      ref: UC19-network-graphs
+      ref: main
     contextDir: scenarios/uc19-network-graphs/mini-contacts/api
   strategy:
     type: Source
@@ -35,7 +35,7 @@ spec:
     type: Git
     git:
       uri: https://github.com/Caseraw/OpenShiftDemoTime.git
-      ref: UC19-network-graphs
+      ref: main
     contextDir: scenarios/uc19-network-graphs/mini-contacts/frontend
   strategy:
     type: Source
