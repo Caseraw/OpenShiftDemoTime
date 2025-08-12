@@ -121,3 +121,85 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - PruneLast=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: mini-contacts-frontend
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: spoke-clusters-placement
+        requeueAfterSeconds: 10
+  template:
+    metadata:
+      name: mini-contacts-frontend-{{name}}
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+        velero.io/exclude-from-backup: "true"
+    spec:
+      destination:
+        namespace: mini-contacts-frontend
+        server: "{{server}}"
+      project: default
+      sources:
+        - path: scenarios/uc19-network-graphs/mini-contacts/kustomize/frontend
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: UC19-network-graphs
+          repositoryType: git
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: mini-contacts-backend
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: spoke-clusters-placement
+        requeueAfterSeconds: 10
+  template:
+    metadata:
+      name: mini-contacts-backend-{{name}}
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+        velero.io/exclude-from-backup: "true"
+    spec:
+      destination:
+        namespace: mini-contacts-backend
+        server: "{{server}}"
+      project: default
+      sources:
+        - path: scenarios/uc19-network-graphs/mini-contacts/kustomize/backend
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: UC19-network-graphs
+          repositoryType: git
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
