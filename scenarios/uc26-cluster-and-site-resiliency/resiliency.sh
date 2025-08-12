@@ -17,19 +17,67 @@ RESULT=""
 declare menu_array
 declare status_array
 
+
 menu_array["1"]="  1) init"
 menu_array["2"]="  2) init"
 menu_array["3"]="  3) init"
+status_array["1"]="❌"
+status_array["2"]="❌"
+status_array["3"]="❌"
 menu_array["4"]="  4) bind service"
 menu_array["5"]="  5) bind service"
 menu_array["6"]="  6) bind service"
+
+if [[ $DC_STATUS == "on" ]] then
+oc login --server=$DC_URL -u $DC_UID -p $DC_PWD --insecure-skip-tls-verify=true
+DEPLOYMENTS=$(kubectl get deployments -n "$PROJECT" --no-headers 2>/dev/null | grep -E "skupper-router|skupper-service-controller")
+SERVICE=$(oc get svc -n "$PROJECT" | grep -w mysql)
+  if [ -n "$DEPLOYMENTS" ]; then
+      menu_array["1"]="✅1) init"
+      status_array["1"]="✅"
+  fi
+
+  if [ -n "$SERVICE" ]; then
+      menu_array["4"]="✅4) bind service"
+  fi
+fi
+
+if [[ $AWS_STATUS == "on" ]] then
+oc login --server=$AWS_URL -u $AWS_UID -p $AWS_PWD --insecure-skip-tls-verify=true
+DEPLOYMENTS=$(kubectl get deployments -n "$PROJECT" --no-headers 2>/dev/null | grep -E "skupper-router|skupper-service-controller")
+SERVICE=$(oc get svc -n "$PROJECT" | grep -w mysql)
+  if [ -n "$DEPLOYMENTS" ]; then
+      menu_array["2"]="✅2) init"
+      status_array["2"]="✅"
+  fi
+
+  if [ -n "$SERVICE" ]; then
+      menu_array["5"]="✅5) bind service"
+  fi  
+fi
+
+if [[ $AZURE_STATUS == "on" ]] then
+oc login --server=$AZURE_URL -u $AZURE_UID -p $AZURE_PWD --insecure-skip-tls-verify=true
+DEPLOYMENTS=$(kubectl get deployments -n "$PROJECT" --no-headers 2>/dev/null | grep -E "skupper-router|skupper-service-controller")
+SERVICE=$(oc get svc -n "$PROJECT" | grep -w mysql)
+  if [ -n "$DEPLOYMENTS" ]; then
+      menu_array["3"]="✅3) init"
+      status_array["3"]="✅"
+  fi
+
+  if [ -n "$SERVICE" ]; then
+      menu_array["6"]="✅6) bind service"
+  fi  
+fi
+
+
 menu_array["7"]="  7) unbind service"
 menu_array["8"]="  8) unbind service"
 menu_array["9"]="  9) unbind service"
 
-status_array["1"]="❌"
-status_array["2"]="❌"
-status_array["3"]="❌"
+
+
+
 
 # Function to check if an array contains an item
 highlight() {
@@ -215,8 +263,13 @@ fi
 # Make sure you remove local svc for postgresql and rtgs-apis
 oc login --server=$DC_URL -u $DC_UID -p $DC_PWD --insecure-skip-tls-verify=true
 oc project $PROJECT
-skupper service create postgresql 5432 --protocol tcp
-#skupper service create rtgs-apis 8080 --protocol http
+#skupper service create mysql 3306 --protocol tcp
+skupper expose deployment mysql
+
+oc login --server=$AWS_URL -u $AWS_UID -p $AWS_PWD --insecure-skip-tls-verify=true
+oc project $PROJECT
+#skupper service create mysql 3306 --protocol tcp
+skupper expose deployment mysql
 ;;
 
 "d")
