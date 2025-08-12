@@ -45,7 +45,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: mini-contacts-frontend
   labels: { app: frontend }
   annotations:
     image.openshift.io/triggers: >-

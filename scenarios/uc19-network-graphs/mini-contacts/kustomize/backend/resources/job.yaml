@@ -3,7 +3,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: db-migrate
-  namespace: mini-contacts-backend
 spec:
   backoffLimit: 4
   template:

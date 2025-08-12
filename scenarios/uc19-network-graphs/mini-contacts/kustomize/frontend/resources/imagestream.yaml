@@ -3,10 +3,8 @@ apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
   name: mini-contacts-api
-  namespace: mini-contacts-frontend
 ---
 apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
   name: mini-contacts-frontend
-  namespace: mini-contacts-frontend

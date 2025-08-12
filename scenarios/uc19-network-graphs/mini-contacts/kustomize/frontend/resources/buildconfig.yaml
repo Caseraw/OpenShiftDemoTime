@@ -3,7 +3,6 @@ apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
   name: mini-contacts-api
-  namespace: mini-contacts-frontend
 spec:
   source:
     type: Git
@@ -31,7 +30,6 @@ apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
   name: mini-contacts-frontend
-  namespace: mini-contacts-frontend
 spec:
   source:
     type: Git
