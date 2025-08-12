@@ -100,13 +100,11 @@ metadata:
   name: allow-api-egress-dns
   namespace: mini-contacts-frontend
 spec:
-  podSelector: { matchLabels: { app: api } }
+  podSelector:
+    matchLabels:
+      app: api
   policyTypes: ["Egress"]
   egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: openshift-dns
-      ports:
+    - ports:
         - { protocol: UDP, port: 53 }
         - { protocol: TCP, port: 53 }
