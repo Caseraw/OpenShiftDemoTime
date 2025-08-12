@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: mini-contacts-backend
+  labels:
+    app: postgres
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: image-registry.openshift-image-registry.svc:5000/openshift/postgresql:12
+          envFrom:
+            - secretRef:
+                name: secret-db
+          ports:
+            - containerPort: 5432
+              name: pg
+          readinessProbe:
+            exec:
+              command: ["sh","-c","pg_isready -h 127.0.0.1 -p 5432 -U \"$POSTGRESQL_USER\""]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["sh","-c","pg_isready -h 127.0.0.1 -p 5432 -U \"$POSTGRESQL_USER\""]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/pgsql/data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        # storageClassName: <set-in-overlay-if-needed>

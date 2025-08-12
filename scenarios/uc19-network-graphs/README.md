@@ -88,3 +88,11 @@ $ ./scenarios/uc19-network-graphs/bootstrap-spoke-cluster.sh
 ...
 ...
 ...
+
+Checking the PostgreSQL databse:
+- `psql`
+- `\c contacts`
+- `\dt`
+- `\d+ contacts`
+- `select * form contacts;`
+

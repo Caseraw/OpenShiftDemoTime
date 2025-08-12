@@ -1,0 +1,30 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: mini-contacts-api
+  namespace: mini-contacts-frontend
+spec:
+  source:
+    type: Git
+    git:
+      uri: https://example.com/your/monorepo.git   # TODO: set real repo
+      ref: main
+    contextDir: apps/api
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: "3.12-ubi9"
+        namespace: openshift
+        apiGroup: image.openshift.io
+      forcePull: true
+  output:
+    to:
+      kind: ImageStreamTag
+      name: mini-contacts-api:latest
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+    - type: Git
