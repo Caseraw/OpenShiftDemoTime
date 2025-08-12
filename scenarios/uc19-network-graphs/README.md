@@ -85,15 +85,9 @@ $ ./scenarios/uc19-network-graphs/bootstrap-spoke-cluster.sh
 
 ## Demo storyline
 
-
-- Open Managed cluster and show the demo application.
-  - Browse the topology.
-  - Open the app and add some records.
-  - Open the DB and show the records.
 - Open ACM and show ACS Central on Hub Cluster.
   - Open ACS Central UI.
   - Explore Graphs.
-  - Remove NetworkPolicies and Add them again.
 
 ...
 ...
