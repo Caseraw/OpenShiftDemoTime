@@ -1,0 +1,185 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: roxctl-prereqs
+  namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: roxctl-prereqs
+  namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get","create","update","patch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get","create","update","patch"]
+  - apiGroups: ["route.openshift.io"]
+    resources: ["routes"]
+    verbs: ["get","list","watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: roxctl-prereqs
+  namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+subjects:
+  - kind: ServiceAccount
+    name: roxctl-prereqs
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: roxctl-prereqs
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: roxctl-job-scripts
+  namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+data:
+  prep.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    NS="${NAMESPACE:-stackrox}"
+
+    # Loop until the Route is created by another process (no failure on NotFound)
+    until oc -n "$NS" get route/central >/dev/null 2>&1; do
+      sleep 3
+    done
+
+    # Best-effort wait for the jsonpath condition; ignore timeout/errs
+    oc -n "$NS" wait route/central --for=jsonpath='{.metadata.name}'=central --timeout=10m || true
+
+    pw_b64="$(oc -n "$NS" get secret central-htpasswd -o jsonpath='{.data.password}')"
+    pw_decoded="$(printf %s "$pw_b64" | base64 -d)"
+    host="$(oc -n "$NS" get route central -o jsonpath='{.spec.host}')"
+
+    oc -n "$NS" create configmap roxctl-prereqs \
+      --from-literal=central_host="$host" \
+      --from-literal=password="$pw_decoded" \
+      --from-literal=password_b64="$pw_b64" \
+      --dry-run=client -o yaml | oc apply -f -
+
+    umask 077
+    mkdir -p /handoff
+    printf %s "$host"       > /handoff/central_host
+    printf %s "$pw_decoded" > /handoff/password
+    printf %s "$pw_b64"     > /handoff/password_b64
+  generate.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    umask 077
+    mkdir -p /bundle
+
+    CENTRAL_HOST="$(cat /handoff/central_host)"
+    PASS="$(cat /handoff/password)"
+    ENDPOINT="$CENTRAL_HOST"; [[ "$ENDPOINT" == *:* ]] || ENDPOINT="${CENTRAL_HOST}:443"
+    : "${BUNDLE_NAME:=hub-central}"
+    : "${WAIT_INTERVAL:=5}"   # seconds
+
+    echo "[wait] Waiting for Central API to become ready (unlimited)..."
+    attempt=0
+    until roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
+           central init-bundles list >/dev/null 2>&1; do
+      attempt=$((attempt+1))
+      sleep "${WAIT_INTERVAL}"
+      if (( attempt % (60/WAIT_INTERVAL) == 0 )); then
+        echo "[wait] still waiting for Central... elapsed ~$((attempt*WAIT_INTERVAL))s"
+      fi
+    done
+
+    # Skip if bundle already exists in Central
+    if roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
+         central init-bundles list \
+         | tail -n +3 | awk '{print $1}' | grep -Fxq "${BUNDLE_NAME}"; then
+      echo "[gen] Init-bundle '${BUNDLE_NAME}' already exists; skipping generation."
+      exit 0
+    fi
+
+    echo "[gen] Creating init-bundle '${BUNDLE_NAME}'..."
+    roxctl -e "${ENDPOINT}" --insecure-skip-tls-verify -p "${PASS}" \
+      central init-bundles generate "${BUNDLE_NAME}" --output-secrets /bundle/bundle.yaml
+
+    [ -s /bundle/bundle.yaml ]
+    chmod 0600 /bundle/bundle.yaml
+  apply.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    NS="${NAMESPACE:-stackrox}"
+
+    if [ ! -s /bundle/bundle.yaml ]; then
+      echo "No bundle.yaml present; skipping Secret creation."
+      exit 0
+    fi
+
+    oc -n "${NS}" create secret generic rox-init-bundle \
+      --from-file=bundle.yaml=/bundle/bundle.yaml \
+      --dry-run=client -o yaml | oc apply -f -
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: roxctl-prep-generate-apply
+  namespace: stackrox
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "5"
+    # argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded,HookFailed
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: roxctl-prereqs
+      restartPolicy: Never
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
+      initContainers:
+        - name: prereqs
+          image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+          command: ["/bin/sh","-c","/scripts/prep.sh"]
+          env:
+            - name: NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+          volumeMounts:
+            - { name: scripts,  mountPath: /scripts }
+            - { name: handoff,  mountPath: /handoff }
+          securityContext: { allowPrivilegeEscalation: false }
+        - name: roxctl-generate
+          image: registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8:4.8
+          command: ["/bin/sh","-c","/scripts/generate.sh"]
+          env:
+            - { name: BUNDLE_NAME, value: "hub-central" }
+          volumeMounts:
+            - { name: scripts,  mountPath: /scripts }
+            - { name: handoff,  mountPath: /handoff, readOnly: true }
+            - { name: bundle,   mountPath: /bundle }
+          securityContext: { allowPrivilegeEscalation: false }
+      containers:
+        - name: apply-secret
+          image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+          command: ["/bin/sh","-c","/scripts/apply.sh"]
+          env:
+            - name: NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+          volumeMounts:
+            - { name: scripts,  mountPath: /scripts }
+            - { name: bundle,   mountPath: /bundle, readOnly: true }
+          securityContext: { allowPrivilegeEscalation: false }
+      volumes:
+        - name: scripts
+          configMap: { name: roxctl-job-scripts, defaultMode: 0755 }
+        - name: handoff
+          emptyDir: { medium: Memory }
+        - name: bundle
+          emptyDir: { medium: Memory }

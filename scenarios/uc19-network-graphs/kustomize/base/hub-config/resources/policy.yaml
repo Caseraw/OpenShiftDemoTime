@@ -1,0 +1,662 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-gitops
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install GitOps Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-gitops
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: openshift-gitops-operator
+            namespace: openshift-gitops-operator
+            channel: latest
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-pipelines
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install OpenShift Pipelines Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-pipelines
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: openshift-pipelines-operator-rh
+            namespace: openshift-operators
+            channel: latest
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-logging
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Installe the OpenShift Logging Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-logging
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: cluster-logging
+            namespace: openshift-logging
+            channel: stable-6.3
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-loki
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install Loki Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-loki
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: loki-operator
+            namespace: openshift-operators-redhat
+            channel: stable-6.3
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-coo
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install the Cluster Observability Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-coo
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: cluster-observability-operator
+            namespace: openshift-cluster-observability-operator
+            channel: stable
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: openshift-monitoring-enableuserworkload
+  namespace: spoke-config
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: openshift-monitoring-enableuserworkload
+        spec:
+          remediationAction: enforce
+          object-templates:
+            # SA
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: ServiceAccount
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+
+            # RBAC (configmaps)
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+                rules:
+                  - apiGroups: [""]
+                    resources: ["configmaps"]
+                    verbs: ["get","list","create","update","patch"]
+
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: RoleBinding
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+                subjects:
+                  - kind: ServiceAccount
+                    name: openshift-monitoring-enableuserworkload
+                    namespace: openshift-monitoring
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: Role
+                  name: openshift-monitoring-enableuserworkload
+
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: batch/v1
+                kind: Job
+                metadata:
+                  name: openshift-monitoring-enableuserworkload
+                  namespace: openshift-monitoring
+                  labels: { patcher: "true" }
+                  annotations:
+                    policy.open-cluster-management.io/created-by: "openshift-monitoring-enableuserworkload"
+                    script-version: "v9"
+                spec:
+                  backoffLimit: 0
+                  activeDeadlineSeconds: 180
+                  template:
+                    spec:
+                      serviceAccountName: openshift-monitoring-enableuserworkload
+                      restartPolicy: Never
+                      containers:
+                        - name: patch
+                          image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+                          command: ["/bin/bash","-ceu","--"]
+                          args:
+                            - |
+                              set -euo pipefail
+                              NS=openshift-monitoring
+                              CM=cluster-monitoring-config
+
+                              # Read current embedded YAML (may be empty)
+                              CUR="$(oc -n "$NS" get cm "$CM" -o jsonpath='{.data.config\.yaml}' 2>/dev/null || true || :)"
+                              CUR="$(printf "%s" "${CUR:-}" | tr -d '\r')"
+
+                              # 1) Scrub lines we manage
+                              CLEAN="$(printf "%s" "${CUR}" | awk '
+                                /^[[:space:]]*enableUserWorkload[[:space:]]*:/ {next}
+                                /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/ {next}
+                                {print}
+                              ')"
+
+                              # 2) Ensure alertmanagerMain.enableUserAlertmanagerConfig: true
+                              CLEAN="$(printf "%s" "$CLEAN" | sed -E 's/^[[:space:]]*alertmanagerMain:[[:space:]]*\{\}[[:space:]]*$/alertmanagerMain:/')"
+                              if printf "%s\n" "$CLEAN" | grep -qE '^[[:space:]]*alertmanagerMain:[[:space:]]*$'; then
+                                # Section exists: insert/replace the nested key inside it
+                                WITH_AM="$(printf "%s\n" "$CLEAN" | awk '
+                                  BEGIN{insec=0; inserted=0}
+                                  /^[[:space:]]*alertmanagerMain:[[:space:]]*$/ { print; insec=1; next }
+                                  insec && /^[^[:space:]]/ { if(!inserted){ print "  enableUserAlertmanagerConfig: true"; inserted=1 } ; insec=0 }
+                                  {
+                                    if(insec && $0 ~ /^[[:space:]]+enableUserAlertmanagerConfig[[:space:]]*:/){
+                                      print "  enableUserAlertmanagerConfig: true"; inserted=1; next
+                                    }
+                                    print
+                                  }
+                                  END { if(insec && !inserted) print "  enableUserAlertmanagerConfig: true" }
+                                ')"
+                              else
+                                # Section missing: append with a guaranteed leading newline
+                                WITH_AM="$(printf "%s" "$CLEAN")"$'\n''alertmanagerMain:'$'\n''  enableUserAlertmanagerConfig: true'$'\n'
+                              fi
+
+                              # 3) Put enableUserWorkload: true at the top (force newline after it)
+                              NEW="enableUserWorkload: true"$'\n'"$WITH_AM"
+
+                              # Build manifest (block scalar lines indented by 4 spaces) and apply
+                              TMP="$(mktemp)"
+                              {
+                                printf '%s\n' \
+                                  'apiVersion: v1' \
+                                  'kind: ConfigMap' \
+                                  'metadata:' \
+                                  '  name: cluster-monitoring-config' \
+                                  '  namespace: openshift-monitoring' \
+                                  'data:' \
+                                  '  config.yaml: |'
+                                printf "%s" "$NEW" | sed 's/^/    /'
+                                echo
+                              } > "$TMP"
+
+                              echo "Applying updated ConfigMap (script-version v9)..."
+                              oc apply -f "$TMP"
+                              echo "Done."
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-acs-hub
+  namespace: hub-config
+  annotations:
+    policy.open-cluster-management.io/description: Install OpenShift Advanced Cluster Security Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-acs-hub
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: rhacs-operator
+            namespace: rhacs-operator
+            channel: stable
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-ocp-acs
+  namespace: spoke-config
+  annotations:
+    policy.open-cluster-management.io/description: Install OpenShift Advanced Cluster Security Operator
+    policy.open-cluster-management.io/categories: ""
+    policy.open-cluster-management.io/standards: ""
+    policy.open-cluster-management.io/controls: ""
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-ocp-acs
+        spec:
+          remediationAction: enforce
+          severity: high
+          complianceType: musthave
+          subscription:
+            name: rhacs-operator
+            namespace: rhacs-operator
+            channel: stable
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: stackrox-bundle-job
+  namespace: spoke-config
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: stackrox-bundle-job-config
+        spec:
+          remediationAction: enforce
+          severity: low
+          pruneObjectBehavior: DeleteIfCreated
+          object-templates:
+            # (Optional) Ensure namespace exists
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: stackrox
+
+            # ServiceAccount to run the Job
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: ServiceAccount
+                metadata:
+                  name: rox-bundle-applier
+                  namespace: stackrox
+
+            # RBAC: allow applying Secrets in stackrox
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: rox-bundle-applier
+                  namespace: stackrox
+                rules:
+                  - apiGroups: [""]
+                    resources: ["secrets"]
+                    verbs: ["get","list","watch","create","update","patch"]
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: RoleBinding
+                metadata:
+                  name: rox-bundle-applier
+                  namespace: stackrox
+                subjects:
+                  - kind: ServiceAccount
+                    name: rox-bundle-applier
+                    namespace: stackrox
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: Role
+                  name: rox-bundle-applier
+
+            # The one-shot Job
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: batch/v1
+                kind: Job
+                metadata:
+                  name: apply-rox-bundle
+                  namespace: stackrox
+                  labels:
+                    app: apply-rox-bundle
+                spec:
+                  ttlSecondsAfterFinished: 600
+                  backoffLimit: 1
+                  template:
+                    metadata:
+                      labels:
+                        app: apply-rox-bundle
+                    spec:
+                      serviceAccountName: rox-bundle-applier
+                      restartPolicy: Never
+                      containers:
+                        - name: applier
+                          image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+                          command: ["/bin/bash","-euox","pipefail","-c"]
+                          args:
+                            - |
+                              echo "[INFO] Applying bundle secrets from mounted secret ..."
+                              # Secret volume mounts are decoded; use as-is.
+                              if [[ ! -s /rox/bundle.yaml ]]; then
+                                echo "[ERROR] /rox/bundle.yaml not found or empty"; exit 1
+                              fi
+                              # Apply the three secrets contained in the YAML into stackrox ns
+                              oc apply -n stackrox -f /rox/bundle.yaml
+                              echo "[INFO] Done."
+                          volumeMounts:
+                            - name: rox-init-bundle
+                              mountPath: /rox
+                              readOnly: true
+                      volumes:
+                        - name: rox-init-bundle
+                          secret:
+                            secretName: rox-init-bundle
+                            optional: false
+                            items:
+                              - key: bundle.yaml   # key in Secret.data
+                                path: bundle.yaml  # file path in the container
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: acs-central-endpoint-bootstrap
+  namespace: hub-config
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: acs-central-endpoint-bootstrap-config
+        spec:
+          remediationAction: enforce
+          severity: low
+          pruneObjectBehavior: DeleteIfCreated
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata: { name: stackrox }
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata: { name: spoke-config }
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: ServiceAccount
+                metadata:
+                  name: central-endpoint-writer
+                  namespace: stackrox
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: read-central-route
+                  namespace: stackrox
+                rules:
+                  - apiGroups: ["route.openshift.io"]
+                    resources: ["routes"]
+                    verbs: ["get","list","watch"]
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: RoleBinding
+                metadata:
+                  name: read-central-route
+                  namespace: stackrox
+                subjects:
+                  - kind: ServiceAccount
+                    name: central-endpoint-writer
+                    namespace: stackrox
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: Role
+                  name: read-central-route
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: write-acs-central-endpoint
+                  namespace: spoke-config
+                rules:
+                  - apiGroups: [""]
+                    resources: ["configmaps"]
+                    verbs: ["get","create","update","patch"]
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: RoleBinding
+                metadata:
+                  name: write-acs-central-endpoint
+                  namespace: spoke-config
+                subjects:
+                  - kind: ServiceAccount
+                    name: central-endpoint-writer
+                    namespace: stackrox
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: Role
+                  name: write-acs-central-endpoint
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: batch/v1
+                kind: Job
+                metadata:
+                  name: acs-central-endpoint-writer
+                  namespace: stackrox
+                spec:
+                  ttlSecondsAfterFinished: 300
+                  backoffLimit: 1
+                  template:
+                    spec:
+                      serviceAccountName: central-endpoint-writer
+                      restartPolicy: Never
+                      containers:
+                        - name: writer
+                          image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+                          command: ["/bin/bash","-euo","pipefail","-c"]
+                          args:
+                            - |
+                              H=$(oc -n stackrox get route central -o jsonpath='{.spec.host}')
+                              [[ -n "${H:-}" ]] || { echo "central route not found"; exit 1; }
+                              cat <<EOF | oc apply -f -
+                              apiVersion: v1
+                              kind: ConfigMap
+                              metadata:
+                                name: acs-central-endpoint
+                                namespace: spoke-config
+                              data:
+                                endpoint: "${H}:443"
+                              EOF
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: stackrox-secured-cluster
+  namespace: spoke-config
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: stackrox-secured-cluster-config
+        spec:
+          remediationAction: enforce
+          severity: low
+          pruneObjectBehavior: DeleteIfCreated
+          object-templates-raw: |-
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: stackrox
+
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: platform.stackrox.io/v1alpha1
+                kind: SecuredCluster
+                metadata:
+                  name: stackrox-secured-cluster
+                  namespace: stackrox
+                spec:
+                  clusterName: '{{ fromClusterClaim "name" | default "unknown-cluster" }}'
+                  monitoring:
+                    openshift:
+                      enabled: true
+                  auditLogs:
+                    collection: Auto
+                  centralEndpoint: '{{hub ((lookup "v1" "ConfigMap" "spoke-config" "acs-central-endpoint").data.endpoint) | quote hub}}'
+                  network:
+                    policies: Enabled
+                  admissionControl:
+                    bypass: BreakGlassAnnotation
+                    contactImageScanners: DoNotScanInline
+                    listenOnCreates: true
+                    listenOnEvents: true
+                    listenOnUpdates: true
+                    replicas: 3
+                    timeoutSeconds: 10
+                  scannerV4:
+                    db:
+                      persistence:
+                        persistentVolumeClaim:
+                          claimName: scanner-v4-db
+                    indexer:
+                      scaling:
+                        autoScaling: Enabled
+                        maxReplicas: 5
+                        minReplicas: 2
+                        replicas: 3
+                  scanner:
+                    analyzer:
+                      scaling:
+                        autoScaling: Enabled
+                        maxReplicas: 5
+                        minReplicas: 2
+                        replicas: 3
+                    scannerComponent: AutoSense
+                  perNode:
+                    collector:
+                      collection: CORE_BPF
+                      forceCollection: false
+                      imageFlavor: Regular
+                    taintToleration: TolerateTaints

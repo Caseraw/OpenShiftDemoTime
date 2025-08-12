@@ -22,6 +22,7 @@ kustomize build "$KUSTOMIZE_BASE" | oc apply -f -
 # Wait for Operator to be ready
 show_msg "show-date" "INFO" "Wait for Operator to be ready"
 run_cmd --infinite -- oc -n $NS wait ClusterServiceVersion -l olm.managed=true --for=jsonpath='{.status.phase}'=Succeeded
+run_cmd --infinite -- oc wait CustomResourceDefinition multiclusterhubs.operator.open-cluster-management.io --for=jsonpath='{.metadata.name}'=multiclusterhubs.operator.open-cluster-management.io
 
 # Wait for Workload to be ready
 show_msg "show-date" "INFO" "Wait for Operator to be ready"

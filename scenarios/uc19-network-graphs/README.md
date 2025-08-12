@@ -1,9 +1,8 @@
-# Demo - Use Case 18 - Metrics and Logging
+# Demo - Use Case 19 - Network Graphs
 
-This scenario covers the exploration of the integrated OpenShift Monitoring and
-Logging stacks. It aims to provide different points of views such as, Developer,
-Administrator and Fleet Management. Although observability is a large topic to
-cover, this scenario is scoped to provide the entry level experience.
+This scenario covers the exploration of the added value Red Hat Advanced Cluster
+Security provides regarding Networking. It's scoped to only demonstrate some
+Network features.
 
 ## Prerequisites
 
@@ -41,7 +40,7 @@ When the Hub Cluster is setup you need to initialize the demo parts on it. Run
 this script (with an active `oc` login session with the Hub Cluster).
 
 ```shell
-$ ./scenarios/uc18-metrics-and-logs/bootstrap-hub-cluster.sh
+$ ./scenarios/uc19-network-graphs/bootstrap-hub-cluster.sh
 ```
 
 ### AWS - Spoke Cluster
@@ -81,31 +80,22 @@ login with the `oc` CLI command before running the below command.
 Run:
 
 ```shell
-$ ./scenarios/uc18-metrics-and-logs/bootstrap-spoke-cluster.sh
+$ ./scenarios/uc19-network-graphs/bootstrap-spoke-cluster.sh
 ```
 
 ## Demo storyline
 
-## Metrics
+- Open ACM and show ACS Central on Hub Cluster.
+  - Open ACS Central UI.
+  - Explore Graphs.
 
-- Use example deployment "podinfo".
-- Checkout it's performance in the metrics tab of pod, deployment etc.
-- Checkout some cluster dashboards for the worload in the namespace "podinfo".
-- Checkout some other dashboards, cluster, node etc.
-- Checkout the ACM Grafana dashboards for the fleet overview.
+...
+...
 
-- Checkout the custom metrics of "podinfo" on the frontend.
-- Checkout the custom metrics in the metrics query page.
-- Perform some query for demo purposes.
-    - `demo_random_metric{namespace="podinfo"}`
+Checking the PostgreSQL databse:
+- `psql`
+- `\c contacts`
+- `\dt`
+- `\d+ contacts`
+- `select * form contacts;`
 
-## Logs
-
-- Checkout the logs of a pod from the "podinfo" deployment.
-- Explore the pod log interface.
-- Go to Observe => Logs on the left hand side and explore the default landing page.
-- Perform a demo query.
-    - Filter on pod logs with a certain uptime.
-        - `{ k8s_namespace_name="podinfo" } |= "uptime=8:09:49.73356"`
-- Checkout the Node logs.
-- Checkout the logs from ACM point of view, pod, node etc.

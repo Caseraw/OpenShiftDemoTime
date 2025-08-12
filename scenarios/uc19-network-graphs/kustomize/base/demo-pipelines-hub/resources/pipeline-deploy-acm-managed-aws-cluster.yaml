@@ -1,0 +1,24 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: deploy-aws-cluster
+spec:
+  tasks:
+    - name: demo-deploy-aws-cluster
+      params:
+        - name: CLUSTER_NAME
+          value: aws-cluster-01
+        - name: AWS_REGION
+          value: us-east-1
+        - name: CLUSTER_TYPE
+          value: ocp-virt
+        - name: CLUSTER_SIZE
+          value: ocp-virt-small
+        - name: CLUSTER_VERSION
+          value: 4.19.6-multi
+        - name: CLUSTER_SET
+          value: default
+      taskRef:
+        kind: Task
+        name: demo-deploy-aws-cluster
