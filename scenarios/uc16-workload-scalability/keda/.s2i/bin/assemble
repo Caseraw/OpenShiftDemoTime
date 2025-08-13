@@ -1,7 +1,0 @@
-#!/bin/bash
-# Call the default assemble
-/usr/libexec/s2i/assemble
-
-# Install Redis extension
-echo "Installing php-pecl-redis..."
-yum install -y php-pecl-redis && yum clean all
