@@ -3,9 +3,9 @@ oc get pods -n hybrid-workload -o custom-columns='NAME:.metadata.name,STATUS:.st
 ```
 
 ```shell
-oc adm cordon <node1>
+oc adm cordon <INSERT NODE NAME>
 ```
 
 ```shell
-oc adm drain <node1> --delete-emptydir-data --ignore-daemonsets=true --force
+oc adm drain <INSERT NODE NAME> --delete-emptydir-data --ignore-daemonsets=true --force
 ```
