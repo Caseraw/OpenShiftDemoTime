@@ -65,13 +65,14 @@ def cpu_stress(duration_seconds: int):
     return avg_usage
 
 def get_system_metrics():
-    usage = cpu_stress(5)
+    usage = cpu_stress(2)
     
     process = psutil.Process(os.getpid())
     mem_info = process.memory_info()
     cpu_percent = process.cpu_percent(interval=0.05)
     uptime = datetime.now() - datetime.fromtimestamp(process.create_time())
-    return mem_info, cpu_percent, uptime
+    # return mem_info, cpu_percent, uptime
+    return mem_info, usage, uptime
 
 def update_metrics():
     uptime = (datetime.now() - START_TIME).total_seconds()
