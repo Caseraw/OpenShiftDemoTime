@@ -1,0 +1,69 @@
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ksvc-php-crud
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: ksvc-php-crud
+        app.kubernetes.io/instance: ksvc-php-crud
+        app.openshift.io/runtime-version: latest
+      annotations:
+        autoscaling.knative.dev/min-scale: "0"
+        autoscaling.knative.dev/max-scale: "10"
+        autoscaling.knative.dev/target: "200"
+        autoscaling.knative.dev/target-utilization-percentage: "70"
+    spec:
+      containerConcurrency: 0
+      containers:
+        - env:
+            - name: DATABASE_SERVICE_NAME
+              value: galera
+              #value: mysql.sit.svc.cluster.local
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: database-name
+                  name: mysql
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  key: database-user
+                  name: mysql
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: database-password
+                  name: mysql
+          image: 'image-registry.openshift-image-registry.svc:5000/hybrid-workload/php-crud:latest'
+          imagePullPolicy: IfNotPresent
+          name: ksvc-php-crud
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            successThreshold: 1
+            tcpSocket:
+              port: 0
+          resources:
+            limits:
+              cpu: 20m
+              memory: 75Mi
+            requests:
+              cpu: 5m
+              memory: 50Mi          
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+      enableServiceLinks: false
+      timeoutSeconds: 300
+  traffic:
+    - latestRevision: true
+      percent: 100
