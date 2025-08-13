@@ -1,0 +1,37 @@
+---
+apiVersion: policy.networking.k8s.io/v1alpha1
+kind: AdminNetworkPolicy
+metadata:
+  name: anp-deny-all-frontend
+spec:
+  priority: 5
+  subject:
+    namespaces:
+      matchLabels:
+        kubernetes.io/metadata.name: mini-contacts-frontend
+  # Block every source
+  ingress:
+  - name: deny-all-ingress
+    action: Deny
+    from:
+    - namespaces: {}     # valid catch-all for all namespaces
+  # Block every destination (pods, nodes, and all networks)
+  egress:
+  - name: deny-egress-to-pods
+    action: Deny
+    to:
+    - namespaces: {}     # all pods in all namespaces
+  - name: deny-egress-to-nodes
+    action: Deny
+    to:
+    - nodes:
+        matchExpressions:
+        - key: node-role.kubernetes.io/worker
+          operator: Exists
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+  - name: deny-egress-to-internet
+    action: Deny
+    to:
+    - networks:
+      - 0.0.0.0/0        # everything outside pods/nodes
