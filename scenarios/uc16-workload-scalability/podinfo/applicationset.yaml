@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: podinfo
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: podinfo-placement
+        requeueAfterSeconds: 10
+  template:
+    metadata:
+      name: podinfo-{{name}}
+      labels:
+        velero.io/exclude-from-backup: "true"
+    spec:
+      destination:
+        namespace: podinfo
+        server: "{{server}}"
+      project: default
+      sources:
+        - path: scenarios/uc18-metrics-and-logs/podinfo/kustomize
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: main
+          repositoryType: git
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: podinfo-placement
+  namespace: openshift-gitops
+  creationTimestamp: 2025-08-13T17:58:02Z
+  generation: 1
+  resourceVersion: "8399700"
+  uid: 469a2f87-ae32-438a-9b73-cdcc696b7100
+spec:
+  clusterSets:
+    - default
+  numberOfClusters: 1
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: provider
+              operator: In
+              values:
+                - dc
