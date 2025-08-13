@@ -1,0 +1,54 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: mini-contacts-api
+spec:
+  source:
+    type: Git
+    git:
+      uri: https://github.com/Caseraw/OpenShiftDemoTime.git
+      ref: main
+    contextDir: scenarios/uc19-network-graphs/mini-contacts/api
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: python:3.12-ubi9
+        namespace: openshift
+  output:
+    to:
+      kind: ImageStreamTag
+      name: mini-contacts-api:1.0
+  triggers:
+    - type: ConfigChange
+    - imageChange: {}	
+      type: ImageChange
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: mini-contacts-frontend
+spec:
+  source:
+    type: Git
+    git:
+      uri: https://github.com/Caseraw/OpenShiftDemoTime.git
+      ref: main
+    contextDir: scenarios/uc19-network-graphs/mini-contacts/frontend
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: nodejs:18-minimal-ubi9
+        namespace: openshift
+  output:
+    to:
+      kind: ImageStreamTag
+      name: mini-contacts-frontend:1.0
+  triggers:
+    - type: ConfigChange
+    - imageChange: {}	
+      type: ImageChange

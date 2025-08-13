@@ -1,0 +1,94 @@
+---
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: default
+  namespace: stackrox
+spec:
+  clusterSet: default
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: stackrox-init-bundle-placement
+  namespace: stackrox
+spec:
+  clusterSets:
+    - default
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+    - key: cluster.open-cluster-management.io/unavailable
+      operator: Exists
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: environment
+              operator: In
+              values: ["dev"]
+            - key: local-cluster
+              operator: NotIn
+              values: ["true"]
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: stackrox-init-bundle-binding
+  namespace: stackrox
+placementRef:
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+  name: stackrox-init-bundle-placement
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: stackrox-init-bundle-copy
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: stackrox-init-bundle-copy
+  namespace: stackrox
+  annotations:
+    policy.open-cluster-management.io/description: Copy the hub Secret stackrox/rox-init-bundle to spokes
+spec:
+  disabled: false
+  policy-templates:
+    # 1) Ensure namespace exists on spokes
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: stackrox-namespace
+        spec:
+          remediationAction: enforce
+          severity: low
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: stackrox
+    # 2) Copy the Secret (type + data) from the hub -> spokes
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: stackrox-init-bundle-copy
+        spec:
+          remediationAction: enforce
+          pruneObjectBehavior: DeleteIfCreated
+          severity: low
+          object-templates-raw: |
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Secret
+                metadata:
+                  name: rox-init-bundle
+                  namespace: stackrox
+                type: {{hub (default "Opaque" ((lookup "v1" "Secret" "stackrox" "rox-init-bundle").type)) hub}}
+                data:
+                  bundle.yaml: {{hub (index (lookup "v1" "Secret" "stackrox" "rox-init-bundle").data "bundle.yaml") hub}}

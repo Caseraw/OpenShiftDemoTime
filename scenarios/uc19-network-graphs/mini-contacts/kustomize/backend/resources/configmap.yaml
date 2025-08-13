@@ -1,0 +1,27 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-sql
+data:
+  schema.sql: |
+    CREATE TABLE IF NOT EXISTS contacts (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      note TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_contacts_name ON contacts (name);
+    -- simple trigger to update updated_at
+    CREATE OR REPLACE FUNCTION set_updated_at() RETURNS trigger AS $$
+    BEGIN NEW.updated_at = now(); RETURN NEW; END; $$ LANGUAGE plpgsql;
+    DROP TRIGGER IF EXISTS trg_contacts_updated_at ON contacts;
+    CREATE TRIGGER trg_contacts_updated_at
+      BEFORE UPDATE ON contacts FOR EACH ROW EXECUTE PROCEDURE set_updated_at();
+  seed.sql: |
+    INSERT INTO contacts (name, email, note) VALUES
+      ('Ada Lovelace','ada@example.com','First seed'),
+      ('Grace Hopper','grace@example.com','Second seed')
+    ON CONFLICT (email) DO NOTHING;

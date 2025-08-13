@@ -1,0 +1,40 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      labels:
+        job: db-migrate
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: image-registry.openshift-image-registry.svc:5000/openshift/postgresql:12
+          envFrom:
+            - secretRef:
+                name: secret-db
+          volumeMounts:
+            - name: sql
+              mountPath: /init
+          command:
+            - /bin/bash
+            - -lc
+            - |
+              set -euo pipefail
+              echo "Waiting for Postgres..."
+              until pg_isready -h postgres -p 5432 -U "$POSTGRESQL_USER"; do sleep 2; done
+              echo "Applying schema..."
+              PGPASSWORD="$POSTGRESQL_PASSWORD" psql -h postgres -p 5432 -U "$POSTGRESQL_USER" -d "$POSTGRESQL_DATABASE" -f /init/schema.sql
+              if [ -f /init/seed.sql ]; then
+                echo "Seeding data..."
+                PGPASSWORD="$POSTGRESQL_PASSWORD" psql -h postgres -p 5432 -U "$POSTGRESQL_USER" -d "$POSTGRESQL_DATABASE" -f /init/seed.sql
+              fi
+      volumes:
+        - name: sql
+          configMap:
+            name: db-sql
+            defaultMode: 0444

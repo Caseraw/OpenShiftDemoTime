@@ -1,0 +1,55 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: hub-cluster-placement
+  namespace: hub-config
+placementRef:
+  name: hub-cluster-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: install-ocp-acs-hub
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+  - name: acs-central-endpoint-bootstrap
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: spoke-clusters-placement
+  namespace: spoke-config
+placementRef:
+  name: spoke-clusters-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: install-ocp-gitops
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+  - name: install-ocp-pipelines
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+  - name: install-ocp-logging
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+  - name: install-loki
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+  - name: install-coo
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+  - name: openshift-monitoring-enableuserworkload
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+  - name: install-ocp-acs
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+  - name: stackrox-bundle-job
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
+  - name: stackrox-secured-cluster
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy

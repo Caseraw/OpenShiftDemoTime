@@ -1,0 +1,10 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: stackrox
+  labels:
+    kubernetes.io/metadata.name: stackrox
+    openshift.io/cluster-monitoring: 'true'
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
