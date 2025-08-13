@@ -1,20 +1,18 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: php-counter-scaler
+  name: php-mysql-scaler
   namespace: default
 spec:
   scaleTargetRef:
-    name: php-app             # Your Deployment name
-  pollingInterval: 15         # Check every 15s
-  cooldownPeriod: 30          # Scale down after 30s of low usage
+    name: php-app
+  pollingInterval: 15   # seconds
+  cooldownPeriod: 30
   minReplicaCount: 1
   maxReplicaCount: 5
   triggers:
-    - type: prometheus
+    - type: mysql
       metadata:
-        serverAddress: http://prometheus-operated:9090
-        metricName: php_requests_total
-        threshold: "10"  # Scale when requests exceed 50
-        query: |
-          php_requests_total
+        connectionString: "Server=mysql;Database=keda_php;User=demo;Password=demo;"
+        query: "SELECT count FROM request_counter WHERE id=1"
+        targetValue: "10"   # scale when counter >= 50

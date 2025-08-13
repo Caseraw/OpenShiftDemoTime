@@ -1,10 +1,17 @@
 <?php
-$redis = new Redis();
-$redis->connect('redis', 6379);
+require_once "config.php";
 
-// Increment request counter
-$redis->incr('request_count');
+$mysqli = new mysqli("mysql", "demo", "demo", "keda_php");
 
-// Return something
-echo "Hello! Requests so far: " . $redis->get('request_count');
+if ($mysqli->connect_errno) {
+    die("Failed to connect to MySQL: " . $mysqli->connect_error);
+}
+
+// Increment counter
+$mysqli->query("UPDATE request_counter SET count = count + 1 WHERE id = 1");
+
+// Get current count
+$result = $mysqli->query("SELECT count FROM request_counter WHERE id = 1");
+$row = $result->fetch_assoc();
+echo "Requests so far: " . $row['count'];
 ?>
