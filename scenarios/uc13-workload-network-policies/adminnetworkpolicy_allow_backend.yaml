@@ -1,0 +1,74 @@
+---
+apiVersion: policy.networking.k8s.io/v1alpha1
+kind: AdminNetworkPolicy
+metadata:
+  name: anp-allow-backend
+spec:
+  priority: 1  # must be lower than your deny-all priority
+  subject:
+    namespaces:
+      matchLabels:
+        kubernetes.io/metadata.name: mini-contacts-backend
+
+  ingress:
+    # API (frontend ns) -> Postgres on 5432
+    - name: allow-frontend-api-to-postgres
+      action: Allow
+      from:
+        - pods:
+            namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: mini-contacts-frontend
+            podSelector:
+              matchLabels:
+                app: api
+      ports:
+        - portNumber:
+            protocol: TCP
+            port: 5432
+
+    # db-migrate (same ns) -> Postgres on 5432
+    - name: allow-db-migrate-to-postgres
+      action: Allow
+      from:
+        - pods:
+            namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: mini-contacts-backend
+            podSelector:
+              matchLabels:
+                job: db-migrate
+      ports:
+        - portNumber:
+            protocol: TCP
+            port: 5432
+
+  egress:
+    # db-migrate (and any backend pod) -> Postgres on 5432
+    - name: allow-egress-to-postgres
+      action: Allow
+      to:
+        - pods:
+            namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: mini-contacts-backend
+            podSelector:
+              matchLabels:
+                app: postgres
+      ports:
+        - portNumber:
+            protocol: TCP
+            port: 5432
+
+    # DNS egress to openshift-dns namespace
+    - name: allow-dns
+      action: Allow
+      to:
+        - namespaces:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-dns
+      ports:
+        - portNumber: { protocol: UDP, port: 53 }
+        - portNumber: { protocol: TCP, port: 53 }
+        - portNumber: { protocol: UDP, port: 5353 }
+        - portNumber: { protocol: TCP, port: 5353 }

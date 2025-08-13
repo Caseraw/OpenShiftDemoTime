@@ -1,0 +1,86 @@
+---
+apiVersion: policy.networking.k8s.io/v1alpha1
+kind: AdminNetworkPolicy
+metadata:
+  name: anp-allow-frontend
+spec:
+  priority: 1  # must be lower than your deny-all priority
+  subject:
+    namespaces:
+      matchLabels:
+        kubernetes.io/metadata.name: mini-contacts-frontend
+
+  ingress:
+    # Router -> frontend pods on 8080
+    - name: allow-router-to-frontend-8080
+      action: Allow
+      from:
+        - namespaces:
+            matchLabels:
+              policy-group.network.openshift.io/ingress: ""
+      ports:
+        - portNumber:
+            protocol: TCP
+            port: 8080
+
+    # Frontend pods -> (ingress to) API pods (same ns) on 8080
+    - name: allow-frontend-to-api-8080-ing
+      action: Allow
+      from:
+        - pods:
+            namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: mini-contacts-frontend
+            podSelector:
+              matchLabels:
+                app: frontend
+      ports:
+        - portNumber:
+            protocol: TCP
+            port: 8080
+
+  egress:
+    # Frontend pods -> API pods (same ns) on 8080
+    - name: allow-frontend-to-api-8080-eg
+      action: Allow
+      to:
+        - pods:
+            namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: mini-contacts-frontend
+            podSelector:
+              matchLabels:
+                app: api
+      ports:
+        - portNumber:
+            protocol: TCP
+            port: 8080
+
+    # API pods (this ns) -> Postgres (backend) on 5432
+    - name: allow-api-to-backend-postgres
+      action: Allow
+      to:
+        - pods:
+            namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: mini-contacts-backend
+            podSelector:
+              matchLabels:
+                app: postgres
+      ports:
+        - portNumber:
+            protocol: TCP
+            port: 5432
+
+    # DNS egress to openshift-dns namespace
+    - name: allow-dns
+      action: Allow
+      to:
+        - namespaces:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-dns
+      ports:
+        - portNumber: { protocol: UDP, port: 53 }
+        - portNumber: { protocol: TCP, port: 53 }
+        - portNumber: { protocol: UDP, port: 5353 }
+        - portNumber: { protocol: TCP, port: 5353 }
