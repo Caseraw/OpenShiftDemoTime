@@ -1,0 +1,5 @@
+FROM registry.access.redhat.com/ubi8/php-81
+
+USER root
+RUN yum install -y php-pecl-redis && yum clean all
+USER 1001 
