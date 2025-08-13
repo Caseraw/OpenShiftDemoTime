@@ -10,7 +10,7 @@ spec:
         labelSelector:
           matchLabels:
             cluster.open-cluster-management.io/placement: podinfo-placement
-        requeueAfterSeconds: 10
+        requeueAfterSeconds: 30
   template:
     metadata:
       name: podinfo-{{name}}
@@ -22,9 +22,9 @@ spec:
         server: "{{server}}"
       project: default
       sources:
-        - path: scenarios/uc18-metrics-and-logs/podinfo/kustomize
+        - path: scenarios/uc16-workload-scalability/podinfo
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: main
+          targetRevision: UC16--Workload-scalability
           repositoryType: git
       syncPolicy:
         automated:
@@ -39,10 +39,6 @@ kind: Placement
 metadata:
   name: podinfo-placement
   namespace: openshift-gitops
-  creationTimestamp: 2025-08-13T17:58:02Z
-  generation: 1
-  resourceVersion: "8399700"
-  uid: 469a2f87-ae32-438a-9b73-cdcc696b7100
 spec:
   clusterSets:
     - default
