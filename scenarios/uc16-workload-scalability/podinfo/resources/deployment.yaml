@@ -19,6 +19,13 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
+          resources:
+            limits:
+              cpu: 100m
+              memory: 40Mi
+            requests:
+              cpu: 50m
+              memory: 20Mi            
           env:
             - name: POD_IP
               valueFrom:
