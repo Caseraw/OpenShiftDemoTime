@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/php-81
+FROM php:8.2-ubi8
 
 USER root
 RUN yum install -y php-pecl-redis && yum clean all
