@@ -2,11 +2,24 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: podinfo
+  name: scaling
+  namespace: scaling
+  labels:
+    app: scaling
+    app.kubernetes.io/component: scaling
+    app.kubernetes.io/instance: scaling
+    app.kubernetes.io/name: scaling
+    app.kubernetes.io/part-of: scaling
+    app.openshift.io/runtime: php
+    app.openshift.io/runtime-version: 8.2-ubi8
+  annotations:
+    app.openshift.io/vcs-ref: ''
+    app.openshift.io/vcs-uri: 'https://github.com/wael2000/php-cpu-intense'
+    openshift.io/generated-by: OpenShiftWebConsole  
 spec:
   to:
     kind: Service
-    name: podinfo
+    name: scaling
     weight: 100
   port:
     targetPort: 8080

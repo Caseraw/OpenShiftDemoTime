@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: podinfo
+  name: scaling
   labels:
-    kubernetes.io/metadata.name: podinfo
+    kubernetes.io/metadata.name: scaling
   annotations:
-    openshift.io/description: "podinfo"
-    openshift.io/display-name: "podinfo"
+    openshift.io/description: "scaling"
+    openshift.io/display-name: "scaling"

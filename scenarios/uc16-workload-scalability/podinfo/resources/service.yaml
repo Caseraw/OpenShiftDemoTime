@@ -1,15 +1,31 @@
----
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
-  name: podinfo
+  name: scaling
+  namespace: scaling
   labels:
-    app: podinfo
+    app: scaling
+    app.kubernetes.io/component: scaling
+    app.kubernetes.io/instance: scaling
+    app.kubernetes.io/name: scaling
+    app.kubernetes.io/part-of: scaling
+    app.openshift.io/runtime: php
+    app.openshift.io/runtime-version: 8.2-ubi8
+  annotations:
+    app.openshift.io/vcs-ref: ''
+    app.openshift.io/vcs-uri: 'https://github.com/wael2000/php-cpu-intense'
+    openshift.io/generated-by: OpenShiftWebConsole
 spec:
-  selector:
-    app: podinfo
   ports:
-    - name: http
-      port: 80
+    - name: 8080-tcp
       protocol: TCP
+      port: 8080
       targetPort: 8080
+    - name: 8443-tcp
+      protocol: TCP
+      port: 8443
+      targetPort: 8443
+  sessionAffinity: None
+  selector:
+    app: scaling
+    deployment: scaling
