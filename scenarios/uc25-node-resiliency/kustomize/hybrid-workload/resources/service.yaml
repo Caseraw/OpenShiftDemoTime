@@ -1,0 +1,109 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: galera-01
+spec:
+  selector:
+    vm.kubevirt.io/name: galera-01
+  ports:
+    - protocol: TCP
+      name: tcp-3306
+      port: 3306
+      targetPort: 3306
+    - protocol: TCP
+      name: tcp-4567
+      port: 4567
+      targetPort: 4567
+    - protocol: TCP
+      name: tcp-4568
+      port: 4568
+      targetPort: 4568
+    - protocol: TCP
+      name: tcp-4444
+      port: 4444
+      targetPort: 4444
+    - protocol: UDP
+      name: udp-4567
+      port: 4567
+      targetPort: 4567
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: galera-02
+spec:
+  selector:
+    vm.kubevirt.io/name: galera-02
+  ports:
+    - protocol: TCP
+      name: tcp-3306
+      port: 3306
+      targetPort: 3306
+    - protocol: TCP
+      name: tcp-4567
+      port: 4567
+      targetPort: 4567
+    - protocol: TCP
+      name: tcp-4568
+      port: 4568
+      targetPort: 4568
+    - protocol: TCP
+      name: tcp-4444
+      port: 4444
+      targetPort: 4444
+    - protocol: UDP
+      name: udp-4567
+      port: 4567
+      targetPort: 4567
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: galera
+spec:
+  selector:
+    galera/cluster: galera
+  ports:
+    - protocol: TCP
+      name: tcp-3306
+      port: 3306
+      targetPort: 3306
+    - protocol: TCP
+      name: tcp-4567
+      port: 4567
+      targetPort: 4567
+    - protocol: TCP
+      name: tcp-4568
+      port: 4568
+      targetPort: 4568
+    - protocol: TCP
+      name: tcp-4444
+      port: 4444
+      targetPort: 4444
+    - protocol: UDP
+      name: udp-4567
+      port: 4567
+      targetPort: 4567
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: php-crud
+spec:
+  ports:
+    - name: 8080-tcp
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+    - name: 8443-tcp
+      protocol: TCP
+      port: 8443
+      targetPort: 8443
+  internalTrafficPolicy: Cluster
+  type: ClusterIP
+  ipFamilyPolicy: SingleStack
+  sessionAffinity: None
+  selector:
+    app: php-crud
+    deployment: php-crud
