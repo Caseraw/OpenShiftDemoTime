@@ -24,7 +24,7 @@ spec:
       sources:
         - path: scenarios/uc16-workload-scalability/podinfo
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: UC16--Workload-scalability
+          targetRevision: main
           repositoryType: git
       syncPolicy:
         automated:

@@ -11,7 +11,7 @@ spec:
     git:
       uri: "https://github.com/Caseraw/OpenShiftDemoTime.git"
       ref: main
-    contextDir: scenarios/uc18-metrics-and-logs/podinfo
+    contextDir: scenarios/uc16-workload-scalability/podinfo
   strategy:
     type: Source
     sourceStrategy:
