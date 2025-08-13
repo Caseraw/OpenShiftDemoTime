@@ -1,0 +1,20 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: php-counter-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: php-app             # Your Deployment name
+  pollingInterval: 15         # Check every 15s
+  cooldownPeriod: 30          # Scale down after 30s of low usage
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-operated:9090
+        metricName: php_requests_total
+        threshold: "10"  # Scale when requests exceed 50
+        query: |
+          php_requests_total
