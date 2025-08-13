@@ -24,37 +24,37 @@ show_msg "show-date" "INFO" "Script" "$SCRIPT"
 source "$SCRIPT"
 show_msg "show-date" "INFO" "Bootstrap - Login to OpenShift" "Completed" "✅"
 
-# 1) Install the OpenShift Local Storage Operator
-SCRIPT="$COMPONENTS_BASE/openshift-local-storage/setup.sh"
+# # 1) Install the OpenShift Local Storage Operator
+# SCRIPT="$COMPONENTS_BASE/openshift-local-storage/setup.sh"
 
-show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Local Storage Operator" "⏳"
-show_msg "show-date" "INFO" "Script" "$SCRIPT"
-source "$SCRIPT"
-show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Local Storage Operator" "Completed" "✅"
+# show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Local Storage Operator" "⏳"
+# show_msg "show-date" "INFO" "Script" "$SCRIPT"
+# source "$SCRIPT"
+# show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Local Storage Operator" "Completed" "✅"
 
-# 2) Install the OpenShift Data Foundation Operator
-SCRIPT="$COMPONENTS_BASE/openshift-storage/setup.sh"
+# # 2) Install the OpenShift Data Foundation Operator
+# SCRIPT="$COMPONENTS_BASE/openshift-storage/setup.sh"
 
-show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Data Foundation Operator" "⏳"
-show_msg "show-date" "INFO" "Script" "$SCRIPT"
-source "$SCRIPT"
-show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Data Foundation Operator" "Completed" "✅"
+# show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Data Foundation Operator" "⏳"
+# show_msg "show-date" "INFO" "Script" "$SCRIPT"
+# source "$SCRIPT"
+# show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Data Foundation Operator" "Completed" "✅"
 
-# 3) Install the OpenShift Virtualization Operator
-SCRIPT="$COMPONENTS_BASE/openshift-virtualization/setup.sh"
+# # 3) Install the OpenShift Virtualization Operator
+# SCRIPT="$COMPONENTS_BASE/openshift-virtualization/setup.sh"
 
-show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Virtualization Operator" "⏳"
-show_msg "show-date" "INFO" "Script" "$SCRIPT"
-source "$SCRIPT"
-show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Virtualization Operator" "Completed" "✅"
+# show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Virtualization Operator" "⏳"
+# show_msg "show-date" "INFO" "Script" "$SCRIPT"
+# source "$SCRIPT"
+# show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Virtualization Operator" "Completed" "✅"
 
-# 4) Install the OpenShift Serverless Operator
-SCRIPT="$COMPONENTS_BASE/openshift-serverless/setup.sh"
+# # 4) Install the OpenShift Serverless Operator
+# SCRIPT="$COMPONENTS_BASE/openshift-serverless/setup.sh"
 
-show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Serverless Operator" "⏳"
-show_msg "show-date" "INFO" "Script" "$SCRIPT"
-source "$SCRIPT"
-show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Serverless Operator" "Completed" "✅"
+# show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Serverless Operator" "⏳"
+# show_msg "show-date" "INFO" "Script" "$SCRIPT"
+# source "$SCRIPT"
+# show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Serverless Operator" "Completed" "✅"
 
 # 5) Deploy the first ArgoCD Applications to initiate with
 show_msg "show-date" "INFO" "Bootstrap - Deploy the first ArgoCD Applications to initiate" "⏳"
