@@ -13,3 +13,4 @@ resources:
   - resources/servicemonitor.yaml
   - resources/route.yaml
   - resources/prometheusrule.yaml
+  - hpa.yaml
