@@ -1,0 +1,55 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-check-kubeadmin
+  namespace: hub-config
+spec:
+  disabled: false
+  remediationAction: inform
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: check-kubeadmin-secret
+        spec:
+          remediationAction: inform
+          severity: medium
+          object-templates:
+            - complianceType: mustnothave
+              objectDefinition:
+                apiVersion: v1
+                kind: Secret
+                metadata:
+                  name: kubeadmin
+                  namespace: kube-system
+
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: policy-check-kubeadmin-placement
+  namespace: hub-config
+spec:
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+    - key: cluster.open-cluster-management.io/unavailable
+      operator: Exists
+  clusterSets:
+    - default
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: policy-check-kubeadmin-placement
+  namespace: hub-config
+placementRef:
+  name: policy-check-kubeadmin-placement
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+subjects:
+  - name: policy-check-kubeadmin
+    apiGroup: policy.open-cluster-management.io
+    kind: Policy
