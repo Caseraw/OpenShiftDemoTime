@@ -31,7 +31,6 @@ spec:
     requests:
       storage: 1Gi
   storageClassName: gp3-csi
-  volumeMode: Filesystem
 ---
 kind: DeploymentConfig
 apiVersion: apps.openshift.io/v1
