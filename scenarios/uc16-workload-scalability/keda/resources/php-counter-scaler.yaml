@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: mysql-secrets
-  namespace: sclaing
+  namespace: scaling
 type: Opaque
 data:
   mysql_conn_str: ZGVtbzpkZW1vQHRjcChteXNxbC5zY2xhaW5nLnN2Yy5jbHVzdGVyLmxvY2FsOjMzMDYpL2tlZGFfcGhw
@@ -12,7 +12,7 @@ apiVersion: keda.sh/v1alpha1
 kind: TriggerAuthentication
 metadata:
   name: keda-trigger-auth-mysql-secret
-  namespace: sclaing
+  namespace: scaling
 spec:
   secretTargetRef:
   - parameter: connectionString
@@ -23,7 +23,7 @@ apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: php-mysql-scaler
-  namespace: sclaing
+  namespace: scaling
 spec:
   scaleTargetRef:
     name: php-app

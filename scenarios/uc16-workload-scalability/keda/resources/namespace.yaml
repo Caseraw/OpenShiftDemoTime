@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: scaling
+  labels:
+    kubernetes.io/metadata.name: scaling
+  annotations:
+    openshift.io/description: "scaling"
+    openshift.io/display-name: "scaling"

@@ -1,0 +1,17 @@
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  annotations:
+    app.openshift.io/vcs-ref: ''
+    app.openshift.io/vcs-uri: 'https://github.com/wael2000/php-cpu-intense'
+    openshift.io/generated-by: OpenShiftWebConsole
+  resourceVersion: '8582360'
+  name: scaling
+  labels:
+    app: scaling
+    app.kubernetes.io/component: scaling
+    app.kubernetes.io/instance: scaling
+    app.kubernetes.io/name: scaling
+    app.kubernetes.io/part-of: scaling
+    app.openshift.io/runtime: php
+    app.openshift.io/runtime-version: 8.2-ubi8

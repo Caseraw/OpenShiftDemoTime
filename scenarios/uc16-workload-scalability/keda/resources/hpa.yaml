@@ -1,0 +1,30 @@
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v2
+metadata:
+  name: scaling-hpa
+  namespace: scaling
+spec:
+  # HPA will only wait 10 seconds after seeing a lower CPU load before making a scale-down decision.
+  # Type: Percent with value 100 means:
+  # In each periodSeconds window (15s here), HPA can scale down by up to 100% of current pods.
+  # In other words, if you have 3 pods and CPU drops, HPA can go straight to minReplicas (1) in one step.
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 10   # default is 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: scaling
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50

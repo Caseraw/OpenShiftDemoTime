@@ -1,0 +1,52 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  annotations:
+    app.openshift.io/vcs-ref: ''
+    app.openshift.io/vcs-uri: 'https://github.com/Caseraw/OpenShiftDemoTime'
+    openshift.io/generated-by: OpenShiftWebConsole
+  name: scaling
+  namespace: scaling
+  labels:
+    app: scaling
+    app.kubernetes.io/component: scaling
+    app.kubernetes.io/instance: scaling
+    app.kubernetes.io/name: scaling
+    app.kubernetes.io/part-of: scaling
+    app.openshift.io/runtime: php
+    app.openshift.io/runtime-version: 8.2-ubi8
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'scaling:latest'
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        namespace: openshift
+        name: 'php:8.2-ubi8'
+  postCommit: {}
+  source:
+    type: Git
+    git:
+      uri: 'https://github.com/wael2000/php-cpu-intense'
+    contextDir: /
+  triggers:
+    - type: Generic
+      generic:
+        secretReference:
+          name: scaling-generic-webhook-secret
+    - type: GitHub
+      github:
+        secretReference:
+          name: scaling-github-webhook-secret
+    - type: ImageChange
+      imageChange: {}
+    - type: ConfigChange
+  runPolicy: Serial
