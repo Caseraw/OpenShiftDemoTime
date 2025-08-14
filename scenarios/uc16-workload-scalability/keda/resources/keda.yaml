@@ -1,0 +1,18 @@
+# Kera Controller Configuration
+# This file configures the Keda controller for workload scalability in the OpenShift environment. 
+# It includes settings for admission webhooks, metrics server, and operator logging.
+apiVersion: keda.sh/v1alpha1
+kind: KedaController
+metadata:
+  name: keda
+  namespace: openshift-keda
+spec:
+  admissionWebhooks:
+    logEncoder: console
+    logLevel: info
+  metricsServer:
+    logLevel: '0'
+  operator:
+    logEncoder: console
+    logLevel: info
+  watchNamespace: scaling
