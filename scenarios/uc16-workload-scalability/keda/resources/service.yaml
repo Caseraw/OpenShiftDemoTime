@@ -1,19 +1,19 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: scaling
+  name: php-app
   namespace: scaling
   labels:
-    app: scaling
-    app.kubernetes.io/component: scaling
-    app.kubernetes.io/instance: scaling
-    app.kubernetes.io/name: scaling
-    app.kubernetes.io/part-of: scaling
+    app: php-app
+    app.kubernetes.io/component: php-app
+    app.kubernetes.io/instance: php-app
+    app.kubernetes.io/name: php-app
+    app.kubernetes.io/part-of: php-app
     app.openshift.io/runtime: php
     app.openshift.io/runtime-version: 8.2-ubi8
   annotations:
-    app.openshift.io/vcs-ref: ''
-    app.openshift.io/vcs-uri: 'https://github.com/wael2000/php-cpu-intense'
+    app.openshift.io/vcs-ref: main
+    app.openshift.io/vcs-uri: 'https://github.com/Caseraw/OpenShiftDemoTime'
     openshift.io/generated-by: OpenShiftWebConsole
 spec:
   ports:
@@ -27,5 +27,5 @@ spec:
       targetPort: 8443
   sessionAffinity: None
   selector:
-    app: scaling
-    deployment: scaling
+    app: php-app
+    deployment: php-app

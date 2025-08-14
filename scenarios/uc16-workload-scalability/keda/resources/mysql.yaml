@@ -1,0 +1,151 @@
+kind: Secret
+apiVersion: v1
+metadata:
+  name: mysql
+  namespace: scaling
+  labels:
+    app.openshift.io/runtime: mysql-database
+    template: mysql-persistent-template
+  annotations:
+    template.openshift.io/expose-database_name: '{.data[''database-name'']}'
+    template.openshift.io/expose-password: '{.data[''database-password'']}'
+    template.openshift.io/expose-root_password: '{.data[''database-root-password'']}'
+    template.openshift.io/expose-username: '{.data[''database-user'']}'
+data:
+  database-name: a2VkYV9waHA=
+  database-password: ZGVtbw==
+  database-root-password: ZGVtbw==
+  database-user: ZGVtbw==
+type: Opaque
+---
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  annotations:
+    template.alpha.openshift.io/wait-for-ready: 'true'
+  resourceVersion: '8771519'
+  name: mysql
+  namespace: scaling
+  labels:
+    app.openshift.io/runtime: mysql-database
+    template: mysql-persistent-template
+spec:
+  strategy:
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - mysql
+        from:
+          kind: ImageStreamTag
+          namespace: openshift
+          name: 'mysql:8.0-el8'
+        lastTriggeredImage: 'image-registry.openshift-image-registry.svc:5000/openshift/mysql@sha256:412a3bd7209202e64251b8310f8322094e073f798d54e5ba0bf3de0a3af8691c'
+    - type: ConfigChange
+  replicas: 1
+  revisionHistoryLimit: 10
+  test: false
+  selector:
+    name: mysql
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        name: mysql
+    spec:
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql
+      containers:
+        - resources:
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - '-i'
+                - '-c'
+                - MYSQL_PWD="$MYSQL_PASSWORD" mysqladmin -u $MYSQL_USER ping
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: mysql
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - '-i'
+                - '-c'
+                - MYSQL_PWD="$MYSQL_PASSWORD" mysqladmin -u $MYSQL_USER ping
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: database-user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: database-password
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: database-root-password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: database-name
+          ports:
+            - containerPort: 3306
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql/data
+          terminationMessagePolicy: File
+          image: 'image-registry.openshift-image-registry.svc:5000/openshift/mysql@sha256:412a3bd7209202e64251b8310f8322094e073f798d54e5ba0bf3de0a3af8691c'
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mysql
+  namespace: scaling
+  labels:
+    app.openshift.io/runtime: mysql-database
+    template: mysql-persistent-template
+  annotations:
+    template.openshift.io/expose-uri: 'mysql://{.spec.clusterIP}:{.spec.ports[?(.name=="mysql")].port}'
+  spec:
+  ports:
+    - name: mysql
+      protocol: TCP
+      port: 3306
+      targetPort: 3306
+  internalTrafficPolicy: Cluster
+  sessionAffinity: None
+  selector:
+    name: mysql

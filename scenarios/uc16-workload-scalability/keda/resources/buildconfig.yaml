@@ -2,17 +2,17 @@ kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
   annotations:
-    app.openshift.io/vcs-ref: ''
+    app.openshift.io/vcs-ref: main
     app.openshift.io/vcs-uri: 'https://github.com/Caseraw/OpenShiftDemoTime'
     openshift.io/generated-by: OpenShiftWebConsole
-  name: scaling
+  name: php-app
   namespace: scaling
   labels:
-    app: scaling
-    app.kubernetes.io/component: scaling
-    app.kubernetes.io/instance: scaling
-    app.kubernetes.io/name: scaling
-    app.kubernetes.io/part-of: scaling
+    app: php-app
+    app.kubernetes.io/component: php-app
+    app.kubernetes.io/instance: php-app
+    app.kubernetes.io/name: php-app
+    app.kubernetes.io/part-of: php-app
     app.openshift.io/runtime: php
     app.openshift.io/runtime-version: 8.2-ubi8
 spec:
@@ -20,7 +20,7 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: 'scaling:latest'
+      name: 'php-app:latest'
   resources: {}
   successfulBuildsHistoryLimit: 5
   failedBuildsHistoryLimit: 5
@@ -35,18 +35,19 @@ spec:
   source:
     type: Git
     git:
-      uri: 'https://github.com/wael2000/php-cpu-intense'
-    contextDir: /
+      uri: 'https://github.com/Caseraw/OpenShiftDemoTime'
+      ref: main
+    contextDir: /scenarios/uc16-workload-scalability/keda/app
   triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChange: {}
     - type: Generic
       generic:
         secretReference:
-          name: scaling-generic-webhook-secret
+          name: php-app-generic-webhook-secret
     - type: GitHub
       github:
         secretReference:
-          name: scaling-github-webhook-secret
-    - type: ImageChange
-      imageChange: {}
-    - type: ConfigChange
+          name: php-app-github-webhook-secret
   runPolicy: Serial

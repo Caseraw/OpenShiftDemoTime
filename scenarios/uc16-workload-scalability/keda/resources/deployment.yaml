@@ -4,48 +4,42 @@ metadata:
   annotations:
     alpha.image.policy.openshift.io/resolve-names: '*'
     app.openshift.io/route-disabled: 'false'
-    app.openshift.io/vcs-ref: ''
-    app.openshift.io/vcs-uri: 'https://github.com/wael2000/php-cpu-intense'
-    deployment.kubernetes.io/revision: '2'
-    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"scaling:latest","namespace":"scaling"},"fieldPath":"spec.template.spec.containers[?(@.name==\"scaling\")].image","paused":false}]'
+    app.openshift.io/vcs-ref: main
+    app.openshift.io/vcs-uri: 'https://github.com/Caseraw/OpenShiftDemoTime'
+    deployment.kubernetes.io/revision: '5'
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"php-app:latest","namespace":"scaling"},"fieldPath":"spec.template.spec.containers[?(@.name==\"php-app\")].image","paused":false}]'
     openshift.io/generated-by: OpenShiftWebConsole
-  name: scaling
+  name: php-app
   namespace: scaling
   labels:
-    app: scaling
-    app.kubernetes.io/component: scaling
-    app.kubernetes.io/instance: scaling
-    app.kubernetes.io/name: scaling
-    app.kubernetes.io/part-of: scaling
+    app: php-app
+    app.kubernetes.io/component: php-app
+    app.kubernetes.io/instance: php-app
+    app.kubernetes.io/name: php-app
+    app.kubernetes.io/part-of: php-app
     app.openshift.io/runtime: php
     app.openshift.io/runtime-version: 8.2-ubi8
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: scaling
+      app: php-app
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: scaling
-        deployment: scaling
+        app: php-app
+        deployment: php-app
     spec:
       containers:
-        - name: scaling
-          image: 'image-registry.openshift-image-registry.svc:5000/scaling/scaling@sha256:bb894a1d9d8b64b0dc43a496069fa28b278dc5fce753bd6f2b9e646563ff845b'
+        - name: php-app
+          image: 'image-registry.openshift-image-registry.svc:5000/scaling/php-app@sha256:548778d1575134b02cc9110c3a58b55dea66d3aab72ad8b460ad061caf20de3e'
           ports:
             - containerPort: 8080
               protocol: TCP
             - containerPort: 8443
               protocol: TCP
-          resources:
-            limits:
-              cpu: 256m
-              memory: 512Mi
-            requests:
-              cpu: 128m
-              memory: 128Mi
+          resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           imagePullPolicy: Always
