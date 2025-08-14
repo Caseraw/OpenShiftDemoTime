@@ -18,6 +18,21 @@ data:
   database-user: ZGVtbw==
 type: Opaque
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql
+  namespace: scaling
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: gp3-csi
+  volumeMode: Filesystem
+---
 kind: DeploymentConfig
 apiVersion: apps.openshift.io/v1
 metadata:
@@ -139,7 +154,7 @@ metadata:
     template: mysql-persistent-template
   annotations:
     template.openshift.io/expose-uri: 'mysql://{.spec.clusterIP}:{.spec.ports[?(.name=="mysql")].port}'
-  spec:
+spec:
   ports:
     - name: mysql
       protocol: TCP
