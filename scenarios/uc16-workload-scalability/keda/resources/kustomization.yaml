@@ -12,3 +12,4 @@ resources:
   - service.yaml
   - route.yaml
   - mysql.yaml
+  - php-counter-scaler.yaml
