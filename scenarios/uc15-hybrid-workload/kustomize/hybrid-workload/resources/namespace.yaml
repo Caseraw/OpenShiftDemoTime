@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hybrid-workload
+  labels:
+    kubernetes.io/metadata.name: hybrid-workload
+  annotations:
+    openshift.io/description: "hybrid-workload"
+    openshift.io/display-name: "hybrid-workload"

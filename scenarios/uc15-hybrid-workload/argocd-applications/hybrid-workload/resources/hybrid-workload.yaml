@@ -1,0 +1,14 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hybrid-workload
+  namespace: openshift-gitops
+spec:
+  destination:
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    path: scenarios/uc15-hybrid-workload/kustomize/hybrid-workload
+    repoURL: 'https://github.com/Caseraw/OpenShiftDemoTime.git'
+    targetRevision: uc15-hybrid-workload
