@@ -28,7 +28,7 @@ spec:
   scaleTargetRef:
     name: php-app
     kind: Deployment
-  pollingInterval: 15   # This is the interval to check each trigger on. By default, KEDA will check each trigger source on every ScaledObject every 30 seconds.
+  pollingInterval: 20   # This is the interval to check each trigger on. By default, KEDA will check each trigger source on every ScaledObject every 30 seconds.
   cooldownPeriod: 15    # The period to wait after the last trigger reported active before scaling the resource back to 0, in seconds. By default, it’s 300 (5 minutes).
   minReplicaCount: 1
   maxReplicaCount: 5    
