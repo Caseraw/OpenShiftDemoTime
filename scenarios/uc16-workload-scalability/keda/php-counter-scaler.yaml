@@ -1,18 +1,42 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secrets
+  namespace: sclaing
+type: Opaque
+data:
+  mysql_conn_str: ZGVtbzpkZW1vQHRjcChteXNxbC5zY2xhaW5nLnN2Yy5jbHVzdGVyLmxvY2FsOjMzMDYpL2tlZGFfcGhw
+  # mysql_conn_str: "demo:demo@tcp(mysql.sclaing.svc.cluster.local:3306)/keda_php" # base64 encoded
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: keda-trigger-auth-mysql-secret
+  namespace: sclaing
+spec:
+  secretTargetRef:
+  - parameter: connectionString
+    name: mysql-secrets
+    key: mysql_conn_str  
+---  
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: php-mysql-scaler
-  namespace: default
+  namespace: sclaing
 spec:
   scaleTargetRef:
     name: php-app
-  pollingInterval: 15   # seconds
-  cooldownPeriod: 30
+    kind: Deployment
+  pollingInterval: 15   # This is the interval to check each trigger on. By default, KEDA will check each trigger source on every ScaledObject every 30 seconds.
+  cooldownPeriod: 15    # The period to wait after the last trigger reported active before scaling the resource back to 0, in seconds. By default, it’s 300 (5 minutes).
   minReplicaCount: 1
-  maxReplicaCount: 5
+  maxReplicaCount: 5    
   triggers:
-    - type: mysql
-      metadata:
-        connectionString: "Server=mysql;Database=keda_php;User=demo;Password=demo;"
-        query: "SELECT count FROM request_counter WHERE id=1"
-        targetValue: "10"   # scale when counter >= 50
+  - type: mysql
+    metadata:
+      queryValue: "10"
+      activationQueryValue: "10"
+      query: "SELECT count FROM request_counter WHERE id=1"
+    authenticationRef:
+      name: keda-trigger-auth-mysql-secret
