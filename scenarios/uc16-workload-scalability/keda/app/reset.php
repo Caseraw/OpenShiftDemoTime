@@ -1,6 +1,4 @@
 <?php
-require_once "config.php";
-
 $mysqli = new mysqli("mysql", "demo", "demo", "keda_php");
 
 if ($mysqli->connect_errno) {
