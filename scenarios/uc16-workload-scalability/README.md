@@ -7,14 +7,7 @@
 ## Check the ReplicaSet with every scaling trigger. 
 
 
-
-oc new-app php:8.2-ubi8~https://github.com/Caseraw/OpenShiftDemoTime --context-dir=scenarios/uc16-workload-scalability/keda \
-  --build-env INSTALL_PKGS="php-pecl-redis" --name myapp
-
-
-
-oc new-build --name=php-redis-builder --strategy=docker --binary
-oc start-build php-redis-builder --from-dir=.
-
-  oc new-app php:8.2-ubi8~https://github.com/Caseraw/OpenShiftDemoTime --context-dir=scenarios/uc16-workload-scalability/keda \
-  --build-env INSTALL_PKGS="php-pecl-redis" --name myapp
+1 - install Custom Metrics Autoscaler
+2 - create keda CRD instace keda/resources/keda.yaml
+3 - push the sample app and scaledobject
+oc create -k keda/resources
