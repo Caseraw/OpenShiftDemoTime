@@ -5,8 +5,8 @@ metadata:
   namespace: scaling
 type: Opaque
 data:
-  mysql_conn_str: ZGVtbzpkZW1vQHRjcChteXNxbC5zY2xhaW5nLnN2Yy5jbHVzdGVyLmxvY2FsOjMzMDYpL2tlZGFfcGhw
-  # mysql_conn_str: "demo:demo@tcp(mysql.sclaing.svc.cluster.local:3306)/keda_php" # base64 encoded
+  mysql_conn_str: ZGVtbzpkZW1vQHRjcChteXNxbC5zY2FsaW5nLnN2Yy5jbHVzdGVyLmxvY2FsOjMzMDYpL2tlZGFfcGhw
+  # mysql_conn_str: "demo:demo@tcp(mysql.scaling.svc.cluster.local:3306)/keda_php" # base64 encoded
 ---
 apiVersion: keda.sh/v1alpha1
 kind: TriggerAuthentication
