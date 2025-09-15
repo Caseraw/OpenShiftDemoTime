@@ -55,18 +55,18 @@ show_msg "show-date" "INFO" "Script" "$SCRIPT"
 source "$SCRIPT"
 show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Serverless Operator" "Completed" "✅"
 
-# 6) Setup the OpenShift GitOps Operator
-SCRIPT="$COMPONENTS_BASE/openshift-gitops/setup.sh"
+# # 6) Setup the OpenShift GitOps Operator
+# SCRIPT="$COMPONENTS_BASE/openshift-gitops/setup.sh"
 
-show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "⏳"
-show_msg "show-date" "INFO" "Script" "$SCRIPT"
-source "$SCRIPT"
-show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "Completed" "✅"
+# show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "⏳"
+# show_msg "show-date" "INFO" "Script" "$SCRIPT"
+# source "$SCRIPT"
+# show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "Completed" "✅"
 
-# 7) Setup the OpenShift Pipelines Operator
-SCRIPT="$COMPONENTS_BASE/openshift-pipelines/setup.sh"
+# # 7) Setup the OpenShift Pipelines Operator
+# SCRIPT="$COMPONENTS_BASE/openshift-pipelines/setup.sh"
 
-show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Pipelines Operator" "⏳"
-show_msg "show-date" "INFO" "Script" "$SCRIPT"
-source "$SCRIPT"
-show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Pipelines Operator" "Completed" "✅"
+# show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Pipelines Operator" "⏳"
+# show_msg "show-date" "INFO" "Script" "$SCRIPT"
+# source "$SCRIPT"
+# show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Pipelines Operator" "Completed" "✅"

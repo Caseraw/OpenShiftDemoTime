@@ -30,7 +30,7 @@ spec:
       sources:
         - path: scenarios/uc22-cluster-upgrade/backend-pod-spot/kustomize
           repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: UC22-cluster-upgrade
+          targetRevision: main
           repositoryType: git
       syncPolicy:
         automated:

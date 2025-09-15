@@ -11,4 +11,4 @@ spec:
   source:
     path: scenarios/uc15-hybrid-workload/kustomize/hybrid-workload
     repoURL: 'https://github.com/Caseraw/OpenShiftDemoTime.git'
-    targetRevision: uc15-hybrid-workload
+    targetRevision: main
