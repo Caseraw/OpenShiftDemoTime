@@ -71,20 +71,20 @@ RUN wget -q -O oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/x86_64/cl
 RUN wget -q -O kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.7.0/kustomize_v5.7.0_linux_amd64.tar.gz && \
     tar -xzf kustomize.tar.gz && \
     install -m 755 kustomize /usr/local/bin/kustomize && \
-    kustomize completion bash > /etc/bash_completion.d/kustomize && \
+    # kustomize completion bash > /etc/bash_completion.d/kustomize && \
     rm -rf kustomize.tar.gz kustomize
 
 # Download/Install Helm Client binary
 RUN wget -q -O helm.tar.gz https://get.helm.sh/helm-v3.18.3-linux-amd64.tar.gz && \
     tar -xzf helm.tar.gz && \
     install -m 755 linux-amd64/helm /usr/local/bin/helm && \
-    helm completion bash > /etc/bash_completion.d/helm && \
+    # helm completion bash > /etc/bash_completion.d/helm && \
     rm -rf helm.tar.gz linux-amd64
 
 # Download/Install Tekton CLI RPM directly from URL
 RUN dnf install -y https://github.com/tektoncd/cli/releases/download/v0.41.0/tektoncd-cli-0.41.0_Linux-64bit.rpm && \
-    dnf clean all && \
-    tkn completion bash > /etc/bash_completion.d/tkn
+    dnf clean all
+    # tkn completion bash > /etc/bash_completion.d/tkn
 
 # Download/Install roxctl from URL
 RUN curl -L -f -o roxctl "https://mirror.openshift.com/pub/rhacs/assets/latest/bin/Linux/roxctl" && \
@@ -107,14 +107,14 @@ RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
 RUN wget -q -O openshift-install-linux.tar.gz https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-install-linux.tar.gz && \
     tar -xzf openshift-install-linux.tar.gz && \
     install -m 755 openshift-install /usr/local/bin/openshift-install && \
-    openshift-install completion bash > /etc/bash_completion.d/openshift-install && \
+    # openshift-install completion bash > /etc/bash_completion.d/openshift-install && \
     rm -rf openshift-install-linux.tar.gz openshift-install
 
 # Download/Install Rosa CLI
 RUN wget -q -O rosa-linux.tar.gz https://mirror.openshift.com/pub/cgw/rosa/latest/rosa-linux.tar.gz && \
     tar -xzf rosa-linux.tar.gz && \
     install -m 755 rosa /usr/local/bin/rosa && \
-    rosa completion bash > /etc/bash_completion.d/rosa && \
+    # rosa completion bash > /etc/bash_completion.d/rosa && \
     rm -rf rosa-linux.tar.gz rosa
 
 # Download Knative CLI
