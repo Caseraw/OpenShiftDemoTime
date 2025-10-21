@@ -1,0 +1,1 @@
+cn=openshift-users,cn=groups,cn=accounts,dc=north,dc=star

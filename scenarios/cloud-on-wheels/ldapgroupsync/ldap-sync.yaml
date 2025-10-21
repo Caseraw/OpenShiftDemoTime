@@ -1,0 +1,23 @@
+# rfc2307.yaml
+kind: LDAPSyncConfig
+apiVersion: v1
+url: ldaps://idm.north.star:636
+bindDN: "uid=admin,cn=users,cn=accounts,dc=north,dc=star"
+bindPassword: "<LDAP_ADMIN_PASSWORD>"
+insecure: false
+ca: idm_ca.crt
+rfc2307:
+  groupsQuery:
+    baseDN: "cn=groups,cn=accounts,dc=north,dc=star"
+    scope: sub
+    filter: "(cn=openshift-*)"
+    derefAliases: never
+  groupUIDAttribute: dn
+  groupNameAttributes: [ "cn" ]
+  groupMembershipAttributes: [ "member" ]
+  usersQuery:
+    baseDN: "cn=users,cn=accounts,dc=north,dc=star"
+    scope: sub
+    derefAliases: never
+  userUIDAttribute: dn
+  userNameAttributes: [ "uid" ]
