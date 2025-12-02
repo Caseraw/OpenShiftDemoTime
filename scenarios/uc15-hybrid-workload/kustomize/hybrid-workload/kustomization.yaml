@@ -14,5 +14,5 @@ resources:
   - resources/deployment.yaml
   - resources/secret.yaml
   - resources/route.yaml
-  - resources/service-knative.yaml
-  - resources/networkpolicy.yaml
+  # - resources/service-knative.yaml
+  # - resources/networkpolicy.yaml
