@@ -6,16 +6,18 @@
 - Create snapshot.
 - Intentionally break the VM "fedora01" with `sudo rm -rf /boot/grub2; sudo shutdown -r now`.
     - .... *VM does not boot*
-- Shut down VM > Force Shutdown VM > Restore snapshot > Start VM.
+- Shut down VM > Force Shutdown VM
+- Restore snapshot > Start VM.
 
 **Clone**
 - Go to VM vm "fedora01" in namespace "vmexamples-user1".
 - Select VM "fedora01".
-- Create clone.
+- Create clone, uncheck "Start VM once created"
 - Rename "fedora01" into "fedora02".
 - Start VM "fedora02".
 
 **Backup**
+- OADP Operator, project "oadp-user1"
 - Create backup from VM "fedora02".
 
 ```yaml

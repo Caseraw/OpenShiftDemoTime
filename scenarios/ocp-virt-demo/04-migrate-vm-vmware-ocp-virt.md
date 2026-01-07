@@ -10,3 +10,7 @@
     - Target namespace: vmexamples-user1
     - Network mapping: segment-migration-to-ocpvirt --- pod network
     - Storage mapping: default...
+    - Create plan.
+    - Wait for status.
+    - Start migration.
+    
