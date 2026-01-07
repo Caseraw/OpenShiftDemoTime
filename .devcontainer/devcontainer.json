@@ -3,25 +3,7 @@
     "build": {
         "dockerfile": "Containerfile"
     },
-    "customizations": {
-        "vscode": {
-            "settings": {
-                "terminal.integrated.shell.linux": "/bin/bash"
-            }
-        }
-    },
-    "runArgs": [
-        "--userns=keep-id",
-        "--security-opt=label=disable",
-        "--user", "vscode"
-    ],
-    "containerUser": "vscode",
-    "updateRemoteUserUID": true,
-    "containerEnv": {
-        "HOME": "/home/vscode"
-    },
-    "remoteEnv": {
-        "PODMAN_USERNS": "keep-id"
-    },
-    "remoteUser": "vscode"
+    "remoteUser": "root",
+    "containerUser": "root"
+    // "postStartCommand": "chown -R root:root /workspaces 2>/dev/null || true"
 }

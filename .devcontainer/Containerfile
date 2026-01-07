@@ -165,12 +165,3 @@ RUN ARCH=$(cat /tmp/arch) && \
     curl -L -f -o kn "https://github.com/knative/client/releases/download/knative-v1.19.5/kn-linux-${ARCH}" && \
     install -m 755 kn /usr/local/bin/kn && \
     rm -rf kn
-
-# Create a non-root user to use the dev container
-RUN useradd -m -s /bin/bash vscode
-COPY files/.bashrc /home/vscode/.bashrc
-RUN chown vscode:vscode /home/vscode/.bashrc
-USER vscode
-
-# Set the working directory to the workspace folder within the vscode home directory
-WORKDIR /home/vscode/workspace
