@@ -2,7 +2,6 @@ apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
   name: rhel-9-test-01
-  namespace: vm-test-01
 spec:
   dataVolumeTemplates:
     - metadata:

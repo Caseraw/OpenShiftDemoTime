@@ -21,7 +21,6 @@ metadata:
     vm.kubevirt.io/template.revision: '1'
     vm.kubevirt.io/template.version: v0.34.0
   name: rhel-9-test-02
-  namespace: vm-test-01
 spec:
   dataVolumeTemplates:
     - apiVersion: cdi.kubevirt.io/v1beta1
