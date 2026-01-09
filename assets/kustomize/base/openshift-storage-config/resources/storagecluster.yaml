@@ -65,6 +65,9 @@ spec:
     connections:
       encryption: {}
     multiClusterService: {}
+    # multiClusterService:
+    #   clusterID: aws-cluster-01
+    #   enabled: true
   nodeTopologies: {}
   externalStorage: {}
   resourceProfile: balanced

@@ -1,0 +1,216 @@
+# Create Cluster set
+
+Manually create:
+- Create Cluster set "test-poc"
+- Add "local cluster" to the cluster set as a resource assignment
+
+# Create Policies for the HUB
+
+## Prep
+
+```yaml
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: rhacm-hub-policy
+  labels:
+    kubernetes.io/metadata.name: rhacm-hub-policy
+  annotations:
+    openshift.io/description: rhacm-hub-policy
+    openshift.io/display-name: rhacm-hub-policy
+---
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: test-poc
+  namespace: rhacm-hub-policy
+spec:
+  clusterSet: test-poc
+```
+
+## Install GitOps Operator Policy
+
+```yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-gitops-operator
+  namespace: rhacm-hub-policy
+  annotations:
+    policy.open-cluster-management.io/categories: Baseline hub
+    policy.open-cluster-management.io/controls: Baseline hub configuration
+    policy.open-cluster-management.io/description: install-gitops-operator
+    policy.open-cluster-management.io/standards: Configuration
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1beta1
+        kind: OperatorPolicy
+        metadata:
+          name: install-gitops-operator
+        spec:
+          complianceType: musthave
+          remediationAction: enforce
+          severity: critical
+          subscription:
+            name: openshift-gitops-operator
+            namespace: openshift-gitops-operator
+            channel: latest
+            source: redhat-operators
+            sourceNamespace: openshift-marketplace
+          upgradeApproval: Automatic
+          versions:
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: install-gitops-operator-placement
+  namespace: rhacm-hub-policy
+spec:
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+    - key: cluster.open-cluster-management.io/unavailable
+      operator: Exists
+  clusterSets:
+    - test-poc
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: name
+              operator: In
+              values:
+                - local-cluster
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: install-gitops-operator-placement
+  namespace: rhacm-hub-policy
+placementRef:
+  name: install-gitops-operator-placement
+  kind: Placement
+  apiGroup: cluster.open-cluster-management.io
+subjects:
+  - name: install-gitops-operator
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+```
+
+## Setup GitOps Cluster on HUB
+
+```yaml
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: test-poc
+  namespace: openshift-gitops
+spec:
+  clusterSet: test-poc
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: setup-gitops-cluster-placement
+  namespace: openshift-gitops
+spec:
+  clusterSets:
+    - test-poc
+---
+apiVersion: apps.open-cluster-management.io/v1beta1
+kind: GitOpsCluster
+metadata:
+  name: rhacm-gitops-cluster
+  namespace: openshift-gitops
+spec:
+  argoServer:
+    argoNamespace: openshift-gitops
+  placementRef:
+    name: setup-gitops-cluster-placement
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+```
+
+# Create Policies for the SPOKES
+
+## Prep
+
+```yaml
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: rhacm-spoke-policy
+  labels:
+    kubernetes.io/metadata.name: rhacm-spoke-policy
+  annotations:
+    openshift.io/description: rhacm-spoke-policy
+    openshift.io/display-name: rhacm-spoke-policy
+---
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: test-poc
+  namespace: rhacm-spoke-policy
+spec:
+  clusterSet: test-poc
+```
+
+# Create the sample application
+
+```yaml
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: podinfo-placement
+  namespace: openshift-gitops
+spec:
+  clusterSets:
+    - test-poc
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: virtualization
+              operator: In
+              values:
+                - "true"
+  numberOfClusters: 1
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: podinfo
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: podinfo-placement
+        requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: podinfo-{{name}}
+      labels:
+        velero.io/exclude-from-backup: "true"
+    spec:
+      project: default
+      sources:
+        - repositoryType: git
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: main
+          path: scenarios/uc18-metrics-and-logs/podinfo/kustomize
+      destination:
+        namespace: podinfo
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+```

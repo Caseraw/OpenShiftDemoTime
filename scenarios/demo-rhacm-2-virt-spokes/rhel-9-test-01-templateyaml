@@ -1,0 +1,52 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: rhel-9-test-01
+  namespace: vm-test-01
+spec:
+  dataVolumeTemplates:
+    - metadata:
+        name: rhel-9-test-01-volume
+      spec:
+        sourceRef:
+          kind: DataSource
+          name: rhel9
+          namespace: openshift-virtualization-os-images
+        storage:
+          resources:
+            requests:
+              storage: 30Gi
+          storageClassName: ocs-storagecluster-ceph-rbd-virtualization
+  instancetype:
+    name: u1.medium
+  preference:
+    name: rhel.9
+  runStrategy: Halted
+  template:
+    metadata:
+      labels:
+        network.kubevirt.io/headlessService: headless
+    spec:
+      domain:
+        devices:
+          autoattachPodInterface: false
+          disks: []
+          interfaces:
+            - masquerade: {}
+              name: default
+      networks:
+        - name: default
+          pod: {}
+      subdomain: headless
+      volumes:
+        - dataVolume:
+            name: rhel-9-test-01-volume
+          name: rootdisk
+        - cloudInitNoCloud:
+            userData: |
+              #cloud-config
+              chpasswd:
+                expire: false
+              password: ivgd-k2ls-jp5g
+              user: rhel
+          name: cloudinitdisk
