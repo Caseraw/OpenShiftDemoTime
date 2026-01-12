@@ -1,3 +1,7 @@
+# Scenario
+
+https://github.com/Caseraw/OpenShiftDemoTime/tree/main/scenarios/demo-rhacm-2-virt-spokes
+
 # Create Cluster set
 
 Manually create:
@@ -214,3 +218,57 @@ spec:
           - CreateNamespace=true
           - PruneLast=true
 ```
+
+# ODF Redgional DR
+
+
+
+https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.14
+https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.14/html-single/business_continuity/index
+https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.14/html-single/networking/index#deploying-submariner-console
+
+https://docs.redhat.com/en/documentation/red_hat_openshift_data_foundation/4.19/html-single/deploying_openshift_data_foundation_using_bare_metal_infrastructure/index
+https://docs.redhat.com/en/documentation/red_hat_openshift_data_foundation/4.19/html-single/configuring_openshift_data_foundation_disaster_recovery_for_openshift_workloads/index#rdr-solution
+
+## Ensure spoke cluster certs are in trusted CA bundle
+
+```shel
+
+# Hub
+oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" > cm-clusters.crt
+
+# Spoke 1
+oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" >> cm-clusters.crt
+
+# Spoke 2
+oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" >> cm-clusters.crt
+
+# Hub, Spoke 1 and Spoke 2
+oc create configmap user-ca-bundle \
+  --from-file=ca-bundle.crt=cm-clusters.crt \
+  -n openshift-config \
+  --dry-run=client -o yaml | oc apply -f -
+
+oc patch proxy cluster --type=merge  --patch='{"spec":{"trustedCA":{"name":"user-ca-bundle"}}}'
+```
+
+## label nodes for submariner
+
+```shell
+for node in $(oc get nodes -l node-role.kubernetes.io/worker -o name); do
+  oc label "$node" submariner.io/gateway=true --overwrite
+done
+```
+
+## Create ClusterSet
+
+- Create ClusterSet "test-poc"
+- Add Spoke clusters for Regiona DR
+- Install Submariner addons
+- Enable Globalnet
+- Wait for all to complete
+
+# Links
+
+https://rhpds.github.io/openshift-virt-roadshow-cnv-multi-user/modules/module-07-tempinst.html#create_win
+

@@ -62,3 +62,27 @@ show_msg "show-date" "INFO" "Bootstrap - Deploy AWS Credentials in RHACM" "⏳"
 show_msg "show-date" "INFO" "Script" "$SCRIPT"
 source "$SCRIPT"
 show_msg "show-date" "INFO" "Bootstrap - Deploy AWS Credentials in RHACM" "Completed" "✅"
+
+# 6) Setup the OpenShift GitOps Operator
+SCRIPT="$COMPONENTS_BASE/openshift-gitops/setup.sh"
+
+show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "⏳"
+show_msg "show-date" "INFO" "Script" "$SCRIPT"
+source "$SCRIPT"
+show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "Completed" "✅"
+
+# 7) Setup the GitOps Cluster for RHACM
+SCRIPT="$COMPONENTS_BASE/openshift-rhacm-gitops-cluster/setup.sh"
+
+show_msg "show-date" "INFO" "Bootstrap - Setup the GitOps Cluster for RHACM" "⏳"
+show_msg "show-date" "INFO" "Script" "$SCRIPT"
+source "$SCRIPT"
+show_msg "show-date" "INFO" "Bootstrap - Setup the GitOps Cluster for RHACM" "Completed" "✅"
+
+# 8) Setup the OpenShift Pipelines Operator
+SCRIPT="$COMPONENTS_BASE/openshift-pipelines/setup.sh"
+
+show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Pipelines Operator" "⏳"
+show_msg "show-date" "INFO" "Script" "$SCRIPT"
+source "$SCRIPT"
+show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift Pipelines Operator" "Completed" "✅"
