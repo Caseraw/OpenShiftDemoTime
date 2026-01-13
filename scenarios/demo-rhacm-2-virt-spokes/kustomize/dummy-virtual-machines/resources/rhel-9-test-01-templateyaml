@@ -6,6 +6,8 @@ spec:
   dataVolumeTemplates:
     - metadata:
         name: rhel-9-test-01-volume
+        labels:
+          app: rhel-9-test-01
       spec:
         sourceRef:
           kind: DataSource
@@ -25,6 +27,7 @@ spec:
     metadata:
       labels:
         network.kubevirt.io/headlessService: headless
+        app: rhel-9-test-01
     spec:
       domain:
         devices:
@@ -46,6 +49,6 @@ spec:
               #cloud-config
               chpasswd:
                 expire: false
-              password: ivgd-k2ls-jp5g
-              user: rhel
+              password: secretpass01
+              user: user01
           name: cloudinitdisk

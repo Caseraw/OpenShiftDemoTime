@@ -278,6 +278,13 @@ oc patch proxy cluster --type=merge  --patch='{"spec":{"trustedCA":{"name":"user
       enabled: true
 ```
 
+```yaml
+  network:
+    multiClusterService:
+      clusterID: aws-cluster-02
+      enabled: true
+```
+
 Wait for the StorageCluster update to recycle some pods.
 
 ## Install the ODF Multicluster Orchestrator on the Hub cluster
@@ -308,6 +315,10 @@ oc annotate storagecluster ocs-storagecluster -n openshift-storage ocs.openshift
 
 ## Create the DRPolicy on the HUB
 
+- Create DR Policy for a test failover
+
+This will install Operators on the Spoke clusters, it willl take a while for everything to sync up. ~10 minutes.
+
 ## Create a sample application
 
 Ensure there is a binding:
@@ -330,6 +341,78 @@ spec:
   clusterSets:
     - test-poc
 ```
+
+Sample according to he docs:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apptest01
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: apptest01-placement
+        requeueAfterSeconds: 180
+  template:
+    metadata:
+      name: apptest01-{{name}}
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+        velero.io/exclude-from-backup: "true"
+    spec:
+      destination:
+        namespace: busybox-sample
+        server: "{{server}}"
+      project: default
+      sources:
+        - path: workloads/deployment/odr-regional-rbd
+          repoURL: https://github.com/red-hat-storage/ocm-ramen-samples
+          targetRevision: main
+          repositoryType: git
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: apptest01-placement
+  namespace: openshift-gitops
+spec:
+  clusterSets:
+    - test-poc
+  decisionStrategy:
+    groupStrategy:
+      clustersPerDecisionGroup: 0
+  prioritizerPolicy:
+    mode: Additive
+  spreadPolicy: {}
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: name
+              operator: In
+              values:
+                - aws-cluster-01
+        claimSelector: {}
+  numberOfClusters: 1
+```
+
+OLD example
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1

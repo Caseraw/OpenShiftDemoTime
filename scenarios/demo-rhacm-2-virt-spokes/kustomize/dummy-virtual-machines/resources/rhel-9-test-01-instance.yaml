@@ -1,18 +1,7 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  annotations:
-    kubemacpool.io/transaction-timestamp: '2026-01-09T17:50:57.231088848Z'
-    vm.kubevirt.io/validations: |
-      [
-        {
-          "name": "minimal-required-memory",
-          "path": "jsonpath::.spec.domain.memory.guest",
-          "rule": "integer",
-          "message": "This VM requires more memory.",
-          "min": 1610612736
-        }
-      ]
+  name: rhel-9-test-02
   labels:
     app: rhel-9-test-02
     kubevirt.io/dynamic-credentials-support: 'true'
@@ -20,7 +9,6 @@ metadata:
     vm.kubevirt.io/template.namespace: openshift
     vm.kubevirt.io/template.revision: '1'
     vm.kubevirt.io/template.version: v0.34.0
-  name: rhel-9-test-02
 spec:
   dataVolumeTemplates:
     - apiVersion: cdi.kubevirt.io/v1beta1
@@ -28,6 +16,8 @@ spec:
       metadata:
         creationTimestamp: null
         name: rhel-9-test-02
+        labels:
+          app: rhel-9-test-02
       spec:
         sourceRef:
           kind: DataSource
@@ -48,6 +38,7 @@ spec:
       labels:
         kubevirt.io/domain: rhel-9-test-02
         kubevirt.io/size: small
+        app: rhel-9-test-02
     spec:
       architecture: amd64
       domain:
@@ -93,7 +84,7 @@ spec:
         - cloudInitNoCloud:
             userData: |-
               #cloud-config
-              user: cloud-user
-              password: 1nl0-0mcu-sdfb
+              user: user01
+              password: secretpass01
               chpasswd: { expire: False }
           name: cloudinitdisk
