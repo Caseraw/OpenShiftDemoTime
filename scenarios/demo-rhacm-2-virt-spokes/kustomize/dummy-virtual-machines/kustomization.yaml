@@ -4,4 +4,4 @@ kind: Kustomization
 
 resources:
   - resources/rhel-9-test-01-instance.yaml
-  - resources/rhel-9-test-01-templateyaml
+  # - resources/rhel-9-test-01-templateyaml
