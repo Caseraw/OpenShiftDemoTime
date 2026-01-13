@@ -2,12 +2,14 @@ apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
   name: rhel-9-test-01
+  labels:
+    appname: rhel-9-test-01
 spec:
   dataVolumeTemplates:
     - metadata:
         name: rhel-9-test-01-volume
         labels:
-          app: rhel-9-test-01
+          appname: rhel-9-test-01
       spec:
         sourceRef:
           kind: DataSource
@@ -17,7 +19,7 @@ spec:
           resources:
             requests:
               storage: 30Gi
-          storageClassName: ocs-storagecluster-ceph-rbd-virtualization
+          storageClassName: ocs-storagecluster-ceph-rbd
   instancetype:
     name: u1.medium
   preference:
@@ -27,7 +29,7 @@ spec:
     metadata:
       labels:
         network.kubevirt.io/headlessService: headless
-        app: rhel-9-test-01
+        appname: rhel-9-test-01
     spec:
       domain:
         devices:

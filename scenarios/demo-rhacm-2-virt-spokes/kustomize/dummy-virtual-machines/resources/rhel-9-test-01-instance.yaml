@@ -3,7 +3,7 @@ kind: VirtualMachine
 metadata:
   name: rhel-9-test-02
   labels:
-    app: rhel-9-test-02
+    appname: rhel-9-test-02
     kubevirt.io/dynamic-credentials-support: 'true'
     vm.kubevirt.io/template: rhel9-server-small
     vm.kubevirt.io/template.namespace: openshift
@@ -17,7 +17,7 @@ spec:
         creationTimestamp: null
         name: rhel-9-test-02
         labels:
-          app: rhel-9-test-02
+          appname: rhel-9-test-02
       spec:
         sourceRef:
           kind: DataSource
@@ -38,7 +38,7 @@ spec:
       labels:
         kubevirt.io/domain: rhel-9-test-02
         kubevirt.io/size: small
-        app: rhel-9-test-02
+        appname: rhel-9-test-02
     spec:
       architecture: amd64
       domain:
@@ -55,8 +55,7 @@ spec:
                 bus: virtio
               name: cloudinitdisk
           interfaces:
-            - macAddress: '02:2c:3e:00:00:03'
-              masquerade: {}
+            - masquerade: {}
               model: virtio
               name: default
           rng: {}

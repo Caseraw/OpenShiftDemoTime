@@ -412,6 +412,69 @@ spec:
   numberOfClusters: 1
 ```
 
+VM Example:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: vmest01
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: vmest01-placement
+        requeueAfterSeconds: 180
+  template:
+    metadata:
+      name: vmest01-{{name}}
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+        argocd.argoproj.io/skip-reconcile: "true"
+      labels:
+        velero.io/exclude-from-backup: "true"
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
+    spec:
+      project: default
+      sources:
+        - repositoryType: git
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: main
+          path: scenarios/demo-rhacm-2-virt-spokes/kustomize/dummy-virtual-machines
+      destination:
+        namespace: vmtest01
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: vmest01-placement
+  namespace: openshift-gitops
+spec:
+  numberOfClusters: 1
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: name
+              operator: In
+              values:
+                - aws-cluster-01
+  clusterSets:
+    - test-poc
+```
+
 OLD example
 
 ```yaml
@@ -487,3 +550,5 @@ spec:
 
 https://rhpds.github.io/openshift-virt-roadshow-cnv-multi-user/modules/module-07-tempinst.html#create_win
 
+https://www.youtube.com/watch?v=kpejA7_5nL0
+https://www.youtube.com/watch?v=-vKzJr4dYxg
