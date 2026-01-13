@@ -230,15 +230,20 @@ https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for
 https://docs.redhat.com/en/documentation/red_hat_openshift_data_foundation/4.19/html-single/deploying_openshift_data_foundation_using_bare_metal_infrastructure/index
 https://docs.redhat.com/en/documentation/red_hat_openshift_data_foundation/4.19/html-single/configuring_openshift_data_foundation_disaster_recovery_for_openshift_workloads/index#rdr-solution
 
+## label nodes for submariner
+
+```shell
+for node in $(oc get nodes -l node-role.kubernetes.io/worker -o name); do
+  oc label "$node" submariner.io/gateway=
+done
+```
+
 ## Ensure spoke cluster certs are in trusted CA bundle
 
 ```shel
 
-# Hub
-oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" > cm-clusters.crt
-
 # Spoke 1
-oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" >> cm-clusters.crt
+oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" > cm-clusters.crt
 
 # Spoke 2
 oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" >> cm-clusters.crt
@@ -252,13 +257,7 @@ oc create configmap user-ca-bundle \
 oc patch proxy cluster --type=merge  --patch='{"spec":{"trustedCA":{"name":"user-ca-bundle"}}}'
 ```
 
-## label nodes for submariner
-
-```shell
-for node in $(oc get nodes -l node-role.kubernetes.io/worker -o name); do
-  oc label "$node" submariner.io/gateway=true --overwrite
-done
-```
+> https://access.redhat.com/solutions/7113464
 
 ## Create ClusterSet
 
@@ -267,6 +266,139 @@ done
 - Install Submariner addons
 - Enable Globalnet
 - Wait for all to complete
+
+## ODF with Globalnet
+
+- Update the `StorageCLuster` to add this, per spoke.
+
+```yaml
+  network:
+    multiClusterService:
+      clusterID: aws-cluster-01
+      enabled: true
+```
+
+Wait for the StorageCluster update to recycle some pods.
+
+## Install the ODF Multicluster Orchestrator on the Hub cluster
+
+## (Globalnet) Connect storage clusters with the ocs-provider-server ServiceExport
+
+Add this on bith Spoke clusters.
+
+```yaml
+apiVersion: multicluster.x-k8s.io/v1alpha1
+kind: ServiceExport
+metadata:
+  name: ocs-provider-server
+  namespace: openshift-storage
+```
+
+Cluster 1
+
+```shell
+oc annotate storagecluster ocs-storagecluster -n openshift-storage ocs.openshift.io/api-server-exported-address=aws-cluster-01.ocs-provider-server.openshift-storage.svc.clusterset.local:50051
+```
+
+Cluster 2
+
+```shell
+oc annotate storagecluster ocs-storagecluster -n openshift-storage ocs.openshift.io/api-server-exported-address=aws-cluster-02.ocs-provider-server.openshift-storage.svc.clusterset.local:50051
+```
+
+## Create the DRPolicy on the HUB
+
+## Create a sample application
+
+Ensure there is a binding:
+
+```yaml
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: test-poc
+  namespace: openshift-gitops
+spec:
+  clusterSet: test-poc
+```
+
+Ensure the GitOps cluster placement has the "test-poc" in the clusterset:
+
+
+```yaml
+spec:
+  clusterSets:
+    - test-poc
+```
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: my-vm-apps
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: my-vm-apps-placement
+        requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: my-vm-apps-{{name}}
+      labels:
+        velero.io/exclude-from-backup: "true"
+    spec:
+      project: default
+      sources:
+        - repositoryType: git
+          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
+          targetRevision: main
+          path: scenarios/demo-rhacm-2-virt-spokes/kustomize/dummy-virtual-machines
+      destination:
+        namespace: my-vm-apps-ns
+        server: "{{server}}"
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: my-vm-apps-placement
+  namespace: openshift-gitops
+spec:
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+  clusterSets:
+    - test-poc
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: name
+              operator: NotIn
+              values:
+                - local-cluster
+            - key: name
+              operator: In
+              values:
+                - aws-cluster-01
+```
+
+
+
+
+
 
 # Links
 
