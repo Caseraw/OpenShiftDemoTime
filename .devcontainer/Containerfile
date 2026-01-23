@@ -95,6 +95,13 @@ RUN ARCH_ALT=$(cat /tmp/arch_alt) && \
     kubectl completion bash > /etc/bash_completion.d/kubectl && \
     rm -rf oc.tar.gz oc kubectl README.md
 
+RUN ARCH=$(cat /tmp/arch) && \
+    VERSION=v1.5.3 && \
+    wget -q -O virtctl "https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/virtctl-${VERSION}-linux-${ARCH}" && \
+    install -m 755 virtctl /usr/local/bin/virtctl && \ 
+    virtctl completion bash > /etc/bash_completion.d/virtctl && \
+    rm -rf virtctl
+
 # Download/Install Kustomize Client binary
 RUN ARCH=$(cat /tmp/arch) && \
     wget -q -O kustomize.tar.gz "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.7.0/kustomize_v5.7.0_linux_${ARCH}.tar.gz" && \

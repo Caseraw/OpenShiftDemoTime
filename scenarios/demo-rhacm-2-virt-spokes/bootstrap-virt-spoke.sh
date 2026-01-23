@@ -46,3 +46,11 @@ show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Virtualization Operat
 show_msg "show-date" "INFO" "Script" "$SCRIPT"
 source "$SCRIPT"
 show_msg "show-date" "INFO" "Bootstrap - Install OpenShift Virtualization Operator" "Completed" "✅"
+
+# 4) Setup the OpenShift GitOps Operator
+SCRIPT="$COMPONENTS_BASE/openshift-gitops/setup.sh"
+
+show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "⏳"
+show_msg "show-date" "INFO" "Script" "$SCRIPT"
+source "$SCRIPT"
+show_msg "show-date" "INFO" "Bootstrap - Setup the OpenShift GitOps Operator" "Completed" "✅"

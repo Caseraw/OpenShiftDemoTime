@@ -242,11 +242,15 @@ done
 
 ```shel
 
+# Hub
+# oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" > cm-clusters.crt
+
 # Spoke 1
 oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" > cm-clusters.crt
 
 # Spoke 2
 oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" >> cm-clusters.crt
+
 
 # Hub, Spoke 1 and Spoke 2
 oc create configmap user-ca-bundle \
@@ -286,6 +290,12 @@ oc patch proxy cluster --type=merge  --patch='{"spec":{"trustedCA":{"name":"user
 ```
 
 Wait for the StorageCluster update to recycle some pods.
+
+Install CEPH tools on both spoke clusters for troubleshooting.
+
+```shell
+oc patch storagecluster ocs-storagecluster -n openshift-storage --type json --patch '[{ "op": "replace", "path": "/spec/enableCephTools", "value": true }]'
+```
 
 ## Install the ODF Multicluster Orchestrator on the Hub cluster
 
@@ -342,7 +352,48 @@ spec:
     - test-poc
 ```
 
-Sample according to he docs:
+Ensure the GitOps cluster placement has the following tolerations:
+
+```yaml
+  tolerations:
+  - key: cluster.open-cluster-management.io/unreachable
+    operator: Exists
+  - key: cluster.open-cluster-management.io/unavailable
+    operator: Exists
+```
+
+Ensure the GitOps Operator is installed on all spoke clusters.
+
+Ensure the correct RBAC is create on all the clusters:
+
+```yaml
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: argocd-cluster-admin
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: 'true'
+subjects:
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops
+  - kind: ServiceAccount
+    name: openshift-gitops-applicationset-controller
+    namespace: openshift-gitops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+```
+
+Ensure CG for DR using RBD
+
+
+
+Create the Application
+
+Sample according to hte docs:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -418,7 +469,7 @@ VM Example:
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: vmest01
+  name: vmtest01-managed-app
   namespace: openshift-gitops
 spec:
   generators:
@@ -426,11 +477,11 @@ spec:
         configMapRef: acm-placement
         labelSelector:
           matchLabels:
-            cluster.open-cluster-management.io/placement: vmest01-placement
+            cluster.open-cluster-management.io/placement: vmtest01-managed-app-placement
         requeueAfterSeconds: 180
   template:
     metadata:
-      name: vmest01-{{name}}
+      name: vmtest01-managed-app-{{name}}
       annotations:
         apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
         apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
@@ -459,7 +510,7 @@ spec:
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: vmest01-placement
+  name: vmtest01-managed-app-placement
   namespace: openshift-gitops
 spec:
   numberOfClusters: 1
