@@ -246,7 +246,7 @@ done
 # oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" > cm-clusters.crt
 
 # Spoke 1
-oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" > cm-clusters.crt
+oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" >> cm-clusters.crt
 
 # Spoke 2
 oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data']['ca-bundle\.crt']}" >> cm-clusters.crt
@@ -256,8 +256,7 @@ oc get cm default-ingress-cert -n openshift-config-managed -o jsonpath="{['data'
 oc create configmap user-ca-bundle \
   --from-file=ca-bundle.crt=cm-clusters.crt \
   -n openshift-config \
-  --dry-run=client -o yaml | oc apply -f -
-
+  --dry-run=client -o yaml | oc apply -f - &&\
 oc patch proxy cluster --type=merge  --patch='{"spec":{"trustedCA":{"name":"user-ca-bundle"}}}'
 ```
 
@@ -526,74 +525,21 @@ spec:
     - test-poc
 ```
 
-OLD example
+## Discovered apps
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
-metadata:
-  name: my-vm-apps
-  namespace: openshift-gitops
-spec:
-  generators:
-    - clusterDecisionResource:
-        configMapRef: acm-placement
-        labelSelector:
-          matchLabels:
-            cluster.open-cluster-management.io/placement: my-vm-apps-placement
-        requeueAfterSeconds: 30
-  template:
-    metadata:
-      name: my-vm-apps-{{name}}
-      labels:
-        velero.io/exclude-from-backup: "true"
-    spec:
-      project: default
-      sources:
-        - repositoryType: git
-          repoURL: https://github.com/Caseraw/OpenShiftDemoTime.git
-          targetRevision: main
-          path: scenarios/demo-rhacm-2-virt-spokes/kustomize/dummy-virtual-machines
-      destination:
-        namespace: my-vm-apps-ns
-        server: "{{server}}"
-      syncPolicy:
-        automated:
-          selfHeal: true
-          prune: true
-        syncOptions:
-          - CreateNamespace=true
-          - PruneLast=true
----
-apiVersion: cluster.open-cluster-management.io/v1beta1
-kind: Placement
-metadata:
-  name: my-vm-apps-placement
-  namespace: openshift-gitops
-spec:
-  tolerations:
-  - key: cluster.open-cluster-management.io/unreachable
-    operator: Exists
-  - key: cluster.open-cluster-management.io/unavailable
-    operator: Exists
-  clusterSets:
-    - test-poc
-  predicates:
-    - requiredClusterSelector:
-        labelSelector:
-          matchExpressions:
-            - key: name
-              operator: NotIn
-              values:
-                - local-cluster
-            - key: name
-              operator: In
-              values:
-                - aws-cluster-01
+https://docs.redhat.com/en/documentation/red_hat_openshift_data_foundation/4.19/html-single/configuring_openshift_data_foundation_disaster_recovery_for_openshift_workloads/index#protect-discovered-apps-regionaldr_manage-rdr
+
+```shell
+oc get configmap user-ca-bundle -n openshift-config -o jsonpath="{['data']['ca-bundle\.crt']}" |base64 -w 0 > cluster01-ramen-cert-onliner
 ```
 
+```shell
+oc get configmap user-ca-bundle -n openshift-config -o jsonpath="{['data']['ca-bundle\.crt']}" |base64 -w 0 > cluster02-ramen-cert-onliner
+```
 
-
+```yaml
+caCertificates: 
+```
 
 
 
